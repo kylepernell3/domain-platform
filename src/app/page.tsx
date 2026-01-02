@@ -1660,7 +1660,7 @@ export default function Home() {
               <p className="text-xs text-neutral-600 mt-3">
                 Payments processed securely through Stripe
               </p>
-            </div>
+           <</div>
           </div>
           
           <div className="border-t border-neutral-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
