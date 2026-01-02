@@ -7,6 +7,7 @@
  * Features: Personalized insights, data visualization, quick actions, and smooth animations.
  */
 
+
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase"
