@@ -888,11 +888,10 @@ export default function Home() {
   }, [])
 
   const handleSearch = () => {
-    if (!searchQuery.trim()) return
-    setIsSearching(true)
-    // Simulate 1-2 second search delay
-    setTimeout(() => setIsSearching(false), Math.random() * 1000 + 1000)
-  }
+        if (!searchQuery.trim()) return
+    
+    // Redirect to search results page
+    window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`
 
   const handleDomainClick = (tld: string) => {
     setSearchQuery(`mydomain${tld}`)
