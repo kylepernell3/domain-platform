@@ -1672,7 +1672,7 @@ export default function Home() {
               <Link href="#" className="text-neutral-500 hover:text-white transition-colors duration-300 font-medium tracking-wide focus:outline-none focus:text-red-400">Sitemap</Link>
             </div>
           </div>
-        </div>
+       </div>
       </footer>
     </div>
   )
