@@ -3,9 +3,50 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Globe, Shield, Search, Check, ArrowRight, Star, Zap, ChevronRight, Sparkles, X, Award, Bot, Clock, DollarSign, Rocket, Eye, LayoutDashboard, FileCheck, MousePointerClick, ChevronDown, Menu, Gift } from "lucide-react"
+import { Globe, Shield, Search, Check, ArrowRight, Star, ChevronRight, Sparkles, X, Award, Bot, Clock, DollarSign, Rocket, Eye, LayoutDashboard, FileCheck, MousePointerClick, ChevronDown, Menu, Gift, Server, Mail, ShoppingCart, Lock, RefreshCw, Layers, Cloud, HardDrive, Send, Briefcase, Store, Code } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
+
+// Navigation menu structure (GoDaddy-style)
+const navMenus = {
+  domains: {
+    title: "Domains",
+    items: [
+      { name: "Domain Search", desc: "Find your perfect domain name", icon: Search },
+      { name: "Domain Transfer", desc: "Move your domain to DomainPro", icon: RefreshCw },
+      { name: "Domain Backorder", desc: "Catch expiring domains", icon: Clock },
+      { name: "Bulk Domain Search", desc: "Register multiple domains at once", icon: Layers },
+      { name: "Domain Auctions", desc: "Bid on premium domains", icon: DollarSign },
+    ]
+  },
+  hosting: {
+    title: "Hosting",
+    items: [
+      { name: "Web Hosting", desc: "Fast & reliable shared hosting", icon: Server },
+      { name: "WordPress Hosting", desc: "Optimized for WordPress sites", icon: Code },
+      { name: "VPS Hosting", desc: "Virtual private server power", icon: HardDrive },
+      { name: "Dedicated Servers", desc: "Maximum performance & control", icon: Server },
+      { name: "Cloud Hosting", desc: "Scalable cloud infrastructure", icon: Cloud },
+    ]
+  },
+  email: {
+    title: "Email",
+    items: [
+      { name: "Professional Email", desc: "Business email with your domain", icon: Mail },
+      { name: "Email Marketing", desc: "Reach your audience effectively", icon: Send },
+      { name: "Microsoft 365", desc: "Full Office suite & email", icon: Briefcase },
+    ]
+  },
+  websites: {
+    title: "Websites",
+    items: [
+      { name: "Website Builder", desc: "Drag & drop site creation", icon: LayoutDashboard },
+      { name: "WordPress", desc: "World's most popular CMS", icon: Code },
+      { name: "Online Store", desc: "Sell products online", icon: Store },
+      { name: "Website Security", desc: "SSL & malware protection", icon: Lock },
+    ]
+  }
+}
 
 // Custom hook for scroll-triggered animations
 function useScrollAnimation() {
@@ -62,12 +103,6 @@ function ParallaxOrbs() {
           backgroundSize: '60px 60px'
         }}
       />
-      <div 
-        className="absolute inset-0 opacity-[0.012]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
-        }}
-      />
     </div>
   )
 }
@@ -77,7 +112,7 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   
   return (
-    <div className={`fixed inset-0 z-[60] md:hidden transition-all duration-300 ${isOpen ? 'visible' : 'invisible'}`}>
+    <div className={`fixed inset-0 z-[60] lg:hidden transition-all duration-300 ${isOpen ? 'visible' : 'invisible'}`}>
       <div 
         className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
         onClick={onClose}
@@ -94,67 +129,42 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             </button>
           </div>
           
-          <div className="space-y-2">
-            {/* Features Accordion */}
-            <div>
-              <button 
-                onClick={() => setExpandedSection(expandedSection === 'features' ? null : 'features')}
-                className="w-full flex items-center justify-between py-3 text-white font-semibold hover:text-red-400 transition-colors duration-300"
-              >
-                Features
-                <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${expandedSection === 'features' ? 'rotate-180' : ''}`} />
-              </button>
-              <div className={`overflow-hidden transition-all duration-300 ${expandedSection === 'features' ? 'max-h-[500px]' : 'max-h-0'}`}>
-                <div className="pl-4 space-y-2 pb-3">
-                  {usps.slice(0, 6).map((usp, i) => (
-                    <Link key={i} href="#features" onClick={onClose} className="flex items-center gap-3 py-2 text-neutral-400 hover:text-white transition-colors duration-300">
-                      <usp.icon className="h-4 w-4 text-red-500/80" />
-                      <span className="text-sm">{usp.title}</span>
-                    </Link>
-                  ))}
+          <div className="space-y-1">
+            {Object.entries(navMenus).map(([key, menu]) => (
+              <div key={key}>
+                <button 
+                  onClick={() => setExpandedSection(expandedSection === key ? null : key)}
+                  className="w-full flex items-center justify-between py-3 text-white font-semibold hover:text-red-400 transition-colors duration-300"
+                >
+                  {menu.title}
+                  <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${expandedSection === key ? 'rotate-180' : ''}`} />
+                </button>
+                <div className={`overflow-hidden transition-all duration-300 ${expandedSection === key ? 'max-h-[400px]' : 'max-h-0'}`}>
+                  <div className="pl-4 space-y-1 pb-3">
+                    {menu.items.map((item, i) => (
+                      <Link key={i} href="#" onClick={onClose} className="flex items-center gap-3 py-2 text-neutral-400 hover:text-white transition-colors duration-300">
+                        <item.icon className="h-4 w-4 text-red-500/80" />
+                        <span className="text-sm">{item.name}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
             
-            {/* Pricing Accordion */}
-            <div>
-              <button 
-                onClick={() => setExpandedSection(expandedSection === 'pricing' ? null : 'pricing')}
-                className="w-full flex items-center justify-between py-3 text-white font-semibold hover:text-red-400 transition-colors duration-300"
-              >
-                Pricing
-                <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${expandedSection === 'pricing' ? 'rotate-180' : ''}`} />
-              </button>
-              <div className={`overflow-hidden transition-all duration-300 ${expandedSection === 'pricing' ? 'max-h-[300px]' : 'max-h-0'}`}>
-                <div className="pl-4 space-y-2 pb-3">
-                  {pricingTiers.map((tier, i) => (
-                    <Link key={i} href="#pricing" onClick={onClose} className="flex items-center justify-between py-2 text-neutral-400 hover:text-white transition-colors duration-300">
-                      <span className="text-sm">{tier.name}</span>
-                      <span className={`text-sm font-semibold ${tier.name === 'Free' ? 'text-emerald-400' : 'text-white'}`}>
-                        {tier.name === 'Free' ? 'FREE' : `$${tier.price}/mo`}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
-            <Link href="#compare" onClick={onClose} className="block py-3 text-white font-semibold hover:text-red-400 transition-colors duration-300">
-              Compare
-            </Link>
-            <Link href="/dashboard" onClick={onClose} className="block py-3 text-white font-semibold hover:text-red-400 transition-colors duration-300">
-              Dashboard
+            <Link href="#pricing" onClick={onClose} className="block py-3 text-white font-semibold hover:text-red-400 transition-colors duration-300">
+              Pricing
             </Link>
           </div>
           
           <div className="mt-8 space-y-3">
-            <Button variant="ghost" className="w-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all duration-300 font-semibold">
+            <button className="w-full py-3 px-4 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-all duration-300 font-semibold">
               Sign In
-            </Button>
-            <Button className="w-full bg-red-600 hover:bg-red-500 text-white hover:text-white transition-all duration-300 font-semibold">
+            </button>
+            <button className="w-full py-3 px-4 bg-red-600 hover:bg-gradient-to-r hover:from-neutral-700 hover:to-neutral-600 text-white rounded-lg transition-all duration-300 font-semibold flex items-center justify-center gap-2">
               Get Started Free
-              <Sparkles className="ml-2 h-4 w-4" />
-            </Button>
+              <Sparkles className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </div>
@@ -286,19 +296,18 @@ function PricingTierCard({ tier, index, popular = false, isFree = false }: { tie
               </li>
             ))}
           </ul>
-          <Button 
-            className={`w-full font-semibold tracking-wide transition-all duration-300 ${
+          <button 
+            className={`w-full py-3 px-6 rounded-lg font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${
               popular 
-                ? 'bg-red-600 hover:bg-red-500 text-white hover:text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:scale-[1.02]' 
+                ? 'bg-red-600 hover:bg-gradient-to-r hover:from-neutral-700 hover:to-neutral-600 text-white shadow-lg shadow-red-500/20' 
                 : isFree
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white hover:text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:scale-[1.02]'
-                : 'bg-neutral-800 hover:bg-neutral-700 text-white hover:text-white hover:scale-[1.02]'
+                ? 'bg-emerald-600 hover:bg-gradient-to-r hover:from-neutral-700 hover:to-neutral-600 text-white shadow-lg shadow-emerald-500/20'
+                : 'bg-neutral-800 hover:bg-gradient-to-r hover:from-neutral-700 hover:to-neutral-600 text-white'
             }`}
-            size="lg"
           >
             {isFree ? 'Start Free' : 'Get Started'}
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
       </Card>
     </div>
@@ -405,7 +414,6 @@ const pricingTiers = [
 export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null)
   const [scrollY, setScrollY] = useState(0)
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const servicesSection = useScrollAnimation()
   const pricingSection = useScrollAnimation()
@@ -416,19 +424,6 @@ export default function Home() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('.nav-dropdown')) {
-        setOpenDropdown(null)
-      }
-    }
-    if (openDropdown) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [openDropdown])
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white overflow-x-hidden">
@@ -442,6 +437,31 @@ export default function Home() {
         
         body { font-family: var(--font-body); }
         .font-display { font-family: var(--font-display); }
+        
+        /* HOVER DROPDOWN STYLES */
+        .nav-dropdown {
+          position: relative;
+        }
+        .nav-dropdown .dropdown-menu {
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          padding-top: 0.5rem;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.2s ease;
+        }
+        .nav-dropdown:hover .dropdown-menu {
+          opacity: 1;
+          visibility: visible;
+        }
+        .nav-dropdown:hover .dropdown-trigger {
+          color: white;
+        }
+        .nav-dropdown:hover .dropdown-chevron {
+          transform: rotate(180deg);
+        }
         
         @keyframes float-slow {
           0%, 100% { transform: translate(0, 0) scale(1); }
@@ -500,10 +520,11 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Navigation with Dropdowns */}
+      {/* Navigation with HOVER Dropdowns */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-neutral-800/50 bg-neutral-950/95 backdrop-blur-xl">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 group cursor-pointer">
+        <div className="container mx-auto px-4 flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3 group cursor-pointer py-4">
             <div className="relative">
               <Globe className="h-9 w-9 text-red-500/90 group-hover:rotate-180 transition-transform duration-700" />
               <div className="absolute inset-0 bg-red-500/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -511,117 +532,129 @@ export default function Home() {
             <span className="text-2xl font-display font-bold tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">
               DomainPro
             </span>
-          </div>
+          </Link>
           
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            {/* Features Dropdown */}
-            <div className="relative nav-dropdown">
-              <button 
-                onClick={() => setOpenDropdown(openDropdown === 'features' ? null : 'features')}
-                className="flex items-center gap-1 text-neutral-400 hover:text-white transition-colors duration-300 text-sm font-semibold tracking-wide uppercase py-2"
-              >
-                Features
-                <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${openDropdown === 'features' ? 'rotate-180' : ''}`} />
+          {/* Desktop Navigation - HOVER Dropdowns */}
+          <div className="hidden lg:flex items-center gap-1">
+            {/* Domains Dropdown */}
+            <div className="nav-dropdown">
+              <button className="dropdown-trigger flex items-center gap-1 text-neutral-400 transition-colors duration-200 text-sm font-semibold tracking-wide uppercase py-4 px-3">
+                Domains
+                <ChevronDown className="dropdown-chevron h-4 w-4 transition-transform duration-200" />
               </button>
-              <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-4 transition-all duration-300 ${openDropdown === 'features' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-                <div className="bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden min-w-[520px]">
-                  <div className="p-4 grid grid-cols-2 gap-2">
-                    {usps.map((usp, i) => (
-                      <Link 
-                        key={i}
-                        href="#features" 
-                        className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/50 transition-all duration-300 group/item"
-                        onClick={() => setOpenDropdown(null)}
-                      >
-                        <div className={`p-2 rounded-lg ${usp.color} bg-opacity-20`}>
-                          <usp.icon className={`h-4 w-4 ${usp.color.replace('bg-', 'text-')}`} />
+              <div className="dropdown-menu z-50">
+                <div className="bg-neutral-900/98 backdrop-blur-xl border border-neutral-800 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden min-w-[320px]">
+                  <div className="p-3">
+                    {navMenus.domains.items.map((item, i) => (
+                      <Link key={i} href="#" className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/60 transition-all duration-200 group/item">
+                        <div className="p-2 rounded-lg bg-red-600/10 group-hover/item:bg-red-600/20 transition-colors duration-200">
+                          <item.icon className="h-4 w-4 text-red-400" />
                         </div>
                         <div>
-                          <div className="font-semibold text-white text-sm group-hover/item:text-red-400 transition-colors duration-300">{usp.title}</div>
-                          <div className="text-xs text-neutral-500 line-clamp-1">{usp.desc}</div>
+                          <div className="font-semibold text-white text-sm group-hover/item:text-red-400 transition-colors duration-200">{item.name}</div>
+                          <div className="text-xs text-neutral-500">{item.desc}</div>
                         </div>
                       </Link>
                     ))}
                   </div>
-                  <div className="p-4 border-t border-neutral-800 bg-neutral-900/50">
-                    <Link href="#features" className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 font-semibold transition-colors duration-300" onClick={() => setOpenDropdown(null)}>
-                      View all features <ArrowRight className="h-4 w-4" />
-                    </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Hosting Dropdown */}
+            <div className="nav-dropdown">
+              <button className="dropdown-trigger flex items-center gap-1 text-neutral-400 transition-colors duration-200 text-sm font-semibold tracking-wide uppercase py-4 px-3">
+                Hosting
+                <ChevronDown className="dropdown-chevron h-4 w-4 transition-transform duration-200" />
+              </button>
+              <div className="dropdown-menu z-50">
+                <div className="bg-neutral-900/98 backdrop-blur-xl border border-neutral-800 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden min-w-[320px]">
+                  <div className="p-3">
+                    {navMenus.hosting.items.map((item, i) => (
+                      <Link key={i} href="#" className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/60 transition-all duration-200 group/item">
+                        <div className="p-2 rounded-lg bg-red-600/10 group-hover/item:bg-red-600/20 transition-colors duration-200">
+                          <item.icon className="h-4 w-4 text-red-400" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-white text-sm group-hover/item:text-red-400 transition-colors duration-200">{item.name}</div>
+                          <div className="text-xs text-neutral-500">{item.desc}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Email Dropdown */}
+            <div className="nav-dropdown">
+              <button className="dropdown-trigger flex items-center gap-1 text-neutral-400 transition-colors duration-200 text-sm font-semibold tracking-wide uppercase py-4 px-3">
+                Email
+                <ChevronDown className="dropdown-chevron h-4 w-4 transition-transform duration-200" />
+              </button>
+              <div className="dropdown-menu z-50">
+                <div className="bg-neutral-900/98 backdrop-blur-xl border border-neutral-800 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden min-w-[320px]">
+                  <div className="p-3">
+                    {navMenus.email.items.map((item, i) => (
+                      <Link key={i} href="#" className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/60 transition-all duration-200 group/item">
+                        <div className="p-2 rounded-lg bg-red-600/10 group-hover/item:bg-red-600/20 transition-colors duration-200">
+                          <item.icon className="h-4 w-4 text-red-400" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-white text-sm group-hover/item:text-red-400 transition-colors duration-200">{item.name}</div>
+                          <div className="text-xs text-neutral-500">{item.desc}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Websites Dropdown */}
+            <div className="nav-dropdown">
+              <button className="dropdown-trigger flex items-center gap-1 text-neutral-400 transition-colors duration-200 text-sm font-semibold tracking-wide uppercase py-4 px-3">
+                Websites
+                <ChevronDown className="dropdown-chevron h-4 w-4 transition-transform duration-200" />
+              </button>
+              <div className="dropdown-menu z-50">
+                <div className="bg-neutral-900/98 backdrop-blur-xl border border-neutral-800 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden min-w-[320px]">
+                  <div className="p-3">
+                    {navMenus.websites.items.map((item, i) => (
+                      <Link key={i} href="#" className="flex items-start gap-3 p-3 rounded-xl hover:bg-neutral-800/60 transition-all duration-200 group/item">
+                        <div className="p-2 rounded-lg bg-red-600/10 group-hover/item:bg-red-600/20 transition-colors duration-200">
+                          <item.icon className="h-4 w-4 text-red-400" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-white text-sm group-hover/item:text-red-400 transition-colors duration-200">{item.name}</div>
+                          <div className="text-xs text-neutral-500">{item.desc}</div>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
             
-            {/* Pricing Dropdown */}
-            <div className="relative nav-dropdown">
-              <button 
-                onClick={() => setOpenDropdown(openDropdown === 'pricing' ? null : 'pricing')}
-                className="flex items-center gap-1 text-neutral-400 hover:text-white transition-colors duration-300 text-sm font-semibold tracking-wide uppercase py-2"
-              >
-                Pricing
-                <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${openDropdown === 'pricing' ? 'rotate-180' : ''}`} />
-              </button>
-              <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-4 transition-all duration-300 ${openDropdown === 'pricing' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-                <div className="bg-neutral-900/95 backdrop-blur-xl border border-neutral-800 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden min-w-[300px]">
-                  <div className="p-4 space-y-2">
-                    {pricingTiers.map((tier, i) => (
-                      <Link 
-                        key={i}
-                        href="#pricing" 
-                        className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-800/50 transition-all duration-300 group/item"
-                        onClick={() => setOpenDropdown(null)}
-                      >
-                        <div>
-                          <div className="font-semibold text-white text-sm group-hover/item:text-red-400 transition-colors duration-300 flex items-center gap-2">
-                            {tier.name}
-                            {tier.name === 'Free' && <Badge className="bg-emerald-600/20 text-emerald-400 text-[10px] hover:bg-emerald-600/20">FREE</Badge>}
-                            {tier.name === 'Professional' && <Badge className="bg-red-600/20 text-red-400 text-[10px] hover:bg-red-600/20">POPULAR</Badge>}
-                          </div>
-                          <div className="text-xs text-neutral-500">{tier.description}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`font-bold ${tier.name === 'Free' ? 'text-emerald-400' : 'text-white'}`}>
-                            {tier.name === 'Free' ? 'FREE' : `$${tier.price}`}
-                          </div>
-                          {tier.name !== 'Free' && <div className="text-xs text-neutral-500">/month</div>}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                  <div className="p-4 border-t border-neutral-800 bg-neutral-900/50">
-                    <Link href="#pricing" className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 font-semibold transition-colors duration-300" onClick={() => setOpenDropdown(null)}>
-                      Compare all plans <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Simple Links */}
-            <Link href="#compare" className="relative text-neutral-400 hover:text-white transition-colors duration-300 group text-sm font-semibold tracking-wide uppercase py-2">
-              Compare
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-red-500/80 to-red-400/80 group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link href="/dashboard" className="relative text-neutral-400 hover:text-white transition-colors duration-300 group text-sm font-semibold tracking-wide uppercase py-2">
-              Dashboard
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-red-500/80 to-red-400/80 group-hover:w-full transition-all duration-300" />
+            {/* Pricing - Single Link */}
+            <Link href="#pricing" className="text-neutral-400 hover:text-white transition-colors duration-200 text-sm font-semibold tracking-wide uppercase py-4 px-3">
+              Pricing
             </Link>
           </div>
           
           {/* Desktop CTA Buttons */}
-          <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" className="text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-all duration-300 font-semibold tracking-wide">
+          <div className="hidden lg:flex items-center gap-3">
+            <button className="text-neutral-400 hover:text-white hover:bg-neutral-800/50 px-4 py-2 rounded-lg transition-all duration-300 font-semibold tracking-wide">
               Sign In
-            </Button>
-            <Button className="bg-red-600 hover:bg-red-500 text-white hover:text-white border-0 shadow-lg shadow-red-500/15 hover:shadow-red-500/30 transition-all duration-300 font-semibold tracking-wide hover:scale-[1.02]">
+            </button>
+            <button className="bg-red-600 hover:bg-gradient-to-r hover:from-neutral-700 hover:to-neutral-600 text-white px-6 py-2.5 rounded-lg transition-all duration-300 font-semibold tracking-wide flex items-center gap-2">
               Get Started Free
-              <Sparkles className="ml-2 h-4 w-4" />
-            </Button>
+              <Sparkles className="h-4 w-4" />
+            </button>
           </div>
           
           {/* Mobile Menu Button */}
-          <button className="md:hidden p-2 hover:bg-neutral-800 rounded-lg transition-colors duration-300" onClick={() => setMobileMenuOpen(true)}>
+          <button className="lg:hidden p-2 hover:bg-neutral-800 rounded-lg transition-colors duration-300" onClick={() => setMobileMenuOpen(true)}>
             <Menu className="h-6 w-6" />
           </button>
         </div>
@@ -666,10 +699,10 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <Button size="lg" className="bg-red-600 hover:bg-red-500 text-white hover:text-white font-bold px-8 shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 hover:scale-105 tracking-wide">
+              <button className="bg-red-600 hover:bg-gradient-to-r hover:from-neutral-700 hover:to-neutral-600 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-red-500/20 transition-all duration-300 tracking-wide flex items-center justify-center gap-2">
                 Search Domains
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+                <ArrowRight className="h-5 w-5" />
+              </button>
             </div>
             
             {/* Domain prices */}
@@ -776,10 +809,10 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <Button size="lg" className="bg-white hover:bg-neutral-100 text-neutral-950 hover:text-neutral-950 font-bold px-8 shadow-lg transition-all duration-300 hover:scale-105 tracking-wide">
+            <button className="bg-white hover:bg-gradient-to-r hover:from-neutral-700 hover:to-neutral-600 text-neutral-950 hover:text-white font-bold px-8 py-3 rounded-lg shadow-lg transition-all duration-300 tracking-wide flex items-center gap-2">
               View Plans
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+              <ArrowRight className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </section>
@@ -906,14 +939,14 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-red-600 hover:bg-red-500 text-white hover:text-white font-bold px-10 shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 hover:scale-105 tracking-wide">
+              <button className="bg-red-600 hover:bg-gradient-to-r hover:from-neutral-700 hover:to-neutral-600 text-white font-bold px-10 py-4 rounded-lg shadow-lg shadow-red-500/20 transition-all duration-300 tracking-wide flex items-center justify-center gap-2">
                 Start Free Today
-                <Sparkles className="ml-2 h-5 w-5" />
-              </Button>
-              <Button size="lg" variant="outline" className="border-neutral-700 text-white hover:text-white hover:bg-neutral-800 hover:border-neutral-600 transition-all duration-300 font-bold tracking-wide hover:scale-[1.02]">
+                <Sparkles className="h-5 w-5" />
+              </button>
+              <button className="bg-transparent border border-neutral-700 hover:bg-gradient-to-r hover:from-neutral-700 hover:to-neutral-600 hover:border-transparent text-white font-bold px-10 py-4 rounded-lg transition-all duration-300 tracking-wide flex items-center justify-center gap-2">
                 View All Plans
-                <ChevronRight className="ml-2 h-5 w-5" />
-              </Button>
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
             
             <p className="text-sm text-neutral-500 mt-8 tracking-wide font-medium">
@@ -926,8 +959,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-neutral-800/50 py-16 bg-neutral-950">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-            <div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+            <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-6">
                 <Globe className="h-7 w-7 text-red-500/90" />
                 <span className="text-xl font-display font-bold tracking-tight">DomainPro</span>
@@ -937,24 +970,57 @@ export default function Home() {
               </p>
             </div>
             
-            {[
-              { title: 'Products', links: ['Domains', 'Hosting', 'Email', 'SSL'] },
-              { title: 'Company', links: ['About', 'Blog', 'Careers', 'Press'] },
-              { title: 'Support', links: ['Help Center', 'Contact', 'Status', 'API Docs'] },
-            ].map((col, i) => (
-              <div key={i}>
-                <h4 className="font-bold text-white mb-4 uppercase tracking-widest text-xs">{col.title}</h4>
-                <ul className="space-y-3">
-                  {col.links.map((link, j) => (
-                    <li key={j}>
-                      <Link href="#" className="text-neutral-500 hover:text-red-400 transition-colors duration-300 text-sm font-medium tracking-wide">
-                        {link}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            <div>
+              <h4 className="font-bold text-white mb-4 uppercase tracking-widest text-xs">Domains</h4>
+              <ul className="space-y-3">
+                {navMenus.domains.items.map((item, i) => (
+                  <li key={i}>
+                    <Link href="#" className="text-neutral-500 hover:text-red-400 transition-colors duration-300 text-sm font-medium tracking-wide">
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-white mb-4 uppercase tracking-widest text-xs">Hosting</h4>
+              <ul className="space-y-3">
+                {navMenus.hosting.items.map((item, i) => (
+                  <li key={i}>
+                    <Link href="#" className="text-neutral-500 hover:text-red-400 transition-colors duration-300 text-sm font-medium tracking-wide">
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-white mb-4 uppercase tracking-widest text-xs">Websites</h4>
+              <ul className="space-y-3">
+                {navMenus.websites.items.map((item, i) => (
+                  <li key={i}>
+                    <Link href="#" className="text-neutral-500 hover:text-red-400 transition-colors duration-300 text-sm font-medium tracking-wide">
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-white mb-4 uppercase tracking-widest text-xs">Support</h4>
+              <ul className="space-y-3">
+                {['Help Center', 'Contact Us', 'System Status', 'API Docs'].map((link, i) => (
+                  <li key={i}>
+                    <Link href="#" className="text-neutral-500 hover:text-red-400 transition-colors duration-300 text-sm font-medium tracking-wide">
+                      {link}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
           
           <div className="border-t border-neutral-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
