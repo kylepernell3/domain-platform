@@ -25,11 +25,9 @@ import {
   LogOut,
   CreditCard,
   HelpCircle,
-  FileText,
   Inbox
 } from "lucide-react"
 
-// Timeline options for stats comparison
 const timelineOptions = [
   { label: "7 Days", value: "7d" },
   { label: "14 Days", value: "14d" },
@@ -41,7 +39,6 @@ const timelineOptions = [
   { label: "All Time", value: "all" },
 ]
 
-// Stats data with timeline variations
 const getStatsForTimeline = (timeline: string) => {
   const variations: Record<string, { value: string; change: string }[]> = {
     "7d": [
@@ -107,7 +104,6 @@ const getStatsForTimeline = (timeline: string) => {
   }))
 }
 
-// Domain data with SSL expiry dates
 const initialDomains = [
   { 
     name: "example.com", 
@@ -165,7 +161,6 @@ const initialDomains = [
   },
 ]
 
-// Chart data
 const chartData = {
   domainGrowth: [
     { month: "Jul", value: 4 },
@@ -205,7 +200,6 @@ const activities = [
   { action: "DNS updated", domain: "mystore.io", time: "3 days ago" },
 ]
 
-// Helper function to calculate days until SSL expiry
 const getDaysUntilExpiry = (expiryDate: string | null): number | null => {
   if (!expiryDate) return null
   const today = new Date()
@@ -215,75 +209,76 @@ const getDaysUntilExpiry = (expiryDate: string | null): number | null => {
   return diffDays
 }
 
-// Helper function to format date
 const formatExpiryDate = (dateStr: string): string => {
   const date = new Date(dateStr)
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 }
 
-// Skeleton Loader Component
-const SkeletonCard = () => (
-  <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-6 animate-pulse">
-    <div className="flex items-start justify-between mb-4">
-      <div className="h-10 w-10 bg-neutral-800 rounded-lg" />
-      <div className="h-4 w-4 bg-neutral-800 rounded" />
+function SkeletonCard() {
+  return (
+    <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-6 animate-pulse">
+      <div className="flex items-start justify-between mb-4">
+        <div className="h-10 w-10 bg-neutral-800 rounded-lg" />
+        <div className="h-4 w-4 bg-neutral-800 rounded" />
+      </div>
+      <div className="mb-1">
+        <div className="h-8 w-16 bg-neutral-800 rounded mb-2" />
+        <div className="h-4 w-24 bg-neutral-800 rounded" />
+      </div>
+      <div className="h-3 w-20 bg-neutral-800 rounded mt-3" />
     </div>
-    <div className="mb-1">
-      <div className="h-8 w-16 bg-neutral-800 rounded mb-2" />
-      <div className="h-4 w-24 bg-neutral-800 rounded" />
-    </div>
-    <div className="h-3 w-20 bg-neutral-800 rounded mt-3" />
-  </div>
-)
+  )
+}
 
-// Empty State Component
-const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center py-16 px-4">
-    <div className="h-20 w-20 bg-neutral-800/50 rounded-full flex items-center justify-center mb-4">
-      <Inbox className="h-10 w-10 text-neutral-600" />
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4">
+      <div className="h-20 w-20 bg-neutral-800/50 rounded-full flex items-center justify-center mb-4">
+        <Inbox className="h-10 w-10 text-neutral-600" />
+      </div>
+      <h3 className="text-lg font-semibold text-white mb-2">No domains yet</h3>
+      <p className="text-neutral-400 text-sm text-center mb-6 max-w-sm">
+        Get started by registering your first domain or transferring an existing one.
+      </p>
+      <button className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <Plus className="h-4 w-4" />
+        Add Your First Domain
+      </button>
     </div>
-    <h3 className="text-lg font-semibold text-white mb-2">No domains yet</h3>
-    <p className="text-neutral-400 text-sm text-center mb-6 max-w-sm">
-      Get started by registering your first domain or transferring an existing one.
-    </p>
-    <button className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
-      <Plus className="h-4 w-4" />
-      Add Your First Domain
-    </button>
-  </div>
-)
+  )
+}
 
-// Bar Chart Component
-const BarChart = ({ data, maxValue, formatValue }: { 
+function BarChart({ data, maxValue, formatValue }: { 
   data: { month: string; value: number }[]; 
   maxValue: number;
   formatValue?: (val: number) => string;
-}) => (
-  <div className="flex items-end justify-between gap-2 h-48 px-4">
-    {data.map((item, index) => {
-      const height = (item.value / maxValue) * 100
-      return (
-        <div key={index} className="flex-1 flex flex-col items-center gap-2">
-          <div className="w-full flex flex-col items-center justify-end h-40">
-            <span className="text-xs text-neutral-400 mb-1">
-              {formatValue ? formatValue(item.value) : item.value}
-            </span>
-            <div 
-              className="w-full bg-gradient-to-t from-red-600 to-red-400 rounded-t-md transition-all duration-500 ease-out"
-              style={{ height: `${height}%`, minHeight: item.value > 0 ? '8px' : '0' }}
-            />
+}) {
+  return (
+    <div className="flex items-end justify-between gap-2 h-48 px-4">
+      {data.map((item, index) => {
+        const height = (item.value / maxValue) * 100
+        return (
+          <div key={index} className="flex-1 flex flex-col items-center gap-2">
+            <div className="w-full flex flex-col items-center justify-end h-40">
+              <span className="text-xs text-neutral-400 mb-1">
+                {formatValue ? formatValue(item.value) : item.value}
+              </span>
+              <div 
+                className="w-full bg-gradient-to-t from-red-600 to-red-400 rounded-t-md transition-all duration-500 ease-out"
+                style={{ height: `${height}%`, minHeight: item.value > 0 ? '8px' : '0' }}
+              />
+            </div>
+            <span className="text-xs text-neutral-500">{item.month}</span>
           </div>
-          <span className="text-xs text-neutral-500">{item.month}</span>
-        </div>
-      )
-    })}
-  </div>
-)
+        )
+      })}
+    </div>
+  )
+}
 
-// Horizontal Bar Chart Component
-const HorizontalBarChart = ({ data }: { 
+function HorizontalBarChart({ data }: { 
   data: { label: string; value: number; color: string }[] 
-}) => {
+}) {
   const total = data.reduce((sum, item) => sum + item.value, 0)
   return (
     <div className="space-y-4 px-4">
@@ -309,7 +304,6 @@ const HorizontalBarChart = ({ data }: {
 }
 
 export default function DashboardPage() {
-  // State management
   const [isLoading, setIsLoading] = useState(true)
   const [showEmptyState, setShowEmptyState] = useState(false)
   const [selectedTimeline, setSelectedTimeline] = useState("30d")
@@ -319,24 +313,15 @@ export default function DashboardPage() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [activeChart, setActiveChart] = useState("domainGrowth")
   const [sslAlertDismissed, setSslAlertDismissed] = useState(false)
-  
-  // Sorting state
-  const [sortConfig, setSortConfig] = useState<{
-    key: string;
-    direction: "asc" | "desc";
-  } | null>(null)
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null)
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "pending">("all")
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
-  
-  // Domains state
   const [domains, setDomains] = useState(initialDomains)
   
-  // Refs for click outside handling
   const userDropdownRef = useRef<HTMLDivElement>(null)
   const timelineDropdownRef = useRef<HTMLDivElement>(null)
   const statusDropdownRef = useRef<HTMLDivElement>(null)
   
-  // Simulate loading
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false)
@@ -344,7 +329,6 @@ export default function DashboardPage() {
     return () => clearTimeout(timer)
   }, [])
   
-  // Click outside handlers
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
@@ -357,25 +341,18 @@ export default function DashboardPage() {
         setStatusDropdownOpen(false)
       }
     }
-    
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
   
-  // Get stats based on timeline
   const stats = getStatsForTimeline(selectedTimeline)
   
-  // Find domain with SSL expiring soonest (within 30 days)
   const sslExpiringDomain = domains
     .filter(d => d.ssl && d.sslExpiry)
-    .map(d => ({
-      ...d,
-      daysUntilExpiry: getDaysUntilExpiry(d.sslExpiry)
-    }))
+    .map(d => ({ ...d, daysUntilExpiry: getDaysUntilExpiry(d.sslExpiry) }))
     .filter(d => d.daysUntilExpiry !== null && d.daysUntilExpiry <= 30 && d.daysUntilExpiry > 0)
     .sort((a, b) => (a.daysUntilExpiry || 999) - (b.daysUntilExpiry || 999))[0]
   
-  // Sorting function
   const handleSort = (key: string) => {
     let direction: "asc" | "desc" = "asc"
     if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
@@ -384,8 +361,8 @@ export default function DashboardPage() {
     setSortConfig({ key, direction })
     
     const sorted = [...domains].sort((a, b) => {
-      let aVal: string | number | boolean = ""
-      let bVal: string | number | boolean = ""
+      let aVal: string | number = ""
+      let bVal: string | number = ""
       
       switch (key) {
         case "name":
@@ -416,13 +393,11 @@ export default function DashboardPage() {
     setDomains(sorted)
   }
   
-  // Filter domains by status
   const filteredDomains = domains.filter(d => {
     if (statusFilter === "all") return true
     return d.status === statusFilter
   })
   
-  // Get sort indicator
   const getSortIndicator = (key: string) => {
     if (!sortConfig || sortConfig.key !== key) {
       return <ArrowUpDown className="h-3 w-3 ml-1 opacity-50" />
@@ -432,7 +407,6 @@ export default function DashboardPage() {
       : <ChevronDown className="h-3 w-3 ml-1" />
   }
   
-  // Chart tabs
   const chartTabs = [
     { id: "domainGrowth", label: "Domain Growth" },
     { id: "sslStatus", label: "SSL Status" },
@@ -440,7 +414,6 @@ export default function DashboardPage() {
     { id: "uptimeHistory", label: "Uptime History" },
   ]
   
-  // Render active chart
   const renderChart = () => {
     switch (activeChart) {
       case "domainGrowth":
@@ -489,9 +462,8 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col">
-      {/* SSL Expiration Alert Banner */}
       {sslExpiringDomain && !sslAlertDismissed && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
+        <div className="fixed bottom-0 left-0 right-0 z-50" style={{ animation: "slideUp 0.4s ease-out forwards" }}>
           <div className="bg-gradient-to-r from-red-700 via-red-600 to-red-700 border-t border-red-500/50 shadow-lg shadow-red-900/30">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -500,9 +472,7 @@ export default function DashboardPage() {
                     <AlertTriangle className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold">
-                      SSL Certificate Expiring Soon!
-                    </p>
+                    <p className="text-white font-semibold">SSL Certificate Expiring Soon!</p>
                     <p className="text-red-100 text-sm">
                       <span className="font-medium">{sslExpiringDomain.name}</span> expires in{" "}
                       <span className="font-bold">{sslExpiringDomain.daysUntilExpiry} days</span>{" "}
@@ -527,11 +497,9 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Header */}
       <header className="border-b border-neutral-800/50 backdrop-blur-xl bg-neutral-950/90 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Mobile Menu Button */}
             <button 
               className="lg:hidden p-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -539,7 +507,6 @@ export default function DashboardPage() {
               <Menu className="h-5 w-5" />
             </button>
 
-            {/* Logo */}
             <Link href="/" className="flex items-center gap-3">
               <div className="relative">
                 <Globe className="h-8 w-8 text-red-500" />
@@ -548,7 +515,6 @@ export default function DashboardPage() {
               <span className="text-xl font-bold text-white hidden sm:block">DomainPro</span>
             </Link>
 
-            {/* Search Bar - Desktop */}
             <div className="hidden md:flex flex-1 max-w-md mx-8">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
@@ -560,9 +526,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center gap-2 sm:gap-4">
-              {/* Mobile Search Toggle */}
               <button 
                 className="md:hidden p-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg transition-colors"
                 onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
@@ -575,7 +539,6 @@ export default function DashboardPage() {
                 <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
               </button>
               
-              {/* User Dropdown */}
               <div className="relative" ref={userDropdownRef}>
                 <button 
                   className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
@@ -589,7 +552,6 @@ export default function DashboardPage() {
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
                 
-                {/* User Dropdown Menu */}
                 <div className={`absolute right-0 top-full mt-2 w-56 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl shadow-black/20 overflow-hidden transition-all duration-200 origin-top-right ${
                   userDropdownOpen 
                     ? "opacity-100 scale-100 translate-y-0" 
@@ -624,7 +586,6 @@ export default function DashboardPage() {
             </div>
           </div>
           
-          {/* Mobile Search Bar */}
           <div className={`md:hidden overflow-hidden transition-all duration-300 ${
             mobileSearchOpen ? "max-h-16 pb-4" : "max-h-0"
           }`}>
@@ -640,7 +601,6 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Mobile Navigation Menu */}
       <div className={`lg:hidden fixed inset-0 z-30 transition-all duration-300 ${
         mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}>
@@ -699,15 +659,22 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Dashboard</h1>
-          <p className="text-neutral-400">Welcome back! Here&apos;s your domain overview</p>
+        <div className="relative mb-8 overflow-visible">
+          <div className="absolute -top-20 -right-20 sm:-top-32 sm:-right-32 w-64 h-64 sm:w-96 sm:h-96 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-600/30 via-red-500/20 to-transparent rounded-full blur-3xl" />
+            <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-red-500/40 to-red-600/10 rounded-full blur-2xl" />
+            <div className="absolute top-1/3 left-1/3 w-24 h-24 sm:w-32 sm:h-32 bg-red-500/20 rounded-full blur-xl" />
+          </div>
+          <div className="absolute -top-10 right-20 sm:right-40 w-32 h-32 sm:w-48 sm:h-48 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-tl from-red-500/15 via-red-400/10 to-transparent rounded-full blur-2xl" />
+          </div>
+          <div className="relative z-10">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Dashboard</h1>
+            <p className="text-neutral-400">Welcome back! Here&apos;s your domain overview</p>
+          </div>
         </div>
 
-        {/* Timeline Dropdown */}
         <div className="mb-6 flex items-center gap-3">
           <span className="text-sm text-neutral-400">Showing stats for:</span>
           <div className="relative" ref={timelineDropdownRef}>
@@ -750,7 +717,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           {isLoading ? (
             <>
@@ -784,13 +750,11 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Domain List */}
           <div className="lg:col-span-2 order-2 lg:order-1">
             <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl overflow-hidden">
               <div className="px-4 sm:px-6 py-4 border-b border-neutral-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h2 className="text-lg font-semibold text-white">Your Domains</h2>
                 <div className="flex items-center gap-2">
-                  {/* Toggle empty state for demo */}
                   <button 
                     onClick={() => setShowEmptyState(!showEmptyState)}
                     className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white border border-neutral-700 rounded-lg transition-colors"
@@ -818,7 +782,6 @@ export default function DashboardPage() {
                   <table className="w-full min-w-[600px]">
                     <thead>
                       <tr className="text-left text-xs border-b border-neutral-800/50">
-                        {/* Domain Header Pill */}
                         <th className="px-4 sm:px-6 py-3 font-medium sticky left-0 bg-neutral-900/80 backdrop-blur-sm">
                           <button 
                             onClick={() => handleSort("name")}
@@ -833,7 +796,6 @@ export default function DashboardPage() {
                           </button>
                         </th>
                         
-                        {/* Status Header Pill with Dropdown */}
                         <th className="px-4 sm:px-6 py-3 font-medium">
                           <div className="relative" ref={statusDropdownRef}>
                             <button 
@@ -875,7 +837,6 @@ export default function DashboardPage() {
                           </div>
                         </th>
                         
-                        {/* SSL Header Pill */}
                         <th className="px-4 sm:px-6 py-3 font-medium">
                           <button 
                             onClick={() => handleSort("ssl")}
@@ -890,7 +851,6 @@ export default function DashboardPage() {
                           </button>
                         </th>
                         
-                        {/* Expiry Header Pill */}
                         <th className="px-4 sm:px-6 py-3 font-medium">
                           <button 
                             onClick={() => handleSort("expiry")}
@@ -905,7 +865,6 @@ export default function DashboardPage() {
                           </button>
                         </th>
                         
-                        {/* Visits Header Pill */}
                         <th className="px-4 sm:px-6 py-3 font-medium">
                           <button 
                             onClick={() => handleSort("visits")}
@@ -974,9 +933,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6 order-1 lg:order-2">
-            {/* Quick Actions */}
             <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
               <div className="space-y-3">
@@ -1002,7 +959,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Recent Activity */}
             <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
               <div className="space-y-4">
@@ -1025,13 +981,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Charts Section */}
         <div className="mt-8">
           <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl overflow-hidden">
             <div className="px-4 sm:px-6 py-4 border-b border-neutral-800/50">
               <h2 className="text-lg font-semibold text-white mb-4">Analytics</h2>
               
-              {/* Chart Tabs - Pill Style */}
               <div className="flex flex-wrap gap-2">
                 {chartTabs.map((tab) => (
                   <button
@@ -1049,7 +1003,6 @@ export default function DashboardPage() {
               </div>
             </div>
             
-            {/* Chart Content */}
             <div className="p-4 sm:p-6 min-h-[280px]">
               <div className="transition-all duration-300 ease-in-out">
                 {renderChart()}
@@ -1059,46 +1012,28 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="bg-neutral-950 border-t border-neutral-800/50 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            {/* Copyright */}
             <div className="flex items-center gap-2 text-neutral-400 text-sm">
               <Globe className="h-4 w-4 text-red-500" />
               <span>© 2026 DomainPro. All rights reserved.</span>
             </div>
             
-            {/* Footer Links */}
             <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-              <Link 
-                href="/terms" 
-                className="text-sm text-neutral-400 hover:text-red-400 transition-colors"
-              >
+              <Link href="/terms" className="text-sm text-neutral-400 hover:text-red-400 transition-colors">
                 Terms
               </Link>
-              <Link 
-                href="/privacy" 
-                className="text-sm text-neutral-400 hover:text-red-400 transition-colors"
-              >
+              <Link href="/privacy" className="text-sm text-neutral-400 hover:text-red-400 transition-colors">
                 Privacy
               </Link>
-              <Link 
-                href="/docs" 
-                className="text-sm text-neutral-400 hover:text-red-400 transition-colors"
-              >
+              <Link href="/docs" className="text-sm text-neutral-400 hover:text-red-400 transition-colors">
                 Documentation
               </Link>
-              <Link 
-                href="/api" 
-                className="text-sm text-neutral-400 hover:text-red-400 transition-colors"
-              >
+              <Link href="/api" className="text-sm text-neutral-400 hover:text-red-400 transition-colors">
                 API
               </Link>
-              <Link 
-                href="/support" 
-                className="text-sm text-neutral-400 hover:text-red-400 transition-colors"
-              >
+              <Link href="/support" className="text-sm text-neutral-400 hover:text-red-400 transition-colors">
                 Support
               </Link>
             </nav>
@@ -1106,9 +1041,8 @@ export default function DashboardPage() {
         </div>
       </footer>
 
-      {/* Custom Styles for Animations */}
       <style jsx global>{`
-        @keyframes slide-up {
+        @keyframes slideUp {
           from {
             transform: translateY(100%);
             opacity: 0;
@@ -1117,10 +1051,6 @@ export default function DashboardPage() {
             transform: translateY(0);
             opacity: 1;
           }
-        }
-        
-        .animate-slide-up {
-          animation: slide-up 0.4s ease-out forwards;
         }
       `}</style>
     </div>
