@@ -888,10 +888,11 @@ export default function Home() {
   }, [])
 
   const handleSearch = () => {
-        if (!searchQuery.trim()) return
+    if (!searchQuery.trim()) return
     
     // Redirect to search results page
     window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`
+  }
 
   const handleDomainClick = (tld: string) => {
     setSearchQuery(`mydomain${tld}`)
@@ -1660,7 +1661,7 @@ export default function Home() {
               <p className="text-xs text-neutral-600 mt-3">
                 Payments processed securely through Stripe
               </p>
-           </div>
+            </div>
           </div>
           
           <div className="border-t border-neutral-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -1672,7 +1673,7 @@ export default function Home() {
               <Link href="#" className="text-neutral-500 hover:text-white transition-colors duration-300 font-medium tracking-wide focus:outline-none focus:text-red-400">Sitemap</Link>
             </div>
           </div>
-       </div>
+        </div>
       </footer>
     </div>
   )
