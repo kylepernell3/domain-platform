@@ -25,7 +25,30 @@ import {
   LogOut,
   CreditCard,
   HelpCircle,
-  Inbox
+  Inbox,
+  Bot,
+  Info,
+  Key,
+  Smartphone,
+  Mail,
+  Download,
+  FileText,
+  Users,
+  UserPlus,
+  Trash2,
+  Lightbulb,
+  CheckCircle,
+  AlertCircle,
+  DollarSign,
+  Zap,
+  Lock,
+  FileJson,
+  FileSpreadsheet,
+  ChevronRight,
+  RefreshCw,
+  Eye,
+  Copy,
+  Send
 } from "lucide-react"
 
 const timelineOptions = [
@@ -109,55 +132,67 @@ const initialDomains = [
     name: "example.com", 
     status: "active" as const, 
     ssl: true, 
-    expiry: "Mar 15, 2026", 
+    expiry: "Jan 20, 2026", 
+    expiryDate: "2026-01-20",
     visits: "8.2K",
     visitsNum: 8200,
     sslExpiry: "2025-01-18",
+    price: 12.99,
   },
   { 
     name: "mystore.io", 
     status: "active" as const, 
     ssl: true, 
     expiry: "Jun 22, 2026", 
+    expiryDate: "2026-06-22",
     visits: "5.1K",
     visitsNum: 5100,
     sslExpiry: "2025-03-15",
+    price: 29.99,
   },
   { 
     name: "portfolio.dev", 
     status: "active" as const, 
     ssl: false, 
     expiry: "Apr 30, 2026", 
+    expiryDate: "2026-04-30",
     visits: "3.8K",
     visitsNum: 3800,
     sslExpiry: null,
+    price: 14.99,
   },
   { 
     name: "blog.net", 
     status: "pending" as const, 
     ssl: false, 
     expiry: "May 10, 2026", 
+    expiryDate: "2026-05-10",
     visits: "2.4K",
     visitsNum: 2400,
     sslExpiry: null,
+    price: 11.99,
   },
   { 
     name: "acmecorp.com", 
     status: "active" as const, 
     ssl: true, 
     expiry: "Aug 05, 2026", 
+    expiryDate: "2026-08-05",
     visits: "12.3K",
     visitsNum: 12300,
     sslExpiry: "2025-02-28",
+    price: 12.99,
   },
   { 
     name: "zenith.tech", 
     status: "active" as const, 
     ssl: true, 
     expiry: "Dec 01, 2026", 
+    expiryDate: "2026-12-01",
     visits: "1.9K",
     visitsNum: 1900,
     sslExpiry: "2025-04-20",
+    price: 34.99,
   },
 ]
 
@@ -200,6 +235,30 @@ const activities = [
   { action: "DNS updated", domain: "mystore.io", time: "3 days ago" },
 ]
 
+const teamMembers = [
+  { name: "John Doe", email: "john@example.com", role: "Admin", avatar: "JD" },
+  { name: "Sarah Smith", email: "sarah@example.com", role: "Billing", avatar: "SS" },
+  { name: "Mike Johnson", email: "mike@example.com", role: "Technical", avatar: "MJ" },
+]
+
+const insights = [
+  { type: "action", icon: AlertCircle, title: "2 SSL certificates expiring soon", description: "Renew before Jan 18 to avoid downtime", color: "text-yellow-400", bgColor: "bg-yellow-500/10" },
+  { type: "security", icon: Shield, title: "Enable 2FA for better security", description: "Protect your account with multi-factor authentication", color: "text-red-400", bgColor: "bg-red-500/10" },
+  { type: "savings", icon: DollarSign, title: "Save 20% with annual billing", description: "Switch to yearly payment and save $28.80", color: "text-emerald-400", bgColor: "bg-emerald-500/10" },
+  { type: "performance", icon: Zap, title: "Enable CDN for faster loading", description: "Improve load times by up to 60%", color: "text-blue-400", bgColor: "bg-blue-500/10" },
+]
+
+const settingsOptions = [
+  { label: "Account Settings", icon: User, path: "/settings/account" },
+  { label: "Security Settings", icon: Shield, path: "/settings/security" },
+  { label: "Billing & Payments", icon: CreditCard, path: "/settings/billing" },
+  { label: "Notifications", icon: Bell, path: "/settings/notifications" },
+  { label: "API Keys", icon: Key, path: "/settings/api" },
+  { label: "Team Members", icon: Users, path: "/settings/team" },
+  { label: "Domain Defaults", icon: Globe, path: "/settings/domains" },
+  { label: "DNS Templates", icon: Settings, path: "/settings/dns" },
+]
+
 const getDaysUntilExpiry = (expiryDate: string | null): number | null => {
   if (!expiryDate) return null
   const today = new Date()
@@ -240,10 +299,56 @@ function EmptyState() {
       <p className="text-neutral-400 text-sm text-center mb-6 max-w-sm">
         Get started by registering your first domain or transferring an existing one.
       </p>
-      <button className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <button className="btn-swipe flex items-center gap-2 px-6 py-3 bg-red-600 text-white text-sm font-medium rounded-lg">
         <Plus className="h-4 w-4" />
         Add Your First Domain
       </button>
+    </div>
+  )
+}
+
+function PricingTooltip({ basePrice, children }: { basePrice: number; children: React.ReactNode }) {
+  const [showTooltip, setShowTooltip] = useState(false)
+  const tax = basePrice * 0.08
+  const icannFee = 0.18
+  const total = basePrice + tax + icannFee
+  
+  return (
+    <div className="relative inline-flex items-center gap-1">
+      {children}
+      <button
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        className="text-neutral-500 hover:text-neutral-300 transition-colors"
+      >
+        <Info className="h-3.5 w-3.5" />
+      </button>
+      
+      {showTooltip && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-neutral-800 border border-neutral-700 rounded-lg p-3 shadow-xl z-50">
+          <div className="text-xs space-y-1.5">
+            <div className="flex justify-between">
+              <span className="text-neutral-400">Base price:</span>
+              <span className="text-white">${basePrice.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-neutral-400">Tax (8%):</span>
+              <span className="text-white">${tax.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-neutral-400">ICANN fee:</span>
+              <span className="text-white">${icannFee.toFixed(2)}</span>
+            </div>
+            <div className="border-t border-neutral-700 pt-1.5 mt-1.5 flex justify-between font-medium">
+              <span className="text-neutral-300">Total:</span>
+              <span className="text-white">${total.toFixed(2)}</span>
+            </div>
+          </div>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full">
+            <div className="border-8 border-transparent border-t-neutral-800" />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -264,7 +369,7 @@ function BarChart({ data, maxValue, formatValue }: {
                 {formatValue ? formatValue(item.value) : item.value}
               </span>
               <div 
-                className="w-full bg-gradient-to-t from-red-600 to-red-400 rounded-t-md transition-all duration-500 ease-out"
+                className="w-full bg-gradient-to-t from-red-600 to-red-400 rounded-t-md transition-all duration-500 ease-out hover:from-red-500 hover:to-red-300"
                 style={{ height: `${height}%`, minHeight: item.value > 0 ? '8px' : '0' }}
               />
             </div>
@@ -285,14 +390,14 @@ function HorizontalBarChart({ data }: {
       {data.map((item, index) => {
         const width = total > 0 ? (item.value / total) * 100 : 0
         return (
-          <div key={index} className="space-y-2">
+          <div key={index} className="space-y-2 group">
             <div className="flex justify-between text-sm">
               <span className="text-neutral-300">{item.label}</span>
               <span className="text-white font-medium">{item.value}</span>
             </div>
             <div className="h-3 bg-neutral-800 rounded-full overflow-hidden">
               <div 
-                className={`h-full ${item.color} rounded-full transition-all duration-500 ease-out`}
+                className={`h-full ${item.color} rounded-full transition-all duration-500 ease-out group-hover:brightness-110`}
                 style={{ width: `${width}%` }}
               />
             </div>
@@ -317,10 +422,26 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "pending">("all")
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
   const [domains, setDomains] = useState(initialDomains)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchMode, setSearchMode] = useState<"domains" | "settings">("domains")
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false)
+  
+  // Modal states
+  const [aiWizardOpen, setAiWizardOpen] = useState(false)
+  const [securityModalOpen, setSecurityModalOpen] = useState(false)
+  const [teamModalOpen, setTeamModalOpen] = useState(false)
+  const [exportModalOpen, setExportModalOpen] = useState(false)
+  const [insightsPanelOpen, setInsightsPanelOpen] = useState(false)
+  const [statusModalOpen, setStatusModalOpen] = useState(false)
+  const [domainExpiryBannerDismissed, setDomainExpiryBannerDismissed] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [inviteRole, setInviteRole] = useState("View-only")
+  const [aiWizardInput, setAiWizardInput] = useState("")
   
   const userDropdownRef = useRef<HTMLDivElement>(null)
   const timelineDropdownRef = useRef<HTMLDivElement>(null)
   const statusDropdownRef = useRef<HTMLDivElement>(null)
+  const searchDropdownRef = useRef<HTMLDivElement>(null)
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -340,6 +461,9 @@ export default function DashboardPage() {
       if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
         setStatusDropdownOpen(false)
       }
+      if (searchDropdownRef.current && !searchDropdownRef.current.contains(event.target as Node)) {
+        setSearchDropdownOpen(false)
+      }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
@@ -350,6 +474,12 @@ export default function DashboardPage() {
   const sslExpiringDomain = domains
     .filter(d => d.ssl && d.sslExpiry)
     .map(d => ({ ...d, daysUntilExpiry: getDaysUntilExpiry(d.sslExpiry) }))
+    .filter(d => d.daysUntilExpiry !== null && d.daysUntilExpiry <= 30 && d.daysUntilExpiry > 0)
+    .sort((a, b) => (a.daysUntilExpiry || 999) - (b.daysUntilExpiry || 999))[0]
+  
+  // Domain expiring soon (for bottom banner)
+  const domainExpiringSoon = domains
+    .map(d => ({ ...d, daysUntilExpiry: getDaysUntilExpiry(d.expiryDate) }))
     .filter(d => d.daysUntilExpiry !== null && d.daysUntilExpiry <= 30 && d.daysUntilExpiry > 0)
     .sort((a, b) => (a.daysUntilExpiry || 999) - (b.daysUntilExpiry || 999))[0]
   
@@ -397,6 +527,10 @@ export default function DashboardPage() {
     if (statusFilter === "all") return true
     return d.status === statusFilter
   })
+  
+  const filteredSettings = settingsOptions.filter(s => 
+    s.label.toLowerCase().includes(searchQuery.toLowerCase())
+  )
   
   const getSortIndicator = (key: string) => {
     if (!sortConfig || sortConfig.key !== key) {
@@ -462,7 +596,189 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col">
-      {sslExpiringDomain && !sslAlertDismissed && (
+      <style jsx global>{`
+        @keyframes slideUp {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+          from {
+            transform: scale(0.95);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        
+        /* Button swipe animation */
+        .btn-swipe {
+          position: relative;
+          overflow: hidden;
+          z-index: 1;
+          transition: all 0.3s ease;
+        }
+        
+        .btn-swipe::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), rgba(107,114,128,0.3));
+          transition: left 0.4s ease;
+          z-index: -1;
+        }
+        
+        .btn-swipe:hover::before {
+          left: 100%;
+        }
+        
+        .btn-swipe:hover {
+          background-color: rgb(75 85 99) !important;
+        }
+        
+        .btn-swipe-red {
+          position: relative;
+          overflow: hidden;
+          z-index: 1;
+          transition: all 0.3s ease;
+        }
+        
+        .btn-swipe-red::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), rgba(75,85,99,0.5));
+          transition: left 0.4s ease;
+          z-index: -1;
+        }
+        
+        .btn-swipe-red:hover::before {
+          left: 100%;
+        }
+        
+        .btn-swipe-red:hover {
+          background-color: rgb(75 85 99) !important;
+        }
+        
+        /* Hover glow effects */
+        .card-hover-glow {
+          transition: all 0.3s ease;
+        }
+        
+        .card-hover-glow:hover {
+          box-shadow: 0 0 20px rgba(239, 68, 68, 0.15), 0 0 40px rgba(239, 68, 68, 0.1);
+          border-color: rgba(239, 68, 68, 0.3) !important;
+        }
+        
+        .row-hover-glow {
+          transition: all 0.3s ease;
+        }
+        
+        .row-hover-glow:hover {
+          box-shadow: 0 0 15px rgba(239, 68, 68, 0.1), 0 0 30px rgba(239, 68, 68, 0.05);
+          background-color: rgba(239, 68, 68, 0.05) !important;
+        }
+        
+        .pill-hover-glow {
+          transition: all 0.3s ease;
+        }
+        
+        .pill-hover-glow:hover {
+          box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+        }
+        
+        .action-hover-glow {
+          transition: all 0.3s ease;
+        }
+        
+        .action-hover-glow:hover {
+          box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+          border-color: rgba(239, 68, 68, 0.3) !important;
+        }
+        
+        /* Floating button pulse */
+        @keyframes pulse-glow {
+          0%, 100% {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+          }
+          50% {
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+          }
+        }
+        
+        .floating-pulse {
+          animation: pulse-glow 2s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* Domain Expiring Banner - Bottom slide up */}
+      {domainExpiringSoon && !domainExpiryBannerDismissed && !sslAlertDismissed && (
+        <div className="fixed bottom-0 left-0 right-0 z-50" style={{ animation: "slideUp 0.4s ease-out forwards" }}>
+          <div className="bg-gradient-to-r from-orange-700 via-orange-600 to-orange-700 border-t border-orange-500/50 shadow-lg shadow-orange-900/30">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0 p-2 bg-white/10 rounded-full animate-pulse">
+                    <Globe className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold">Domain Expiring Soon!</p>
+                    <p className="text-orange-100 text-sm">
+                      <span className="font-medium">{domainExpiringSoon.name}</span> expires in{" "}
+                      <span className="font-bold">{domainExpiringSoon.daysUntilExpiry} days</span>{" "}
+                      ({formatExpiryDate(domainExpiringSoon.expiryDate)})
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <button className="btn-swipe flex-1 sm:flex-none px-6 py-2 bg-white text-orange-600 font-semibold rounded-lg transition-colors">
+                    Auto-Renew Now
+                  </button>
+                  <button 
+                    onClick={() => setDomainExpiryBannerDismissed(true)}
+                    className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SSL Expiring Alert - Shows after domain banner is dismissed */}
+      {sslExpiringDomain && !sslAlertDismissed && domainExpiryBannerDismissed && (
         <div className="fixed bottom-0 left-0 right-0 z-50" style={{ animation: "slideUp 0.4s ease-out forwards" }}>
           <div className="bg-gradient-to-r from-red-700 via-red-600 to-red-700 border-t border-red-500/50 shadow-lg shadow-red-900/30">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -481,7 +797,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <button className="flex-1 sm:flex-none px-6 py-2 bg-white text-red-600 font-semibold rounded-lg hover:bg-red-50 transition-colors">
+                  <button className="btn-swipe flex-1 sm:flex-none px-6 py-2 bg-white text-red-600 font-semibold rounded-lg transition-colors">
                     Renew Now
                   </button>
                   <button 
@@ -497,6 +813,494 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Floating Insights Button */}
+      <button
+        onClick={() => setInsightsPanelOpen(true)}
+        className="fixed right-6 top-1/2 -translate-y-1/2 z-40 p-3 bg-red-600 text-white rounded-full shadow-lg floating-pulse hover:bg-red-700 transition-colors"
+        title="View Insights"
+      >
+        <Lightbulb className="h-5 w-5" />
+      </button>
+
+      {/* Insights Sidebar Panel */}
+      {insightsPanelOpen && (
+        <div className="fixed inset-0 z-50">
+          <div 
+            className="absolute inset-0 bg-black/60" 
+            onClick={() => setInsightsPanelOpen(false)}
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+          />
+          <div 
+            className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-neutral-900 border-l border-neutral-800 shadow-2xl"
+            style={{ animation: "slideInRight 0.3s ease-out" }}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/10 rounded-lg">
+                  <Lightbulb className="h-5 w-5 text-red-400" />
+                </div>
+                <h2 className="text-lg font-semibold text-white">Insights & Recommendations</h2>
+              </div>
+              <button 
+                onClick={() => setInsightsPanelOpen(false)}
+                className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+              {insights.map((insight, index) => (
+                <div 
+                  key={index}
+                  className={`p-4 ${insight.bgColor} border border-neutral-800 rounded-xl card-hover-glow cursor-pointer`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 bg-neutral-900/50 rounded-lg ${insight.color}`}>
+                      <insight.icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-medium text-white mb-1">{insight.title}</h3>
+                      <p className="text-xs text-neutral-400">{insight.description}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-neutral-500" />
+                  </div>
+                </div>
+              ))}
+              
+              <div className="pt-4 border-t border-neutral-800">
+                <h3 className="text-sm font-medium text-neutral-300 mb-3">Quick Tips</h3>
+                <ul className="space-y-2 text-sm text-neutral-400">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Enable auto-renewal to never lose a domain</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Use DNSSEC for enhanced security</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Set up domain locking to prevent unauthorized transfers</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Configure Wizard Modal */}
+      {aiWizardOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/60" 
+            onClick={() => setAiWizardOpen(false)}
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+          />
+          <div 
+            className="relative bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl w-full max-w-lg"
+            style={{ animation: "scaleIn 0.3s ease-out" }}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/10 rounded-lg">
+                  <Bot className="h-5 w-5 text-red-400" />
+                </div>
+                <h2 className="text-lg font-semibold text-white">AI Configure Wizard</h2>
+              </div>
+              <button 
+                onClick={() => setAiWizardOpen(false)}
+                className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <p className="text-neutral-300 text-sm">
+                Let our AI configure your domain settings based on your needs. Just describe what you want, and we&apos;ll handle the rest.
+              </p>
+              
+              <div className="bg-neutral-800/50 border border-neutral-700 rounded-xl p-4">
+                <div className="flex items-start gap-3 mb-3">
+                  <Bot className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-neutral-300">
+                    Try saying: &quot;Set up my domain for an e-commerce store&quot; or &quot;Configure email forwarding to my Gmail&quot;
+                  </p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">What would you like to configure?</label>
+                <textarea
+                  value={aiWizardInput}
+                  onChange={(e) => setAiWizardInput(e.target.value)}
+                  placeholder="E.g., I want to set up my domain for a WordPress blog with email..."
+                  className="w-full h-32 px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 resize-none"
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setAiWizardOpen(false)}
+                  className="btn-swipe flex-1 px-4 py-3 bg-neutral-800 text-white font-medium rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button className="btn-swipe-red flex-1 px-4 py-3 bg-red-600 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  Configure Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Security Options Modal */}
+      {securityModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/60" 
+            onClick={() => setSecurityModalOpen(false)}
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+          />
+          <div 
+            className="relative bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl w-full max-w-lg"
+            style={{ animation: "scaleIn 0.3s ease-out" }}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/10 rounded-lg">
+                  <Shield className="h-5 w-5 text-red-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">Security Options</h2>
+                  <p className="text-xs text-neutral-400">Multi-Factor Authentication & Recovery</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSecurityModalOpen(false)}
+                className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-emerald-400" />
+                <span className="text-sm text-emerald-300 font-medium">Never get locked out with multiple recovery options</span>
+              </div>
+              
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-neutral-300">Authentication Methods</h3>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-neutral-800/50 border border-neutral-700 rounded-xl action-hover-glow">
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-5 w-5 text-neutral-400" />
+                      <div>
+                        <p className="text-sm text-white">Email Codes</p>
+                        <p className="text-xs text-neutral-500">Receive codes via email</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">Active</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-neutral-800/50 border border-neutral-700 rounded-xl action-hover-glow">
+                    <div className="flex items-center gap-3">
+                      <Smartphone className="h-5 w-5 text-neutral-400" />
+                      <div>
+                        <p className="text-sm text-white">Authenticator App</p>
+                        <p className="text-xs text-neutral-500">Google, Authy, etc.</p>
+                      </div>
+                    </div>
+                    <button className="btn-swipe text-xs text-red-400 bg-red-500/10 px-3 py-1.5 rounded-lg font-medium">
+                      Enable
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-neutral-800/50 border border-neutral-700 rounded-xl action-hover-glow">
+                    <div className="flex items-center gap-3">
+                      <Key className="h-5 w-5 text-neutral-400" />
+                      <div>
+                        <p className="text-sm text-white">Backup Codes</p>
+                        <p className="text-xs text-neutral-500">One-time use recovery codes</p>
+                      </div>
+                    </div>
+                    <button className="btn-swipe text-xs text-red-400 bg-red-500/10 px-3 py-1.5 rounded-lg font-medium">
+                      Generate
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-neutral-800/50 border border-neutral-700 rounded-xl action-hover-glow">
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-5 w-5 text-neutral-400" />
+                      <div>
+                        <p className="text-sm text-white">Recovery Email</p>
+                        <p className="text-xs text-neutral-500">backup@example.com</p>
+                      </div>
+                    </div>
+                    <button className="btn-swipe text-xs text-neutral-400 bg-neutral-700 px-3 py-1.5 rounded-lg font-medium">
+                      Change
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t border-neutral-800">
+                <button className="btn-swipe-red w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white font-medium rounded-xl">
+                  <Download className="h-4 w-4" />
+                  Download Backup Codes
+                </button>
+                <p className="text-xs text-neutral-500 text-center mt-2">
+                  Store these codes safely - they can be used to regain access
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Team Management Modal */}
+      {teamModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/60" 
+            onClick={() => setTeamModalOpen(false)}
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+          />
+          <div 
+            className="relative bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl w-full max-w-lg"
+            style={{ animation: "scaleIn 0.3s ease-out" }}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/10 rounded-lg">
+                  <Users className="h-5 w-5 text-red-400" />
+                </div>
+                <h2 className="text-lg font-semibold text-white">Team Members</h2>
+              </div>
+              <button 
+                onClick={() => setTeamModalOpen(false)}
+                className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="space-y-3">
+                {teamMembers.map((member, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-neutral-800/50 border border-neutral-700 rounded-xl action-hover-glow">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center text-sm font-medium">
+                        {member.avatar}
+                      </div>
+                      <div>
+                        <p className="text-sm text-white font-medium">{member.name}</p>
+                        <p className="text-xs text-neutral-500">{member.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-neutral-400 bg-neutral-700 px-2 py-1 rounded">{member.role}</span>
+                      <button className="p-1.5 text-neutral-500 hover:text-red-400 transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="pt-4 border-t border-neutral-800">
+                <h3 className="text-sm font-medium text-neutral-300 mb-3">Invite Team Member</h3>
+                <div className="space-y-3">
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="colleague@company.com"
+                    className="w-full px-4 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500"
+                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={inviteRole}
+                      onChange={(e) => setInviteRole(e.target.value)}
+                      className="flex-1 px-4 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500"
+                    >
+                      <option value="View-only">View-only</option>
+                      <option value="Technical">Technical</option>
+                      <option value="Billing">Billing</option>
+                      <option value="Admin">Admin</option>
+                    </select>
+                    <button className="btn-swipe-red px-4 py-2.5 bg-red-600 text-white font-medium rounded-xl flex items-center gap-2">
+                      <Send className="h-4 w-4" />
+                      Invite
+                    </button>
+                  </div>
+                  <p className="text-xs text-neutral-500">No password sharing needed - each member gets their own secure access</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Data Export Modal */}
+      {exportModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/60" 
+            onClick={() => setExportModalOpen(false)}
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+          />
+          <div 
+            className="relative bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl w-full max-w-md"
+            style={{ animation: "scaleIn 0.3s ease-out" }}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/10 rounded-lg">
+                  <Download className="h-5 w-5 text-red-400" />
+                </div>
+                <h2 className="text-lg font-semibold text-white">Export Data</h2>
+              </div>
+              <button 
+                onClick={() => setExportModalOpen(false)}
+                className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-neutral-400">Choose what you&apos;d like to export and the format.</p>
+              
+              <div className="space-y-2">
+                <button className="w-full flex items-center justify-between p-4 bg-neutral-800/50 border border-neutral-700 rounded-xl action-hover-glow">
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-neutral-400" />
+                    <span className="text-sm text-white">Export All Domains</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-xs text-neutral-500 bg-neutral-700 px-2 py-1 rounded">CSV</span>
+                    <span className="text-xs text-neutral-500 bg-neutral-700 px-2 py-1 rounded">JSON</span>
+                  </div>
+                </button>
+                
+                <button className="w-full flex items-center justify-between p-4 bg-neutral-800/50 border border-neutral-700 rounded-xl action-hover-glow">
+                  <div className="flex items-center gap-3">
+                    <Settings className="h-5 w-5 text-neutral-400" />
+                    <span className="text-sm text-white">Export DNS Records</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-xs text-neutral-500 bg-neutral-700 px-2 py-1 rounded">BIND</span>
+                    <span className="text-xs text-neutral-500 bg-neutral-700 px-2 py-1 rounded">JSON</span>
+                  </div>
+                </button>
+                
+                <button className="w-full flex items-center justify-between p-4 bg-neutral-800/50 border border-neutral-700 rounded-xl action-hover-glow">
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-neutral-400" />
+                    <span className="text-sm text-white">Export Account Info</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-xs text-neutral-500 bg-neutral-700 px-2 py-1 rounded">PDF</span>
+                  </div>
+                </button>
+                
+                <button className="w-full flex items-center justify-between p-4 bg-neutral-800/50 border border-neutral-700 rounded-xl action-hover-glow">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-neutral-400" />
+                    <span className="text-sm text-white">Export Invoices</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-xs text-neutral-500 bg-neutral-700 px-2 py-1 rounded">PDF</span>
+                    <span className="text-xs text-neutral-500 bg-neutral-700 px-2 py-1 rounded">CSV</span>
+                  </div>
+                </button>
+              </div>
+              
+              <button className="btn-swipe-red w-full px-4 py-3 bg-red-600 text-white font-medium rounded-xl flex items-center justify-center gap-2">
+                <Download className="h-4 w-4" />
+                Export Selected
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* System Status Modal */}
+      {statusModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/60" 
+            onClick={() => setStatusModalOpen(false)}
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+          />
+          <div 
+            className="relative bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl w-full max-w-md"
+            style={{ animation: "scaleIn 0.3s ease-out" }}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <Activity className="h-5 w-5 text-emerald-400" />
+                </div>
+                <h2 className="text-lg font-semibold text-white">System Status</h2>
+              </div>
+              <button 
+                onClick={() => setStatusModalOpen(false)}
+                className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                <div className="h-3 w-3 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-emerald-300 font-medium">All Systems Operational</span>
+              </div>
+              
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-neutral-300">Service Status</h3>
+                
+                {[
+                  { name: "Domain Registration", status: "Operational" },
+                  { name: "DNS Services", status: "Operational" },
+                  { name: "SSL Certificates", status: "Operational" },
+                  { name: "API", status: "Operational" },
+                  { name: "Dashboard", status: "Operational" },
+                ].map((service, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-neutral-800/50 rounded-lg">
+                    <span className="text-sm text-neutral-300">{service.name}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 bg-emerald-500 rounded-full" />
+                      <span className="text-xs text-emerald-400">{service.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="pt-4 border-t border-neutral-800">
+                <h3 className="text-sm font-medium text-neutral-300 mb-3">Recent Incidents</h3>
+                <p className="text-sm text-neutral-500">No incidents in the past 30 days</p>
+              </div>
+              
+              <a href="#" className="block text-center text-sm text-red-400 hover:text-red-300 transition-colors">
+                View full status page →
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
       <header className="border-b border-neutral-800/50 backdrop-blur-xl bg-neutral-950/90 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -515,14 +1319,78 @@ export default function DashboardPage() {
               <span className="text-xl font-bold text-white hidden sm:block">DomainPro</span>
             </Link>
 
-            <div className="hidden md:flex flex-1 max-w-md mx-8">
+            {/* Enhanced Search with Settings */}
+            <div className="hidden md:flex flex-1 max-w-md mx-8" ref={searchDropdownRef}>
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                 <input
                   type="text"
-                  placeholder="Search domains, settings..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setSearchDropdownOpen(true)}
+                  placeholder={searchMode === "domains" ? "Search domains..." : "Search settings..."}
                   className="w-full pl-10 pr-4 py-2 bg-neutral-900 border border-neutral-800 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 transition-colors"
                 />
+                
+                {searchDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl overflow-hidden z-50">
+                    <div className="flex border-b border-neutral-800">
+                      <button
+                        onClick={() => setSearchMode("domains")}
+                        className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors ${
+                          searchMode === "domains" 
+                            ? "text-red-400 bg-red-500/10" 
+                            : "text-neutral-400 hover:text-white"
+                        }`}
+                      >
+                        Search Domains
+                      </button>
+                      <button
+                        onClick={() => setSearchMode("settings")}
+                        className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors ${
+                          searchMode === "settings" 
+                            ? "text-red-400 bg-red-500/10" 
+                            : "text-neutral-400 hover:text-white"
+                        }`}
+                      >
+                        Search Settings
+                      </button>
+                    </div>
+                    
+                    <div className="max-h-64 overflow-y-auto">
+                      {searchMode === "settings" ? (
+                        <div className="py-2">
+                          {filteredSettings.map((setting, index) => (
+                            <Link
+                              key={index}
+                              href={setting.path}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors"
+                              onClick={() => setSearchDropdownOpen(false)}
+                            >
+                              <setting.icon className="h-4 w-4 text-neutral-500" />
+                              {setting.label}
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-2">
+                          {domains
+                            .filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                            .map((domain, index) => (
+                              <button
+                                key={index}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors"
+                                onClick={() => setSearchDropdownOpen(false)}
+                              >
+                                <Globe className="h-4 w-4 text-neutral-500" />
+                                {domain.name}
+                              </button>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -532,6 +1400,15 @@ export default function DashboardPage() {
                 onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
               >
                 <Search className="h-5 w-5" />
+              </button>
+              
+              {/* System Status Indicator */}
+              <button 
+                onClick={() => setStatusModalOpen(true)}
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-lg hover:border-neutral-700 transition-colors"
+              >
+                <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-xs text-neutral-400">Operational</span>
               </button>
               
               <button className="relative p-2 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-lg transition-colors">
@@ -552,7 +1429,7 @@ export default function DashboardPage() {
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
                 
-                <div className={`absolute right-0 top-full mt-2 w-56 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl shadow-black/20 overflow-hidden transition-all duration-200 origin-top-right ${
+                <div className={`absolute right-0 top-full mt-2 w-64 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl shadow-black/20 overflow-hidden transition-all duration-200 origin-top-right ${
                   userDropdownOpen 
                     ? "opacity-100 scale-100 translate-y-0" 
                     : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
@@ -569,6 +1446,23 @@ export default function DashboardPage() {
                     <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors">
                       <CreditCard className="h-4 w-4" />
                       Billing
+                    </button>
+                    <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors">
+                      <FileText className="h-4 w-4" />
+                      Recent Invoices
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setUserDropdownOpen(false)
+                        setSecurityModalOpen(true)
+                      }}
+                      className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Shield className="h-4 w-4" />
+                        Security Options
+                      </div>
+                      <span className="text-xs text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">2 Active</span>
                     </button>
                     <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors">
                       <HelpCircle className="h-4 w-4" />
@@ -601,6 +1495,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
+      {/* Mobile Menu */}
       <div className={`lg:hidden fixed inset-0 z-30 transition-all duration-300 ${
         mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}>
@@ -659,27 +1554,22 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {/* Header - NO RED SPLASH */}
         <div className="relative mb-8 overflow-visible">
-          <div className="absolute -top-20 -right-20 sm:-top-32 sm:-right-32 w-64 h-64 sm:w-96 sm:h-96 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-600/30 via-red-500/20 to-transparent rounded-full blur-3xl" />
-            <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-red-500/40 to-red-600/10 rounded-full blur-2xl" />
-            <div className="absolute top-1/3 left-1/3 w-24 h-24 sm:w-32 sm:h-32 bg-red-500/20 rounded-full blur-xl" />
-          </div>
-          <div className="absolute -top-10 right-20 sm:right-40 w-32 h-32 sm:w-48 sm:h-48 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-tl from-red-500/15 via-red-400/10 to-transparent rounded-full blur-2xl" />
-          </div>
           <div className="relative z-10">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Dashboard</h1>
             <p className="text-neutral-400">Welcome back! Here&apos;s your domain overview</p>
           </div>
         </div>
 
+        {/* Timeline Selector */}
         <div className="mb-6 flex items-center gap-3">
           <span className="text-sm text-neutral-400">Showing stats for:</span>
           <div className="relative" ref={timelineDropdownRef}>
             <button 
-              className={`flex items-center gap-2 px-4 py-2 bg-neutral-900 border rounded-lg text-sm font-medium transition-colors ${
+              className={`btn-swipe flex items-center gap-2 px-4 py-2 bg-neutral-900 border rounded-lg text-sm font-medium transition-colors ${
                 timelineDropdownOpen 
                   ? "border-red-500 text-white" 
                   : "border-neutral-800 text-neutral-300 hover:border-neutral-700"
@@ -717,6 +1607,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           {isLoading ? (
             <>
@@ -729,7 +1620,7 @@ export default function DashboardPage() {
             stats.map((stat) => (
               <div
                 key={stat.label}
-                className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4 sm:p-6 hover:border-neutral-700 transition-colors"
+                className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4 sm:p-6 card-hover-glow"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
@@ -749,19 +1640,28 @@ export default function DashboardPage() {
           )}
         </div>
 
+        {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Domains Table */}
           <div className="lg:col-span-2 order-2 lg:order-1">
-            <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl overflow-hidden">
+            <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl overflow-hidden card-hover-glow">
               <div className="px-4 sm:px-6 py-4 border-b border-neutral-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h2 className="text-lg font-semibold text-white">Your Domains</h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button 
                     onClick={() => setShowEmptyState(!showEmptyState)}
-                    className="px-3 py-1.5 text-xs text-neutral-400 hover:text-white border border-neutral-700 rounded-lg transition-colors"
+                    className="btn-swipe px-3 py-1.5 text-xs text-neutral-400 hover:text-white border border-neutral-700 bg-neutral-800 rounded-lg transition-colors"
                   >
                     {showEmptyState ? "Show Data" : "Show Empty"}
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  <button 
+                    onClick={() => setAiWizardOpen(true)}
+                    className="btn-swipe flex items-center gap-2 px-3 py-1.5 text-xs bg-neutral-800 border border-neutral-700 text-neutral-300 rounded-lg transition-colors"
+                  >
+                    <Bot className="h-3.5 w-3.5" />
+                    AI Configure
+                  </button>
+                  <button className="btn-swipe-red flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg transition-colors">
                     <Plus className="h-4 w-4" />
                     <span className="hidden sm:inline">Add Domain</span>
                     <span className="sm:hidden">Add</span>
@@ -785,7 +1685,7 @@ export default function DashboardPage() {
                         <th className="px-4 sm:px-6 py-3 font-medium sticky left-0 bg-neutral-900/80 backdrop-blur-sm">
                           <button 
                             onClick={() => handleSort("name")}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
+                            className={`pill-hover-glow flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
                               sortConfig?.key === "name"
                                 ? "bg-red-500/20 text-red-400 border border-red-500/30"
                                 : "bg-neutral-800 text-neutral-400 border border-neutral-700 hover:border-neutral-600 hover:text-white"
@@ -800,7 +1700,7 @@ export default function DashboardPage() {
                           <div className="relative" ref={statusDropdownRef}>
                             <button 
                               onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
-                              className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
+                              className={`pill-hover-glow flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
                                 statusFilter !== "all"
                                   ? "bg-red-500/20 text-red-400 border border-red-500/30"
                                   : "bg-neutral-800 text-neutral-400 border border-neutral-700 hover:border-neutral-600 hover:text-white"
@@ -840,7 +1740,7 @@ export default function DashboardPage() {
                         <th className="px-4 sm:px-6 py-3 font-medium">
                           <button 
                             onClick={() => handleSort("ssl")}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
+                            className={`pill-hover-glow flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
                               sortConfig?.key === "ssl"
                                 ? "bg-red-500/20 text-red-400 border border-red-500/30"
                                 : "bg-neutral-800 text-neutral-400 border border-neutral-700 hover:border-neutral-600 hover:text-white"
@@ -854,7 +1754,7 @@ export default function DashboardPage() {
                         <th className="px-4 sm:px-6 py-3 font-medium">
                           <button 
                             onClick={() => handleSort("expiry")}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
+                            className={`pill-hover-glow flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
                               sortConfig?.key === "expiry"
                                 ? "bg-red-500/20 text-red-400 border border-red-500/30"
                                 : "bg-neutral-800 text-neutral-400 border border-neutral-700 hover:border-neutral-600 hover:text-white"
@@ -868,7 +1768,7 @@ export default function DashboardPage() {
                         <th className="px-4 sm:px-6 py-3 font-medium">
                           <button 
                             onClick={() => handleSort("visits")}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
+                            className={`pill-hover-glow flex items-center gap-1 px-3 py-1.5 rounded-full transition-colors ${
                               sortConfig?.key === "visits"
                                 ? "bg-red-500/20 text-red-400 border border-red-500/30"
                                 : "bg-neutral-800 text-neutral-400 border border-neutral-700 hover:border-neutral-600 hover:text-white"
@@ -886,7 +1786,7 @@ export default function DashboardPage() {
                       {filteredDomains.map((domain) => (
                         <tr
                           key={domain.name}
-                          className="border-b border-neutral-800/30 hover:bg-neutral-800/20 transition-colors"
+                          className="border-b border-neutral-800/30 row-hover-glow"
                         >
                           <td className="px-4 sm:px-6 py-4 sticky left-0 bg-neutral-900/80 backdrop-blur-sm">
                             <div className="flex items-center gap-2">
@@ -914,15 +1814,22 @@ export default function DashboardPage() {
                             )}
                           </td>
                           <td className="px-4 sm:px-6 py-4">
-                            <span className="text-sm text-neutral-400">{domain.expiry}</span>
+                            <PricingTooltip basePrice={domain.price}>
+                              <span className="text-sm text-neutral-400">{domain.expiry}</span>
+                            </PricingTooltip>
                           </td>
                           <td className="px-4 sm:px-6 py-4">
                             <span className="text-sm font-medium text-white">{domain.visits}</span>
                           </td>
                           <td className="px-4 sm:px-6 py-4">
-                            <button className="p-1 text-neutral-400 hover:text-white transition-colors">
-                              <Settings className="h-4 w-4" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <button className="p-1.5 text-neutral-400 hover:text-white transition-colors" title="View Invoice">
+                                <FileText className="h-4 w-4" />
+                              </button>
+                              <button className="p-1.5 text-neutral-400 hover:text-white transition-colors" title="Settings">
+                                <Settings className="h-4 w-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -933,25 +1840,45 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Sidebar */}
           <div className="space-y-6 order-1 lg:order-2">
-            <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4 sm:p-6">
+            {/* Quick Actions */}
+            <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4 sm:p-6 card-hover-glow">
               <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <button className="w-full flex items-center gap-3 p-3 bg-neutral-800/50 hover:bg-neutral-800 rounded-lg text-sm text-white transition-colors">
+                <button className="btn-swipe w-full flex items-center gap-3 p-3 bg-neutral-800/50 border border-neutral-700/50 rounded-lg text-sm text-white action-hover-glow">
                   <Plus className="h-4 w-4 text-red-400" />
                   <span>Register Domain</span>
                 </button>
-                <button className="w-full flex items-center gap-3 p-3 bg-neutral-800/50 hover:bg-neutral-800 rounded-lg text-sm text-white transition-colors">
+                <button className="btn-swipe w-full flex items-center gap-3 p-3 bg-neutral-800/50 border border-neutral-700/50 rounded-lg text-sm text-white action-hover-glow">
                   <Shield className="h-4 w-4 text-red-400" />
                   <span>Add SSL Certificate</span>
                 </button>
-                <button className="w-full flex items-center gap-3 p-3 bg-neutral-800/50 hover:bg-neutral-800 rounded-lg text-sm text-white transition-colors">
+                <button className="btn-swipe w-full flex items-center gap-3 p-3 bg-neutral-800/50 border border-neutral-700/50 rounded-lg text-sm text-white action-hover-glow">
                   <Settings className="h-4 w-4 text-red-400" />
                   <span>DNS Settings</span>
                 </button>
+                <button 
+                  onClick={() => setTeamModalOpen(true)}
+                  className="btn-swipe w-full flex items-center gap-3 p-3 bg-neutral-800/50 border border-neutral-700/50 rounded-lg text-sm text-white action-hover-glow"
+                >
+                  <Users className="h-4 w-4 text-red-400" />
+                  <span>Team Members</span>
+                </button>
+                <button className="btn-swipe w-full flex items-center gap-3 p-3 bg-neutral-800/50 border border-neutral-700/50 rounded-lg text-sm text-white action-hover-glow">
+                  <FileText className="h-4 w-4 text-red-400" />
+                  <span>Recent Invoices</span>
+                </button>
+                <button 
+                  onClick={() => setExportModalOpen(true)}
+                  className="btn-swipe w-full flex items-center gap-3 p-3 bg-neutral-800/50 border border-neutral-700/50 rounded-lg text-sm text-white action-hover-glow"
+                >
+                  <Download className="h-4 w-4 text-red-400" />
+                  <span>Export Data</span>
+                </button>
                 <Link
                   href="/"
-                  className="w-full flex items-center gap-3 p-3 bg-neutral-800/50 hover:bg-neutral-800 rounded-lg text-sm text-white transition-colors"
+                  className="btn-swipe w-full flex items-center gap-3 p-3 bg-neutral-800/50 border border-neutral-700/50 rounded-lg text-sm text-white action-hover-glow"
                 >
                   <ExternalLink className="h-4 w-4 text-red-400" />
                   <span>Back to Home</span>
@@ -959,11 +1886,12 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4 sm:p-6">
+            {/* Recent Activity */}
+            <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl p-4 sm:p-6 card-hover-glow">
               <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
               <div className="space-y-4">
                 {activities.map((activity, index) => (
-                  <div key={index} className="flex gap-3">
+                  <div key={index} className="flex gap-3 action-hover-glow p-2 -m-2 rounded-lg">
                     <div className="flex-shrink-0 mt-1">
                       <div className="h-8 w-8 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center justify-center">
                         <Clock className="h-4 w-4 text-red-400" />
@@ -981,8 +1909,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Analytics Charts */}
         <div className="mt-8">
-          <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl overflow-hidden">
+          <div className="bg-neutral-900/50 border border-neutral-800/50 rounded-xl overflow-hidden card-hover-glow">
             <div className="px-4 sm:px-6 py-4 border-b border-neutral-800/50">
               <h2 className="text-lg font-semibold text-white mb-4">Analytics</h2>
               
@@ -991,7 +1920,7 @@ export default function DashboardPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveChart(tab.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    className={`pill-hover-glow px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                       activeChart === tab.id
                         ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
                         : "bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700"
@@ -1012,6 +1941,7 @@ export default function DashboardPage() {
         </div>
       </main>
 
+      {/* Footer */}
       <footer className="bg-neutral-950 border-t border-neutral-800/50 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -1040,19 +1970,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </footer>
-
-      <style jsx global>{`
-        @keyframes slideUp {
-          from {
-            transform: translateY(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-      `}</style>
     </div>
   )
 }
