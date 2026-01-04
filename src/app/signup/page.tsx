@@ -3,6 +3,7 @@
 // ============================================================================
 // DOMAINPRO SIGNUP PAGE
 // Complete Production-Ready Version
+// COLOR SCHEME: TRUE BLACK background, RED primary, TEAL secondary
 // ============================================================================
 
 import {
@@ -152,6 +153,7 @@ interface SocialLink {
 
 // ============================================================================
 // CONSTANTS - PRICING PLANS
+// Using RED (#EF4444) as primary accent color
 // ============================================================================
 
 const PLANS: PricingPlan[] = [
@@ -163,9 +165,9 @@ const PLANS: PricingPlan[] = [
     description: "Perfect for getting started",
     tagline: "No credit card required",
     icon: Rocket,
-    gradientFrom: "from-slate-500",
-    gradientTo: "to-slate-600",
-    shadowColor: "shadow-slate-500/25",
+    gradientFrom: "from-gray-500",
+    gradientTo: "to-gray-600",
+    shadowColor: "shadow-gray-500/25",
     highlighted: false,
     stripePriceIdMonthly: "",
     stripePriceIdAnnual: "",
@@ -186,9 +188,9 @@ const PLANS: PricingPlan[] = [
     description: "Great for personal projects",
     tagline: "Everything you need to start",
     icon: Zap,
-    gradientFrom: "from-blue-500",
-    gradientTo: "to-cyan-500",
-    shadowColor: "shadow-blue-500/25",
+    gradientFrom: "from-red-500",
+    gradientTo: "to-red-600",
+    shadowColor: "shadow-red-500/25",
     highlighted: false,
     stripePriceIdMonthly: "price_starter_monthly",
     stripePriceIdAnnual: "price_starter_annual",
@@ -211,7 +213,7 @@ const PLANS: PricingPlan[] = [
     tagline: "Most popular choice",
     icon: Crown,
     gradientFrom: "from-red-500",
-    gradientTo: "to-orange-500",
+    gradientTo: "to-red-600",
     shadowColor: "shadow-red-500/25",
     highlighted: true,
     stripePriceIdMonthly: "price_professional_monthly",
@@ -236,9 +238,9 @@ const PLANS: PricingPlan[] = [
     description: "For large organizations",
     tagline: "Unlimited everything",
     icon: Building2,
-    gradientFrom: "from-purple-500",
-    gradientTo: "to-pink-500",
-    shadowColor: "shadow-purple-500/25",
+    gradientFrom: "from-red-600",
+    gradientTo: "to-red-700",
+    shadowColor: "shadow-red-500/25",
     highlighted: false,
     stripePriceIdMonthly: "price_enterprise_monthly",
     stripePriceIdAnnual: "price_enterprise_annual",
@@ -522,16 +524,16 @@ function getPasswordStrength(score: number): PasswordStrength {
   if (score === 4) {
     return {
       label: "Good",
-      bgColor: "bg-lime-500",
-      textColor: "text-lime-500",
+      bgColor: "bg-emerald-500",
+      textColor: "text-emerald-500",
       width: "80%",
     }
   }
 
   return {
     label: "Strong",
-    bgColor: "bg-green-500",
-    textColor: "text-green-500",
+    bgColor: "bg-emerald-500",
+    textColor: "text-emerald-500",
     width: "100%",
   }
 }
@@ -643,6 +645,40 @@ function useSupabaseClient(): {
 }
 
 // ============================================================================
+// COMPONENT: TopBanner - TEAL banner like homepage
+// ============================================================================
+
+function TopBanner({ theme }: { theme: Theme }): JSX.Element {
+  const [isVisible, setIsVisible] = useState<boolean>(true)
+
+  if (!isVisible) {
+    return <></>
+  }
+
+  return (
+    <div className="bg-emerald-500 text-white py-2 px-4 text-center text-sm font-medium relative">
+      <span>
+        🚀 Get 20% off your first year with code{" "}
+        <span className="font-bold">LAUNCH20</span> →{" "}
+        <Link
+          href="/pricing"
+          className="underline hover:no-underline"
+        >
+          View Plans
+        </Link>
+      </span>
+      <button
+        onClick={() => setIsVisible(false)}
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-emerald-600 rounded transition-colors"
+        aria-label="Close banner"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  )
+}
+
+// ============================================================================
 // COMPONENT: ThemeToggle
 // ============================================================================
 
@@ -691,6 +727,7 @@ function ThemeToggle({
 
 // ============================================================================
 // COMPONENT: Navigation
+// Logo: RED circle with TEAL globe (matching homepage)
 // ============================================================================
 
 function Navigation({
@@ -715,27 +752,19 @@ function Navigation({
       className={
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 " +
         (theme === "dark"
-          ? "bg-[#0F172A]/90 backdrop-blur-xl border-b border-white/5"
+          ? "bg-black/90 backdrop-blur-xl border-b border-white/5"
           : "bg-white/90 backdrop-blur-xl border-b border-gray-200/50")
       }
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
+          {/* Logo - RED circle with TEAL globe */}
           <Link
             href="/"
             className="flex items-center gap-3 group"
           >
-            <div
-              className={
-                "relative p-2.5 rounded-xl transition-all duration-300 " +
-                (theme === "dark"
-                  ? "bg-gradient-to-br from-red-500/20 to-teal-500/20 group-hover:from-red-500/30 group-hover:to-teal-500/30"
-                  : "bg-gradient-to-br from-red-50 to-teal-50 group-hover:from-red-100 group-hover:to-teal-100")
-              }
-            >
-              <Globe className="h-6 w-6 text-red-500" />
-              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-teal-400 rounded-full animate-pulse" />
+            <div className="relative p-2.5 rounded-full bg-red-500 group-hover:bg-red-600 transition-colors duration-300">
+              <Globe className="h-6 w-6 text-emerald-400" />
             </div>
             <span
               className={
@@ -744,9 +773,7 @@ function Navigation({
               }
             >
               Domain
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-400">
-                Pro
-              </span>
+              <span className="text-red-500">Pro</span>
             </span>
           </Link>
 
@@ -775,13 +802,12 @@ function Navigation({
               onToggle={onToggleTheme}
             />
 
+            {/* Sign In link - RED color */}
             <Link
               href="/login"
               className={
                 "hidden sm:flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 " +
-                (theme === "dark"
-                  ? "text-gray-300 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10"
-                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-100 border border-transparent hover:border-gray-200")
+                "text-red-500 hover:text-red-400 hover:bg-red-500/10"
               }
             >
               Sign In
@@ -840,15 +866,11 @@ function Navigation({
                   {link.label}
                 </Link>
               ))}
+              {/* Mobile Sign In - RED color */}
               <Link
                 href="/login"
                 onClick={handleMobileMenuClose}
-                className={
-                  "px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 " +
-                  (theme === "dark"
-                    ? "text-gray-400 hover:text-white hover:bg-white/5"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100")
-                }
+                className="px-4 py-3 text-sm font-medium rounded-xl text-red-500 hover:text-red-400 hover:bg-red-500/10"
               >
                 Sign In
               </Link>
@@ -862,6 +884,7 @@ function Navigation({
 
 // ============================================================================
 // COMPONENT: Footer
+// Logo: RED circle with TEAL globe (matching homepage)
 // ============================================================================
 
 function Footer({ theme }: { theme: Theme }): JSX.Element {
@@ -872,7 +895,7 @@ function Footer({ theme }: { theme: Theme }): JSX.Element {
       className={
         "border-t transition-colors duration-300 " +
         (theme === "dark"
-          ? "bg-[#0F172A] border-white/5"
+          ? "bg-black border-white/5"
           : "bg-gray-50 border-gray-200")
       }
     >
@@ -880,19 +903,13 @@ function Footer({ theme }: { theme: Theme }): JSX.Element {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 lg:gap-12">
           {/* Brand Column */}
           <div className="col-span-2">
+            {/* Logo - RED circle with TEAL globe */}
             <Link
               href="/"
               className="flex items-center gap-3 mb-6"
             >
-              <div
-                className={
-                  "p-2.5 rounded-xl " +
-                  (theme === "dark"
-                    ? "bg-gradient-to-br from-red-500/20 to-teal-500/20"
-                    : "bg-gradient-to-br from-red-50 to-teal-50")
-                }
-              >
-                <Globe className="h-6 w-6 text-red-500" />
+              <div className="p-2.5 rounded-full bg-red-500">
+                <Globe className="h-6 w-6 text-emerald-400" />
               </div>
               <span
                 className={
@@ -1002,6 +1019,7 @@ function Footer({ theme }: { theme: Theme }): JSX.Element {
 
 // ============================================================================
 // COMPONENT: ProgressSteps
+// Using RED (#EF4444) for active/completed states
 // ============================================================================
 
 function ProgressSteps({
@@ -1056,14 +1074,14 @@ function ProgressSteps({
             className="flex items-center"
           >
             <div className="flex flex-col items-center">
-              {/* Step Circle */}
+              {/* Step Circle - RED for current/completed */}
               <div
                 className={
                   "relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 " +
                   (isCurrent
-                    ? "bg-gradient-to-br from-red-500 to-orange-500 text-white shadow-lg shadow-red-500/25 scale-110"
+                    ? "bg-red-500 text-white shadow-lg shadow-red-500/25 scale-110"
                     : isCompleted
-                    ? "bg-gradient-to-br from-green-500 to-emerald-500 text-white"
+                    ? "bg-emerald-500 text-white"
                     : theme === "dark"
                     ? "bg-white/5 text-gray-500 border border-white/10"
                     : "bg-gray-100 text-gray-400 border border-gray-200")
@@ -1075,9 +1093,9 @@ function ProgressSteps({
                   <Icon className="h-5 w-5" />
                 )}
 
-                {/* Pulse Animation for Current Step */}
+                {/* Pulse Animation for Current Step - RED */}
                 {isCurrent && (
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 animate-ping opacity-20" />
+                  <div className="absolute inset-0 rounded-2xl bg-red-500 animate-ping opacity-20" />
                 )}
               </div>
 
@@ -1086,13 +1104,9 @@ function ProgressSteps({
                 className={
                   "mt-3 text-xs font-medium hidden sm:block transition-colors duration-300 " +
                   (isCurrent
-                    ? theme === "dark"
-                      ? "text-white"
-                      : "text-gray-900"
+                    ? "text-red-500"
                     : isCompleted
-                    ? theme === "dark"
-                      ? "text-green-400"
-                      : "text-green-600"
+                    ? "text-emerald-500"
                     : theme === "dark"
                     ? "text-gray-500"
                     : "text-gray-400")
@@ -1102,13 +1116,13 @@ function ProgressSteps({
               </span>
             </div>
 
-            {/* Connector Line */}
+            {/* Connector Line - RED when completed */}
             {index < visibleSteps.length - 1 && (
               <div
                 className={
                   "w-16 sm:w-24 h-0.5 mx-3 rounded-full transition-all duration-500 " +
                   (currentStep > step.number
-                    ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                    ? "bg-emerald-500"
                     : theme === "dark"
                     ? "bg-white/10"
                     : "bg-gray-200")
@@ -1124,6 +1138,7 @@ function ProgressSteps({
 
 // ============================================================================
 // COMPONENT: BillingToggle
+// Using RED for active state
 // ============================================================================
 
 function BillingToggle({
@@ -1157,7 +1172,7 @@ function BillingToggle({
         Monthly
       </span>
 
-      {/* Toggle Switch */}
+      {/* Toggle Switch - RED when active */}
       <button
         onClick={handleToggle}
         type="button"
@@ -1169,7 +1184,7 @@ function BillingToggle({
         className={
           "relative w-16 h-8 rounded-full transition-all duration-300 " +
           (billingCycle === "annual"
-            ? "bg-gradient-to-r from-red-500 to-orange-500 shadow-lg shadow-red-500/25"
+            ? "bg-red-500 shadow-lg shadow-red-500/25"
             : theme === "dark"
             ? "bg-white/10"
             : "bg-gray-200")
@@ -1183,7 +1198,7 @@ function BillingToggle({
         />
       </button>
 
-      {/* Annual Label with Savings Badge */}
+      {/* Annual Label with TEAL Savings Badge */}
       <span
         className={
           "text-sm font-medium flex items-center gap-2 transition-colors duration-300 " +
@@ -1197,7 +1212,7 @@ function BillingToggle({
         }
       >
         Annual
-        <span className="px-2.5 py-1 bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-500 text-xs font-bold rounded-full border border-green-500/20">
+        <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-500 text-xs font-bold rounded-full border border-emerald-500/20">
           Save 20%
         </span>
       </span>
@@ -1207,6 +1222,7 @@ function BillingToggle({
 
 // ============================================================================
 // COMPONENT: PricingCard
+// Using RED for selection and highlights
 // ============================================================================
 
 function PricingCard({
@@ -1241,11 +1257,7 @@ function PricingCard({
       className={
         "relative rounded-3xl p-1 cursor-pointer transition-all duration-500 group " +
         (selected
-          ? "bg-gradient-to-br " +
-            plan.gradientFrom +
-            " " +
-            plan.gradientTo +
-            " shadow-2xl scale-[1.02]"
+          ? "bg-gradient-to-br from-red-500 to-red-600 shadow-2xl shadow-red-500/25 scale-[1.02]"
           : "bg-transparent")
       }
     >
@@ -1254,33 +1266,29 @@ function PricingCard({
           "relative h-full rounded-[22px] p-6 transition-all duration-300 " +
           (selected
             ? theme === "dark"
-              ? "bg-[#0F172A]"
+              ? "bg-black"
               : "bg-white"
             : theme === "dark"
             ? "bg-white/[0.02] border border-white/10 hover:border-white/20 hover:bg-white/[0.04]"
             : "bg-white border border-gray-200 hover:border-gray-300 hover:shadow-lg")
         }
       >
-        {/* Most Popular Badge */}
+        {/* Most Popular Badge - RED */}
         {plan.highlighted && (
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-            <div className="relative px-4 py-1.5 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold rounded-full whitespace-nowrap shadow-lg shadow-red-500/25">
+            <div className="relative px-4 py-1.5 bg-red-500 text-white text-xs font-bold rounded-full whitespace-nowrap shadow-lg shadow-red-500/25">
               <Sparkles className="inline-block h-3 w-3 mr-1 -mt-0.5" />
               MOST POPULAR
             </div>
           </div>
         )}
 
-        {/* Selection Indicator */}
+        {/* Selection Indicator - RED */}
         <div
           className={
             "absolute top-5 right-5 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 " +
             (selected
-              ? "bg-gradient-to-br " +
-                plan.gradientFrom +
-                " " +
-                plan.gradientTo +
-                " border-transparent"
+              ? "bg-red-500 border-transparent"
               : theme === "dark"
               ? "border-white/20"
               : "border-gray-300")
@@ -1293,10 +1301,10 @@ function PricingCard({
         <div className="flex items-center gap-4 mb-5 mt-2">
           <div
             className={
-              "p-3.5 rounded-2xl bg-gradient-to-br " +
-              plan.gradientFrom +
-              " " +
-              plan.gradientTo
+              "p-3.5 rounded-2xl " +
+              (plan.id === "free"
+                ? "bg-gray-500"
+                : "bg-red-500")
             }
           >
             <Icon className="h-6 w-6 text-white" />
@@ -1346,7 +1354,7 @@ function PricingCard({
             )}
           </div>
 
-          {/* Annual Billing Info */}
+          {/* Annual Billing Info with TEAL savings badge */}
           {billingCycle === "annual" && monthlyEquivalent > 0 && (
             <div className="flex items-center gap-2 mt-2">
               <span
@@ -1358,7 +1366,7 @@ function PricingCard({
                 ${plan.annualPrice.toFixed(2)} billed annually
               </span>
               {savings > 0 && (
-                <span className="px-2 py-0.5 bg-green-500/10 text-green-500 text-xs font-bold rounded-full">
+                <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-xs font-bold rounded-full">
                   Save {savings}%
                 </span>
               )}
@@ -1366,21 +1374,14 @@ function PricingCard({
           )}
         </div>
 
-        {/* Features List */}
+        {/* Features List - RED checkmarks */}
         <ul className="space-y-3 mb-6">
           {plan.features.map((feature, index) => (
             <li
               key={index}
               className="flex items-start gap-3"
             >
-              <div
-                className={
-                  "mt-0.5 p-0.5 rounded-full bg-gradient-to-br " +
-                  plan.gradientFrom +
-                  " " +
-                  plan.gradientTo
-                }
-              >
+              <div className="mt-0.5 p-0.5 rounded-full bg-red-500">
                 <Check className="h-3 w-3 text-white" />
               </div>
               <span
@@ -1395,17 +1396,13 @@ function PricingCard({
           ))}
         </ul>
 
-        {/* Select Button */}
+        {/* Select Button - RED when selected */}
         <button
           type="button"
           className={
             "w-full py-3.5 rounded-xl font-semibold transition-all duration-300 " +
             (selected
-              ? "bg-gradient-to-r " +
-                plan.gradientFrom +
-                " " +
-                plan.gradientTo +
-                " text-white shadow-lg"
+              ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
               : theme === "dark"
               ? "bg-white/5 text-white hover:bg-white/10 border border-white/10"
               : "bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200")
@@ -1420,6 +1417,7 @@ function PricingCard({
 
 // ============================================================================
 // COMPONENT: FormInput
+// Using RED for focus states
 // ============================================================================
 
 function FormInput({
@@ -1500,7 +1498,7 @@ function FormInput({
           </div>
         )}
 
-        {/* Input Field */}
+        {/* Input Field - RED focus state */}
         <input
           id={id}
           name={id}
@@ -1561,6 +1559,7 @@ function FormInput({
 
 // ============================================================================
 // COMPONENT: PasswordStrengthIndicator
+// Using TEAL for success (strong password)
 // ============================================================================
 
 function PasswordStrengthIndicator({
@@ -1616,7 +1615,7 @@ function PasswordStrengthIndicator({
         </div>
       </div>
 
-      {/* Requirements List */}
+      {/* Requirements List - TEAL for passed */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {PASSWORD_REQUIREMENTS.map((requirement) => {
           const passed = validation.requirements[requirement.id]
@@ -1627,14 +1626,14 @@ function PasswordStrengthIndicator({
               className={
                 "flex items-center gap-2 text-xs transition-all duration-300 " +
                 (passed
-                  ? "text-green-500"
+                  ? "text-emerald-500"
                   : theme === "dark"
                   ? "text-gray-500"
                   : "text-gray-400")
               }
             >
               {passed ? (
-                <div className="p-0.5 rounded-full bg-green-500">
+                <div className="p-0.5 rounded-full bg-emerald-500">
                   <Check className="h-2.5 w-2.5 text-white" />
                 </div>
               ) : (
@@ -1651,6 +1650,7 @@ function PasswordStrengthIndicator({
 
 // ============================================================================
 // COMPONENT: Checkbox
+// Using RED for checked state
 // ============================================================================
 
 function Checkbox({
@@ -1686,11 +1686,12 @@ function Checkbox({
             onChange={handleChange}
             className="sr-only"
           />
+          {/* Checkbox - RED when checked */}
           <div
             className={
               "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 " +
               (checked
-                ? "bg-gradient-to-br from-red-500 to-orange-500 border-transparent"
+                ? "bg-red-500 border-transparent"
                 : error
                 ? "border-red-500"
                 : theme === "dark"
@@ -1853,6 +1854,7 @@ function SocialSignupButtons({
 
 // ============================================================================
 // COMPONENT: OrderSummary
+// Using RED for plan icon
 // ============================================================================
 
 function OrderSummary({
@@ -1890,17 +1892,10 @@ function OrderSummary({
       </h3>
 
       <div className="space-y-4">
-        {/* Plan */}
+        {/* Plan - RED icon */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div
-              className={
-                "p-2 rounded-lg bg-gradient-to-br " +
-                plan.gradientFrom +
-                " " +
-                plan.gradientTo
-              }
-            >
+            <div className="p-2 rounded-lg bg-red-500">
               <Icon className="h-4 w-4 text-white" />
             </div>
             <span
@@ -1938,9 +1933,9 @@ function OrderSummary({
           </span>
         </div>
 
-        {/* Annual Savings */}
+        {/* Annual Savings - TEAL */}
         {billingCycle === "annual" && annualSavings > 0 && (
-          <div className="flex items-center justify-between text-green-500">
+          <div className="flex items-center justify-between text-emerald-500">
             <span>Annual Savings</span>
             <span className="font-semibold">
               -${annualSavings.toFixed(2)}
@@ -2043,6 +2038,7 @@ function StripeCardForm({
 
 // ============================================================================
 // COMPONENT: SecurityBadges
+// Using TEAL for security icons
 // ============================================================================
 
 function SecurityBadges({ theme }: { theme: Theme }): JSX.Element {
@@ -2057,7 +2053,7 @@ function SecurityBadges({ theme }: { theme: Theme }): JSX.Element {
     >
       <div className="flex items-center justify-center gap-6">
         <div className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-green-500" />
+          <Shield className="h-5 w-5 text-emerald-500" />
           <span
             className={
               "text-sm font-medium " +
@@ -2068,7 +2064,7 @@ function SecurityBadges({ theme }: { theme: Theme }): JSX.Element {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Lock className="h-5 w-5 text-green-500" />
+          <Lock className="h-5 w-5 text-emerald-500" />
           <span
             className={
               "text-sm font-medium " +
@@ -2093,6 +2089,9 @@ function SecurityBadges({ theme }: { theme: Theme }): JSX.Element {
 
 // ============================================================================
 // MAIN COMPONENT: SignupPage
+// Background: TRUE BLACK (#000000)
+// Primary: RED (#EF4444)
+// Secondary: TEAL (#10B981)
 // ============================================================================
 
 export default function SignupPage(): JSX.Element {
@@ -2431,19 +2430,19 @@ export default function SignupPage(): JSX.Element {
   }, [])
 
   // ========================================
-  // LOADING STATE
+  // LOADING STATE - TRUE BLACK background
   // ========================================
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#0F172A] flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <Loader2 className="h-8 w-8 text-red-500 animate-spin" />
       </div>
     )
   }
 
   // ========================================
-  // SUCCESS STATE RENDER
+  // SUCCESS STATE RENDER - TRUE BLACK background
   // ========================================
 
   if (success) {
@@ -2451,7 +2450,7 @@ export default function SignupPage(): JSX.Element {
       <div
         className={
           "min-h-screen transition-colors duration-500 " +
-          (theme === "dark" ? "bg-[#0F172A]" : "bg-gray-50")
+          (theme === "dark" ? "bg-black" : "bg-gray-50")
         }
       >
         <style jsx global>{`
@@ -2460,6 +2459,9 @@ export default function SignupPage(): JSX.Element {
             font-family: "Lato", system-ui, sans-serif;
           }
         `}</style>
+
+        {/* TEAL Top Banner */}
+        <TopBanner theme={theme} />
 
         <Navigation
           theme={theme}
@@ -2476,8 +2478,8 @@ export default function SignupPage(): JSX.Element {
                   : "border-gray-200 bg-white shadow-xl")
               }
             >
-              {/* Success Icon */}
-              <div className="w-24 h-24 mx-auto mb-8 rounded-3xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/25">
+              {/* Success Icon - TEAL */}
+              <div className="w-24 h-24 mx-auto mb-8 rounded-3xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/25">
                 <CheckCircle className="h-12 w-12 text-white" />
               </div>
 
@@ -2515,20 +2517,22 @@ export default function SignupPage(): JSX.Element {
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-4">
+                {/* Primary Button - RED */}
                 <Link
                   href="/login"
-                  className="w-full py-4 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-red-500/25 hover:shadow-red-500/40 text-center"
+                  className="w-full py-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-red-500/25 hover:shadow-red-500/40 text-center"
                 >
                   Go to Login
                 </Link>
 
+                {/* Secondary Button - TEAL outline */}
                 <button
                   onClick={handleReset}
                   className={
                     "w-full py-4 rounded-xl font-semibold transition-all duration-200 " +
                     (theme === "dark"
-                      ? "bg-white/5 hover:bg-white/10 text-white border border-white/10"
-                      : "bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-200")
+                      ? "bg-transparent hover:bg-emerald-500/10 text-emerald-500 border-2 border-emerald-500/50 hover:border-emerald-500"
+                      : "bg-transparent hover:bg-emerald-50 text-emerald-600 border-2 border-emerald-500/50 hover:border-emerald-500")
                   }
                 >
                   Create Another Account
@@ -2544,14 +2548,14 @@ export default function SignupPage(): JSX.Element {
   }
 
   // ========================================
-  // MAIN RENDER
+  // MAIN RENDER - TRUE BLACK background
   // ========================================
 
   return (
     <div
       className={
         "min-h-screen transition-colors duration-500 " +
-        (theme === "dark" ? "bg-[#0F172A]" : "bg-gray-50")
+        (theme === "dark" ? "bg-black" : "bg-gray-50")
       }
     >
       <style jsx global>{`
@@ -2560,6 +2564,9 @@ export default function SignupPage(): JSX.Element {
           font-family: "Lato", system-ui, sans-serif;
         }
       `}</style>
+
+      {/* TEAL Top Banner */}
+      <TopBanner theme={theme} />
 
       <Navigation
         theme={theme}
@@ -2607,7 +2614,17 @@ export default function SignupPage(): JSX.Element {
 
           {/* Step Content */}
           <div className="max-w-6xl mx-auto">
-oogleClick={handleGoogleSignup}
+className={
+                        "text-sm text-center mb-4 " +
+                        (theme === "dark"
+                          ? "text-gray-400"
+                          : "text-gray-500")
+                      }
+                    >
+                      Sign up with
+                    </p>
+                    <SocialSignupButtons
+                      onGoogleClick={handleGoogleSignup}
                       onGithubClick={handleGithubSignup}
                       onMicrosoftClick={handleMicrosoftSignup}
                       loading={socialLoading}
@@ -2672,7 +2689,7 @@ oogleClick={handleGoogleSignup}
                       autoComplete="email"
                     />
 
-                    {/* Account Type */}
+                    {/* Account Type - RED selection */}
                     <div className="space-y-2">
                       <label
                         className={
@@ -3062,7 +3079,7 @@ oogleClick={handleGoogleSignup}
                     Review Your Order
                   </h2>
 
-                  {/* Plan Summary */}
+                  {/* Plan Summary - RED icon */}
                   <div
                     className={
                       "p-5 rounded-2xl mb-6 " +
@@ -3071,14 +3088,7 @@ oogleClick={handleGoogleSignup}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div
-                          className={
-                            "p-3 rounded-xl bg-gradient-to-br " +
-                            selectedPlan.gradientFrom +
-                            " " +
-                            selectedPlan.gradientTo
-                          }
-                        >
+                        <div className="p-3 rounded-xl bg-red-500">
                           <selectedPlan.icon className="h-5 w-5 text-white" />
                         </div>
                         <div>
@@ -3321,7 +3331,7 @@ oogleClick={handleGoogleSignup}
                     </div>
                   )}
 
-                  {/* Agreement Checkboxes */}
+                  {/* Agreement Checkboxes - RED when checked */}
                   <div className="space-y-4 mb-8">
                     <Checkbox
                       id="agreeToTerms"
@@ -3376,12 +3386,12 @@ oogleClick={handleGoogleSignup}
                     />
                   </div>
 
-                  {/* Submit Button */}
+                  {/* Submit Button - RED */}
                   <button
                     onClick={handleSubmit}
                     disabled={isLoading}
                     className={
-                      "w-full py-4 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 disabled:from-red-500/50 disabled:to-orange-500/50 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-red-500/25 " +
+                      "w-full py-4 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-red-500/25 " +
                       (isLoading ? "" : "hover:shadow-red-500/40")
                     }
                   >
@@ -3421,7 +3431,7 @@ oogleClick={handleGoogleSignup}
             )}
           </div>
 
-          {/* Navigation Buttons */}
+          {/* Navigation Buttons - RED primary, TEAL secondary */}
           <div className="max-w-2xl mx-auto mt-10 flex items-center justify-between">
             {currentStep > 1 ? (
               <button
@@ -3443,7 +3453,7 @@ oogleClick={handleGoogleSignup}
             {currentStep < 4 && (
               <button
                 onClick={nextStep}
-                className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-red-500/25 hover:shadow-red-500/40"
+                className="flex items-center gap-2 px-8 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-red-500/25 hover:shadow-red-500/40"
               >
                 Continue
                 <ArrowRight className="h-5 w-5" />
@@ -3451,7 +3461,7 @@ oogleClick={handleGoogleSignup}
             )}
           </div>
 
-          {/* Sign In Link */}
+          {/* Sign In Link - RED */}
           <p
             className={
               "text-center mt-10 " +
