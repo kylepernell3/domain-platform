@@ -843,7 +843,192 @@ function SuccessMessage({ theme, email }: { theme: Theme; email: string }) {
     </div>
   )
 }
-red-500/10" : theme === "dark" ? "border-gray-700 hover:border-gray-600" : "border-gray-200 hover:border-gray-300"}`} role="radio" aria-checked={formData.accountType === "business"}>
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function SignupPage() {
+  const router = useRouter()
+  const [theme, toggleTheme, mounted] = useTheme()
+  const { supabase, loading: supabaseLoading, error: supabaseError } = useSupabaseClient()
+  const { stripe, elements, loading: stripeLoading, error: stripeError } = useStripe()
+
+  const [currentStep, setCurrentStep] = useState(1)
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA)
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [validationState, setValidationState] = useState<FieldValidationState>(INITIAL_VALIDATION_STATE)
+  const [isLoading, setIsLoading] = useState(false)
+  const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null)
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [cardComplete, setCardComplete] = useState(false)
+  const [cardError, setCardError] = useState<string | undefined>()
+
+  const selectedPlan = PLANS.find((p) => p.id === formData.selectedPlan) || PLANS[1]
+  const skipPayment = selectedPlan.monthlyPrice === 0
+
+  const updateFormData = useCallback(<K extends keyof FormData>(key: K, value: FormData[K]) => {
+    setFormData((prev) => ({ ...prev, [key]: value }))
+    if (errors[key as keyof FormErrors]) setErrors((prev) => ({ ...prev, [key]: undefined }))
+  }, [errors])
+
+  const validateFieldRealtime = useCallback((field: keyof FieldValidationState, value: string) => {
+    setValidationState((prev) => ({ ...prev, [field]: "validating" }))
+    setTimeout(() => {
+      let isValid = false
+      let error: string | undefined
+      switch (field) {
+        case "fullName": isValid = value.trim().length >= 2; error = isValid ? undefined : "Name must be at least 2 characters"; break
+        case "email": isValid = validateEmail(value); error = isValid ? undefined : "Please enter a valid email address"; break
+        case "password": isValid = validatePassword(value).isValid; error = isValid ? undefined : "Password does not meet requirements"; break
+        case "confirmPassword": isValid = value === formData.password && value.length > 0; error = isValid ? undefined : "Passwords do not match"; break
+        case "companyName": isValid = formData.accountType === "personal" || value.trim().length >= 2; error = isValid ? undefined : "Company name is required"; break
+        case "phone": isValid = value.length === 0 || /^[\d\s\-+()]+$/.test(value); error = isValid ? undefined : "Please enter a valid phone number"; break
+        case "cardholderName": isValid = value.trim().length >= 2; error = isValid ? undefined : "Cardholder name is required"; break
+        case "billingAddress": isValid = value.trim().length >= 5; error = isValid ? undefined : "Please enter your street address"; break
+        case "billingCity": isValid = value.trim().length >= 2; error = isValid ? undefined : "Please enter your city"; break
+        case "billingState": isValid = value.trim().length >= 2; error = isValid ? undefined : "Please enter your state/province"; break
+        case "billingZip": isValid = value.trim().length >= 3; error = isValid ? undefined : "Please enter your ZIP/postal code"; break
+      }
+      setValidationState((prev) => ({ ...prev, [field]: isValid ? "valid" : "invalid" }))
+      if (error) setErrors((prev) => ({ ...prev, [field]: error }))
+    }, 300)
+  }, [formData.password, formData.accountType])
+
+  const handleFieldBlur = useCallback((field: keyof FieldValidationState) => {
+    const value = formData[field as keyof FormData] as string
+    if (value && value.length > 0) validateFieldRealtime(field, value)
+  }, [formData, validateFieldRealtime])
+
+  const validateStep = useCallback((step: number): boolean => {
+    const newErrors: FormErrors = {}
+    if (step === 1) return true
+    if (step === 2) {
+      if (!formData.fullName.trim()) newErrors.fullName = "Full name is required"
+      else if (formData.fullName.trim().length < 2) newErrors.fullName = "Name must be at least 2 characters"
+      if (!formData.email.trim()) newErrors.email = "Email is required"
+      else if (!validateEmail(formData.email)) newErrors.email = "Please enter a valid email address"
+      if (!formData.password) newErrors.password = "Password is required"
+      else if (!validatePassword(formData.password).isValid) newErrors.password = "Password does not meet requirements"
+      if (!formData.confirmPassword) newErrors.confirmPassword = "Please confirm your password"
+      else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match"
+      if (formData.accountType === "business" && !formData.companyName.trim()) newErrors.companyName = "Company name is required for business accounts"
+    }
+    if (step === 3 && !skipPayment) {
+      if (!formData.cardholderName.trim()) newErrors.cardholderName = "Cardholder name is required"
+      if (!formData.billingAddress.trim()) newErrors.billingAddress = "Street address is required"
+      if (!formData.billingCity.trim()) newErrors.billingCity = "City is required"
+      if (!formData.billingState.trim()) newErrors.billingState = "State/Province is required"
+      if (!formData.billingZip.trim()) newErrors.billingZip = "ZIP/Postal code is required"
+      if (!cardComplete) newErrors.payment = "Please enter valid card details"
+    }
+    if (step === 4) {
+      if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the Terms of Service"
+      if (!formData.agreeToPrivacy) newErrors.agreeToPrivacy = "You must agree to the Privacy Policy"
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }, [formData, skipPayment, cardComplete])
+
+  const nextStep = useCallback(() => {
+    if (validateStep(currentStep)) {
+      if (currentStep === 2 && skipPayment) setCurrentStep(4)
+      else setCurrentStep((prev) => Math.min(prev + 1, 4))
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }, [currentStep, validateStep, skipPayment])
+
+  const prevStep = useCallback(() => {
+    if (currentStep === 4 && skipPayment) setCurrentStep(2)
+    else setCurrentStep((prev) => Math.max(prev - 1, 1))
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [currentStep, skipPayment])
+
+  const handleCardChange = useCallback((complete: boolean, error?: string) => {
+    setCardComplete(complete)
+    setCardError(error)
+    if (errors.payment && complete) setErrors((prev) => ({ ...prev, payment: undefined }))
+  }, [errors.payment])
+
+  const handleSocialSignup = useCallback(async (provider: SocialProvider) => {
+    if (!supabase) { setErrors({ general: "Authentication system not available. Please try again." }); return }
+    setSocialLoading(provider)
+    setErrors({})
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/auth/callback?plan=${formData.selectedPlan}&billing=${formData.billingCycle}` } })
+      if (error) throw error
+    } catch (error: any) {
+      console.error("Social signup error:", error)
+      setErrors({ general: error.message || `Failed to sign up with ${provider}. Please try again.` })
+    } finally { setSocialLoading(null) }
+  }, [supabase, formData.selectedPlan, formData.billingCycle])
+
+  const handleSubmit = useCallback(async () => {
+    if (!validateStep(4)) return
+    if (!supabase) { setErrors({ general: "Authentication system not available. Please try again." }); return }
+    setIsLoading(true)
+    setErrors({})
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: { full_name: formData.fullName, company_name: formData.companyName || null, account_type: formData.accountType, phone: formData.phone || null, selected_plan: formData.selectedPlan, billing_cycle: formData.billingCycle, subscribe_marketing: formData.subscribeMarketing },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      if (authError) {
+        if (authError.message.includes("already registered")) setErrors({ email: "This email is already registered. Please sign in instead." })
+        else if (authError.message.includes("invalid")) setErrors({ email: "Please enter a valid email address." })
+        else setErrors({ general: authError.message })
+        return
+      }
+      setIsSuccess(true)
+    } catch (error: any) {
+      console.error("Signup error:", error)
+      if (error.message.includes("network")) setErrors({ general: "Network error. Please check your connection and try again." })
+      else setErrors({ general: error.message || "An unexpected error occurred. Please try again." })
+    } finally { setIsLoading(false) }
+  }, [formData, supabase, validateStep])
+
+  if (!mounted) return <div className="min-h-screen bg-gray-900 flex items-center justify-center"><Loader2 className="h-8 w-8 text-red-500 animate-spin" aria-label="Loading" /></div>
+  if (isSuccess) return <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}><Navigation theme={theme} toggleTheme={toggleTheme} /><main className="max-w-2xl mx-auto px-4 py-16"><SuccessMessage theme={theme} email={formData.email} /></main><Footer theme={theme} /></div>
+
+  return (
+    <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
+      <Navigation theme={theme} toggleTheme={toggleTheme} />
+      <main className="py-12 px-4" role="main">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <h1 className={`text-4xl sm:text-5xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Create Your Account</h1>
+            <p className={`text-lg ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>Get started with DomainPro in just a few steps</p>
+          </div>
+          <ProgressSteps currentStep={currentStep} skipPayment={skipPayment} theme={theme} />
+          {errors.general && <div className="max-w-2xl mx-auto mb-6"><ErrorAlert message={errors.general} theme={theme} onDismiss={() => setErrors((prev) => ({ ...prev, general: undefined }))} /></div>}
+          {supabaseError && <div className="max-w-2xl mx-auto mb-6"><ErrorAlert message={supabaseError} theme={theme} /></div>}
+
+          <div className="transition-all duration-500">
+            {currentStep === 1 && (
+              <div>
+                <BillingToggle billingCycle={formData.billingCycle} onChange={(cycle) => updateFormData("billingCycle", cycle)} theme={theme} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {PLANS.map((plan) => <PricingCard key={plan.id} plan={plan} selected={formData.selectedPlan === plan.id} billingCycle={formData.billingCycle} onSelect={() => updateFormData("selectedPlan", plan.id)} theme={theme} />)}
+                </div>
+                <div className={`mt-8 text-center ${theme === "dark" ? "text-gray-500" : "text-gray-400"}`}><p className="text-sm">All plans include 30-day money-back guarantee</p></div>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="max-w-2xl mx-auto">
+                <div className={`p-8 rounded-2xl border ${theme === "dark" ? "bg-gray-800/50 border-gray-700" : "bg-white border-gray-200"}`}>
+                  <h2 className={`text-2xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Account Information</h2>
+                  <div className="mb-6">
+                    <label className={`block text-sm font-medium mb-2 ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>Account Type</label>
+                    <div className="flex gap-4" role="radiogroup" aria-label="Account type selection">
+                      <button onClick={() => updateFormData("accountType", "personal")} className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${formData.accountType === "personal" ? "border-red-500 bg-red-500/10" : theme === "dark" ? "border-gray-700 hover:border-gray-600" : "border-gray-200 hover:border-gray-300"}`} role="radio" aria-checked={formData.accountType === "personal"}>
+                        <User className={`h-5 w-5 ${formData.accountType === "personal" ? "text-red-500" : ""}`} /><span className={formData.accountType === "personal" ? "text-red-500 font-medium" : ""}>Personal</span>
+                      </button>
+                      <button onClick={() => updateFormData("accountType", "business")} className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${formData.accountType === "business" ? "border-red-500 bg-red-500/10" : theme === "dark" ? "border-gray-700 hover:border-gray-600" : "border-gray-200 hover:border-gray-300"}`} role="radio" aria-checked={formData.accountType === "business"}>
                         <Building2 className={`h-5 w-5 ${formData.accountType === "business" ? "text-red-500" : ""}`} /><span className={formData.accountType === "business" ? "text-red-500 font-medium" : ""}>Business</span>
                       </button>
                     </div>
