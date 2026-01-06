@@ -1044,8 +1044,7 @@ function DomainSearchContent() {
     setHasSearched(true)
     
     // Update URL
-    router.push(`/domains?q=${encodeURIComponent(searchQuery)}`, { scroll: false })
-
+    router.push(`/search?q=${encodeURIComponent(searchQuery)}`, { scroll: false })
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800))
 
