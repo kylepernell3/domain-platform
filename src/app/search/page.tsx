@@ -149,7 +149,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: "Domains",
     dropdown: [
-      { label: "Domain Search", href: "/domains", icon: <Search className="h-4 w-4" />, description: "Find your perfect domain" },
+      { label: "Domain Search", href: "/search", icon: <Search className="h-4 w-4" />, description: "Find your perfect domain" },
       { label: "Domain Transfer", href: "/domains/transfer", icon: <RefreshCw className="h-4 w-4" />, description: "Transfer existing domains" },
       { label: "Bulk Registration", href: "/domains/bulk", icon: <Layers className="h-4 w-4" />, description: "Register multiple domains" },
       { label: "Domain Auctions", href: "/domains/auctions", icon: <Gavel className="h-4 w-4" />, description: "Bid on premium domains" },
@@ -197,7 +197,7 @@ const NAV_ITEMS: NavItem[] = [
 ]
 
 const FOOTER_SECTIONS: FooterSection[] = [
-  { title: "DOMAINS", links: [{ label: "Domain Search", href: "/domains" }, { label: "Domain Transfer", href: "/domains/transfer" }, { label: "Bulk Registration", href: "/domains/bulk" }, { label: "Domain Auctions", href: "/domains/auctions" }, { label: "WHOIS Lookup", href: "/domains/whois" }] },
+  { title: "DOMAINS", links: [{ label: "Domain Search", href: "/search" }, { label: "Domain Transfer", href: "/domains/transfer" }, { label: "Bulk Registration", href: "/domains/bulk" }, { label: "Domain Auctions", href: "/domains/auctions" }, { label: "WHOIS Lookup", href: "/domains/whois" }] },
   { title: "HOSTING", links: [{ label: "Web Hosting", href: "/hosting/web" }, { label: "WordPress Hosting", href: "/hosting/wordpress" }, { label: "Cloud Hosting", href: "/hosting/cloud" }, { label: "VPS Hosting", href: "/hosting/vps" }, { label: "Dedicated Servers", href: "/hosting/dedicated" }] },
   { title: "SERVICES", links: [{ label: "SSL Certificates", href: "/services/ssl" }, { label: "CDN Services", href: "/services/cdn" }, { label: "Email Hosting", href: "/services/email" }, { label: "Website Builder", href: "/services/builder" }] },
   { title: "SECURITY", links: [{ label: "VPN Services", href: "/security/vpn" }, { label: "DDoS Protection", href: "/security/ddos" }, { label: "Backup Services", href: "/security/backup" }, { label: "Security Monitoring", href: "/security/monitoring" }] },
