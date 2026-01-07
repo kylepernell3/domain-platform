@@ -462,7 +462,7 @@ const navigationSections = [
     title: "CORE SERVICES",
     items: [
       { id: "dashboard", label: "Dashboard", icon: Activity, href: "/dashboard", badge: null },
-      { id: "domains", label: "My Domains", icon: Globe, href: "/domains", badge: null },
+      { id: "domains", label: "My Domains", icon: Globe, href: "/search", badge: null },
       { id: "email", label: "Professional Email", icon: Mail, href: "/email", badge: null },
       { id: "ssl", label: "SSL Certificates", icon: Shield, href: "/ssl", badge: 2 },
       { id: "dns", label: "DNS Settings", icon: Server, href: "/dns", badge: null, subtitle: "Downtown DNS" },
@@ -2520,7 +2520,7 @@ export default function DashboardPage() {
               <Activity className="h-6 w-6" />
               <span className="text-xs">Dashboard</span>
             </Link>
-            <Link href="/domains" className={`flex flex-col items-center gap-1 p-3 min-w-[56px] min-h-[56px] justify-center ${textSecondary}`}>
+            <Link href="/search" className={`flex flex-col items-center gap-1 p-3 min-w-[56px] min-h-[56px] justify-center ${textSecondary}`}>
               <Globe className="h-6 w-6" />
               <span className="text-xs">Domains</span>
             </Link>
