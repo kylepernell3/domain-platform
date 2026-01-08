@@ -1773,7 +1773,7 @@ export default function DashboardPage() {
                   {notificationsPanelOpen && (
                     <div className={`absolute right-0 top-full mt-2 w-96 ${bgDropdown} border rounded-xl overflow-hidden z-50`} style={{ animation: "scaleIn 0.2s ease-out" }}>
                       <div className={`flex items-center justify-between p-4 border-b ${borderColor}`}>
-                        <h3 className={`text-sm font-semibold ${textPrimary}`}>Notifications</h3>
+                        <h3 className={`text-sm font-extrabold ${textPrimary}`}>Notifications</h3>
                         <button onClick={markAllNotificationsRead} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1">
                           <CheckCheck className="h-3 w-3" />
                           Mark all read
@@ -1979,7 +1979,7 @@ export default function DashboardPage() {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className={`text-2xl sm:text-3xl font-bold ${textPrimary}`}>Dashboard</h1>
+              <h1 className={`text-2xl sm:text-3xl font-black ${textPrimary}`}>Dashboard</h1>
               <div className="flex items-center gap-3 mt-1">
                 <p className={textSecondary}>Welcome back! Here&apos;s your domain overview</p>
                 {/* Data Freshness Indicator */}
@@ -2069,7 +2069,7 @@ export default function DashboardPage() {
                   <Calculator className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h2 className={`text-lg font-semibold ${textPrimary}`}>Portfolio Cost Calculator</h2>
+                  <h2 className={`text-lg font-extrabold ${textPrimary}`}>Portfolio Cost Calculator</h2>
                   <div className="flex items-center gap-2 mt-0.5">
                     <BadgeCheck className="h-3.5 w-3.5 text-emerald-400" />
                     <span className="text-xs text-emerald-400">What You See Is What You Pay</span>
@@ -2617,7 +2617,7 @@ export default function DashboardPage() {
                 <div className="p-2 bg-red-500/10 rounded-lg">
                   <LayoutGrid className="h-5 w-5 text-red-400" />
                 </div>
-                <h2 className={`text-lg font-semibold ${textPrimary}`}>Dashboard Widgets</h2>
+                <h2 className={`text-lg font-extrabold ${textPrimary}`}>Dashboard Widgets</h2>
               </div>
               <button onClick={() => setWidgetModalOpen(false)} className={`p-2 ${textSecondary} ${bgHover} rounded-lg`}>
                 <X className="h-5 w-5" />
@@ -2673,7 +2673,7 @@ export default function DashboardPage() {
                 <div className="p-2 bg-red-500/10 rounded-lg">
                   <Keyboard className="h-5 w-5 text-red-400" />
                 </div>
-                <h2 className={`text-lg font-semibold ${textPrimary}`}>Keyboard Shortcuts</h2>
+                <h2 className={`text-lg font-extrabold ${textPrimary}`}>Keyboard Shortcuts</h2>
               </div>
               <button onClick={() => setShortcutsModalOpen(false)} className={`p-2 ${textSecondary} ${bgHover} rounded-lg`}>
                 <X className="h-5 w-5" />
@@ -2708,7 +2708,7 @@ export default function DashboardPage() {
                   <Calculator className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h2 className={`text-lg font-semibold ${textPrimary}`}>Total Cost Calculator</h2>
+                  <h2 className={`text-lg font-extrabold ${textPrimary}`}>Total Cost Calculator</h2>
                   <div className="flex items-center gap-2 mt-0.5">
                     <BadgeCheck className="h-3.5 w-3.5 text-emerald-400" />
                     <span className="text-xs text-emerald-400">What You See Is What You Pay</span>
@@ -2779,7 +2779,7 @@ export default function DashboardPage() {
                 <div className="p-2 bg-emerald-500/10 rounded-lg">
                   <Activity className="h-5 w-5 text-emerald-400" />
                 </div>
-                <h2 className={`text-lg font-semibold ${textPrimary}`}>System Status</h2>
+                <h2 className={`text-lg font-extrabold ${textPrimary}`}>System Status</h2>
               </div>
               <button onClick={() => setStatusModalOpen(false)} className={`p-2 ${textSecondary} ${bgHover} rounded-lg`}>
                 <X className="h-5 w-5" />
@@ -2820,7 +2820,7 @@ export default function DashboardPage() {
                   <Settings className="h-5 w-5 text-red-400" />
                 </div>
                 <div>
-                  <h2 className={`text-lg font-semibold ${textPrimary}`}>Domain Settings</h2>
+                  <h2 className={`text-lg font-extrabold ${textPrimary}`}>Domain Settings</h2>
                   <p className={`text-sm ${textSecondary}`}>{selectedDomainForSettings.name}</p>
                 </div>
               </div>
@@ -3091,7 +3091,7 @@ export default function DashboardPage() {
           <div className="absolute inset-0 bg-black/60" onClick={() => setAddDnsRecordOpen(false)} />
           <div className={`relative ${bgDropdown} border rounded-2xl shadow-2xl w-full max-w-md`} style={{ animation: "scaleIn 0.3s ease-out" }}>
             <div className={`flex items-center justify-between p-6 border-b ${borderColor}`}>
-              <h3 className={`text-lg font-semibold ${textPrimary}`}>Add DNS Record</h3>
+              <h3 className={`text-lg font-extrabold ${textPrimary}`}>Add DNS Record</h3>
               <button onClick={() => setAddDnsRecordOpen(false)} className={`p-2 ${textSecondary} ${bgHover} rounded-lg`}><X className="h-5 w-5" /></button>
             </div>
             <div className="p-6 space-y-4">
