@@ -1905,10 +1905,10 @@ export default function DashboardPage() {
                         </button>
                       </div>
                       <div className={`border-t ${borderColor} py-2`}>
-                        <button className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 ${bgHover}`}>
-                          <LogOut className="h-4 w-4" />
-                          Logout
-                        </button>
+                        <Link href="/login" className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 ${bgHover}`}>
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Link>
                       </div>
                     </div>
                   )}
