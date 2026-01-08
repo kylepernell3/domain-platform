@@ -166,8 +166,12 @@ function formatPrice(price: number): string { return "$" + price.toFixed(2) }
 function normalizeDomain(input: string): string { return input.toLowerCase().trim().replace(/^(https?:\/\/)?(www\.)?/i, "").split("/")[0].replace(/\s/g, "") }
 function extractName(domain: string): string { return domain.split(".")[0] }
 function generateDomainVariations(query: string): string[] {
-  const name = normalizeDomain(query).split(".")[0]
-  if (!name) return []
+  // Extract just the domain name, removing any existing TLD
+  const normalized = normalizeDomain(query)
+  const parts = normalized.split(".")
+  // If input has multiple parts (like mindscapesmedia.com), take all BUT the last part
+  // This handles: mindscapesmedia.com -> mindscapesmedia, example.co.uk -> example.co
+  const name = parts.length > 1 ? parts.slice(0, -1).join(".") : parts[0]  if (!name) return []
   return POPULAR_TLDS.map(t => name + "." + t.tld).slice(0, 16)
 }
 
