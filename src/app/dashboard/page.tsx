@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import Link from "next/link"
-import { 
+import { useRouter } from "next/navigation"
+import { createClient } from '@/lib/supabase/client'
+import {
   Globe, 
   TrendingUp, 
   Shield, 
@@ -719,6 +720,13 @@ function ToggleSwitch({ enabled, onChange, theme }: { enabled: boolean; onChange
 // ============================================
 
 export default function DashboardPage() {
+  // Router and Supabase
+    const router = useRouter()
+  const supabase = createClient()
+
+  // User state
+  const [user, setUser] = useState<{ email: string } | null>(null)
+
   // Theme state
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   
@@ -822,7 +830,18 @@ export default function DashboardPage() {
   const bulkActionsRef = useRef<HTMLDivElement>(null)
   const searchFiltersRef = useRef<HTMLDivElement>(null)
   const tableFiltersRef = useRef<HTMLDivElement>(null)
-  
+
+
+    // Fetch current user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.email) {
+        setUser({ email: user.email })
+      }
+    }
+    getUser()
+  }, [supabase.auth])
   // Load theme and widget visibility from localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('domainpro-theme') as 'dark' | 'light' | null
@@ -834,7 +853,12 @@ export default function DashboardPage() {
     const savedSearchHistory = localStorage.getItem('domainpro-search-history')
     if (savedSearchHistory) setSearchHistory(JSON.parse(savedSearchHistory))
   }, [])
-  
+
+    // Sign out handler
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
   // Toggle theme function
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
@@ -1894,6 +1918,19 @@ export default function DashboardPage() {
                           </div>
                           <span className="text-xs text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">ON</span>
                         </button>
+                        
+                {/* User Info */}
+                {user && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className={textSecondary}>{user.email}</span>
+                    <button
+                      onClick={handleSignOut}
+                      className={`${textSecondary} hover:${textPrimary} transition-colors`}
+                    >
+                      Not you? Sign out
+                    </button>
+                  </div>
+                )}
                         <button onClick={toggleTheme} className={`w-full flex items-center justify-between px-4 py-2.5 text-sm ${textSecondary} ${bgHover}`}>
                           <div className="flex items-center gap-3">
                             {theme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
