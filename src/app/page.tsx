@@ -499,16 +499,19 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
           </nav>
           
           <div className="mt-8 space-y-3">
-            <button className="w-full py-3 px-4 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-all duration-300 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500">
-              Sign In
-            </button>
-            <button 
-              onClick={() => handleNavClick('pricing')}
-              className="btn-swipe-red w-full py-3 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-neutral-950"
-            >
-              Get Started Free
-              <Sparkles className="h-4 w-4 animate-sparkle" aria-hidden="true" />
-            </button>
+            <Link href="/login" className="block">
+              <button className="w-full py-3 px-4 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-all duration-300 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500">
+                Sign In
+              </button>
+            <Link href="/signup" className="block">
+              <button
+                onClick={() => handleNavClick('pricing')}
+                className="btn-swipe-red w-full py-3 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-red-500 font-semibold"
+              >
+                Get Started Free
+                <Sparkles className="h-4 w-4 animate-sparkle" aria-hidden="true" />
+              </button>
+            </Link>            </button>
           </div>
         </div>
       </div>
