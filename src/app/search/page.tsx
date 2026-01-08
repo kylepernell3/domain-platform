@@ -171,11 +171,13 @@ function generateDomainVariations(query: string): string[] {
   const parts = normalized.split(".")
   // If input has multiple parts (like mindscapesmedia.com), take all BUT the last part
   // This handles: mindscapesmedia.com -> mindscapesmedia, example.co.uk -> example.co
-  const name = parts.length > 1 ? parts.slice(0, -1).join(".") : parts[0]  if (!name) return []
+  const name = parts.length > 1 ? parts.slice(0, -1).join(".") : parts[0]
+      if (!name) return []
   return POPULAR_TLDS.map(t => name + "." + t.tld).slice(0, 16)
 }
 
-// ============================================================================
+// ========================================================================
+====
 // NAVIGATION
 // ============================================================================
 
