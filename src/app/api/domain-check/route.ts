@@ -144,18 +144,6 @@ async function checkViaRDAP(domain: string): Promise<DomainCheckResult | null> {
   } catch { return null }
 }
 
-async function checkViaDNS(domain: string): Promise<DomainCheckResult | null> {
-  try {
-    const response = await fetch(`https://dns.google/resolve?name=${domain}&type=A`, { headers: { "Accept": "application/json" }, next: { revalidate: 60 } })
-    if (!response.ok) return null
-    const data = await response.json()
-    const tld = extractTLD(domain)
-    const premium = isPremiumDomain(domain)
-    const pricing = getPrice(tld, premium)
-    if (data.Answer?.length > 0) return { domain, available: false, premium: false, price: null, renewalPrice: null, currency: "USD" }
-    return { domain, available: true, premium, price: pricing.register, renewalPrice: pricing.renew, currency: "USD" }
-  } catch { return null }
-}
 
 async function checkDomainAvailability(domain: string): Promise<DomainCheckResult> {
   const normalizedDomain = normalizeDomain(domain)
@@ -164,12 +152,8 @@ async function checkDomainAvailability(domain: string): Promise<DomainCheckResul
   if (whoisApiKey) { const result = await checkViaWhoisXML(normalizedDomain, whoisApiKey); if (result) return result }
   const rdapResult = await checkViaRDAP(normalizedDomain)
   if (rdapResult) return rdapResult
-  const dnsResult = await checkViaDNS(normalizedDomain)
-  if (dnsResult) return dnsResult
-  const premium = isPremiumDomain(normalizedDomain)
-  const pricing = getPrice(tld, premium)
-  return { domain: normalizedDomain, available: false, premium: false, price: pricing.register, renewalPrice: pricing.renew, currency: "USD", error: "Unable to verify" }
-}
+    // DNS fallback removed - it was unreliable and gave false "available" results
+  return { domain: normalizedDomain, available: false, premium: false, price: null, renewalPrice: null, currency: "USD", error: "Unable to verify availability - please try again or add WhoisXML API key" }}
 
 export async function GET(request: NextRequest) {
   const domain = new URL(request.url).searchParams.get("domain")
