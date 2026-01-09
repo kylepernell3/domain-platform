@@ -1285,7 +1285,7 @@ function AuthRequired({ theme }: { theme: Theme }) {
     </div>
   )
 }
-Cart(prev => {
+setCart(prev => {
       if (prev.find(i => i.id === product.id)) return prev
       return [...prev, item]
     })
