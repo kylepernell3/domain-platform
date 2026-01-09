@@ -503,6 +503,7 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
               <button className="w-full py-3 px-4 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-all duration-300 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500">
                 Sign In
               </button>
+                          </Link>
             <Link href="/signup" className="block">
               <button
                 onClick={() => handleNavClick('pricing')}
@@ -511,8 +512,7 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                 Get Started Free
                 <Sparkles className="h-4 w-4 animate-sparkle" aria-hidden="true" />
               </button>
-            </Link>            </button>
-          </div>
+            </Link>          </div>
         </div>
       </div>
     </div>
