@@ -1361,15 +1361,7 @@ setCart(prev => {
     }
   }, [user, billing.email])
 
-  // Loading state
-  if (!mounted || authLoading) {
-    return <LoadingFallback />
-  }
 
-  // Auth check - redirect if not logged in
-  if (!session) {
-    return <AuthRequired theme={theme} />
-  }
 
   // Order complete view
   if (orderComplete) {
