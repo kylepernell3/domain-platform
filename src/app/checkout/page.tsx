@@ -1288,8 +1288,7 @@ function AuthRequired({ theme }: { theme: Theme }) {
 setCart(prev => {
       if (prev.find(i =>  i.id === product.id)) return prev
       return [...prev, item]
-    }
-  }, [setCart])
+    })
 
   // Validation
   const validateBilling = useCallback((): boolean => {
