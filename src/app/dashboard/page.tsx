@@ -121,7 +121,7 @@ const timelineOptions = [
   { label: "All Time", value: "all" },
 ]
 
-const getStatsForTimeline = (timeline: string) => {
+  const getStatsForTimeline = (timeline: string) => {
   const variations: Record<string, { value: string; change: string }[]> = {
     "7d": [
       { value: "12", change: "+1 vs last 7 days" },
