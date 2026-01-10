@@ -1285,3 +1285,218 @@ function AuthRequired({ theme }: { theme: Theme }) {
     </div>
   )
 }
+
+  // Validation
+  const validateBilling = useCallback((): boolean => {
+    const errors: FormErrors = {}
+    if (!billing.firstName.trim()) errors.firstName = "First name is required"
+    if (!billing.lastName.trim()) errors.lastName = "Last name is required"
+    if (!billing.email.trim()) errors.email = "Email is required"
+    else if (!validateEmail(billing.email)) errors.email = "Invalid email format"
+    if (!billing.address1.trim()) errors.address1 = "Address is required"
+    if (!billing.city.trim()) errors.city = "City is required"
+    if (!billing.state.trim()) errors.state = "State is required"
+    if (!billing.zip.trim()) errors.zip = "ZIP code is required"
+    if (!billing.phone.trim()) errors.phone = "Phone is required"
+    else if (!validatePhone(billing.phone)) errors.phone = "Invalid phone format"
+    setBillingErrors(errors)
+    return Object.keys(errors).length === 0
+  }, [billing])
+
+  // Step handlers
+  const goToStep = (step: CheckoutStep) => {
+    if (step < currentStep || canProceed(step - 1 as CheckoutStep)) {
+      setCurrentStep(step)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+
+  const canProceed = (fromStep: CheckoutStep): boolean => {
+    if (fromStep === 1) return cart.length > 0
+    if (fromStep === 2) return true
+    if (fromStep === 3) return validateBilling()
+    return false
+  }
+
+  const handleStep1Continue = () => {
+    if (cart.length > 0) goToStep(2)
+  }
+
+  const handleStep2Continue = () => {
+    goToStep(3)
+  }
+
+  const handleStep3Continue = () => {
+    if (validateBilling()) goToStep(4)
+  }
+
+  const handlePay = async () => {
+    if (paymentMethod === "card") {
+      const validation = validateCard(card)
+      setCardErrors(validation.errors)
+      if (!validation.isValid) return
+    }
+
+    setIsProcessing(true)
+
+    // Simulate payment processing
+    await new Promise(r => setTimeout(r, 2500))
+
+    const newOrderId = `DP-${Date.now().toString(36).toUpperCase()}`
+    setOrderId(newOrderId)
+    setOrderComplete(true)
+    setCart([])
+    setIsProcessing(false)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  // Populate email from user
+  useEffect(() => {
+    if (user?.email && !billing.email) {
+      setBilling(prev => ({ ...prev, email: user.email }))
+    }
+  }, [user, billing.email])
+
+
+
+// ===========================================================================
+// MAIN CHECKOUT CONTENT COMPONENT
+// ===========================================================================
+const CheckoutContent = () => {
+    // State declarations
+  const [cart, setCart] = useState<CartItem[]>([])
+  // Order complete view
+  if (orderComplete) {
+    return (
+      <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
+        <Navigation theme={theme} toggleTheme={toggleTheme} cartCount={0} />
+        <main className="py-12 px-4">
+          <div className="max-w-2xl mx-auto">
+            <OrderSuccess theme={theme} orderId={orderId} />
+          </div>
+        </main>
+        <Footer theme={theme} />
+      </div>
+    )
+  }
+
+  return (
+    <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
+      <Navigation theme={theme} toggleTheme={toggleTheme} cartCount={cart.length} />
+
+      <main className="py-8 px-4">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+              Secure Checkout
+            </h1>
+            <p className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
+              Complete your purchase securely
+            </p>
+          </div>
+
+          {/* Step Indicator */}
+          <StepIndicator currentStep={currentStep} theme={theme} />
+
+          {/* Step Content */}
+          <div className="max-w-3xl mx-auto">
+            {currentStep === 1 && (
+              <Step1OrderSummary
+                theme={theme}
+                cart={cart}
+                onUpdateQty={updateQuantity}
+                onRemove={removeItem}
+                subtotal={subtotal}
+                onContinue={handleStep1Continue}
+              />
+            )}
+
+            {currentStep === 2 && (
+              <Step2Upsells
+                theme={theme}
+                cart={cart}
+                onAddProduct={addProduct}
+                onContinue={handleStep2Continue}
+                onBack={() => goToStep(1)}
+              />
+            )}
+
+            {currentStep === 3 && (
+              <Step3Billing
+                theme={theme}
+                billing={billing}
+                setBilling={setBilling}
+                errors={billingErrors}
+                onContinue={handleStep3Continue}
+                onBack={() => goToStep(2)}
+              />
+            )}
+
+            {currentStep === 4 && (
+              <Step4Payment
+                theme={theme}
+                paymentMethod={paymentMethod}
+                setPaymentMethod={setPaymentMethod}
+                card={card}
+                setCard={setCard}
+                cardErrors={cardErrors}
+                total={total}
+                isProcessing={isProcessing}
+                onPay={handlePay}
+                onBack={() => goToStep(3)}
+                agreeTerms={agreeTerms}
+                setAgreeTerms={setAgreeTerms}
+              />
+            )}
+          </div>
+
+          {/* Order Summary Sidebar (Steps 3 & 4) */}
+          {(currentStep === 3 || currentStep === 4) && cart.length > 0 && (
+            <div className="max-w-3xl mx-auto mt-8">
+              <div className={`p-6 rounded-2xl border ${theme === "dark" ? "bg-gray-800/30 border-gray-700" : "bg-gray-50 border-gray-200"}`}>
+                <h3 className={`font-bold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Order Summary</h3>
+                <div className="space-y-2">
+                  {cart.map(item => (
+                    <div key={item.id} className="flex justify-between text-sm">
+                      <span className={theme === "dark" ? "text-gray-300" : "text-gray-600"}>{item.name} x{item.quantity}</span>
+                      <span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formatPrice(item.price * item.quantity)}</span>
+                    </div>
+                  ))}
+                  <div className={`pt-2 mt-2 border-t ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
+                    <div className="flex justify-between text-sm">
+                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Subtotal</span>
+                      <span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formatPrice(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Tax</span>
+                      <span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formatPrice(tax)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-lg mt-2">
+                      <span className={theme === "dark" ? "text-white" : "text-gray-900"}>Total</span>
+                      <span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formatPrice(total)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+
+      <Footer theme={theme} />
+    </div>
+  )
+}
+
+// ============================================================================
+// MAIN PAGE EXPORT WITH SUSPENSE
+// ============================================================================
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CheckoutContent />
+    </Suspense>
+  )
+}
