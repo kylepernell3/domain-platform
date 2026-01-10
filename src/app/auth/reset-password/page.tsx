@@ -2083,4 +2083,8 @@ export default function ResetPasswordPage() {
       <Footer theme={theme} />
     </div>
   )
+
 }
+
+// Force dynamic rendering to support useSearchParams
+export const dynamic = 'force-dynamic'
