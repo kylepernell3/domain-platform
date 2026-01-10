@@ -5,7 +5,7 @@
 // Complete Production-Ready with Webhook Integration, Supabase Auth
 // ============================================================================
 
-import React, { useState, useEffect, useCallback, useRef } from "react"
+import React, Suspense, { useState, useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
@@ -2088,4 +2088,7 @@ export default function ResetPasswordPage() {
 
 // Force dynamic rendering to support useSearchParams
 export const dynamic = 'force-dynamic'
+
+
+
 
