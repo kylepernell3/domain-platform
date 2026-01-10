@@ -187,4 +187,3 @@ const getStatsForTimeline = (timeline: string) => {
 }
 
 const initialDomains = []
-{
