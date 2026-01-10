@@ -1292,6 +1292,113 @@ function AuthRequired({ theme }: { theme: Theme }) {
 const CheckoutContent = () => {
     // State declarations
   const [cart, setCart] = useState<CartItem[]>([])
+    const [currentStep, setCurrentStep] = useState<CheckoutStep>(1)
+  const [orderComplete, setOrderComplete] = useState(false)
+  const [orderId, setOrderId] = useState("")
+  const [billing, setBilling] = useState<BillingInfo>(DEFAULT_BILLING)
+  const [billingErrors, setBillingErrors] = useState<FormErrors>({})
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card")
+  const [card, setCard] = useState<CardInfo>(DEFAULT_CARD)
+  const [cardErrors, setCardErrors] = useState<FormErrors>({})
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [agreeTerms, setAgreeTerms] = useState(false)
+  
+  // Theme and auth
+  const [theme, toggleTheme, mounted] = useTheme()
+  const { user, loading } = useSupabaseAuth()
+  
+  // Computed values
+  const subtotal = useMemo(() => cart.reduce((sum, item) => sum + item.price * item.quantity, 0), [cart])
+  const tax = useMemo(() => calculateTax(subtotal, billing.country, billing.state), [subtotal, billing.country, billing.state])
+  const total = useMemo(() => subtotal + tax, [subtotal, tax])
+  
+  // Cart management
+  const updateQuantity = useCallback((id: string, qty: number) => {
+    setCart(prev => prev.map(item => item.id === id ? { ...item, quantity: qty } : item))
+  }, [])
+  
+  const removeItem = useCallback((id: string) => {
+    setCart(prev => prev.filter(item => item.id !== id))
+  }, [])
+  
+  const addProduct = useCallback((product: UpsellProduct) => {
+    setCart(prev => [...prev, { id: product.id, type: product.type, name: product.name, description: product.description, price: product.price, period: product.period, quantity: 1 }])
+  }, [])
+  
+  // Validation
+  const validateBilling = useCallback((): boolean => {
+    const errors: FormErrors = {}
+    if (!billing.firstName.trim()) errors.firstName = "First name is required"
+    if (!billing.lastName.trim()) errors.lastName = "Last name is required"
+    if (!billing.email.trim()) errors.email = "Email is required"
+    else if (!validateEmail(billing.email)) errors.email = "Invalid email format"
+    if (!billing.address1.trim()) errors.address1 = "Address is required"
+    if (!billing.city.trim()) errors.city = "City is required"
+    if (!billing.state.trim()) errors.state = "State is required"
+    if (!billing.zip.trim()) errors.zip = "ZIP code is required"
+    if (!billing.phone.trim()) errors.phone = "Phone is required"
+    else if (!validatePhone(billing.phone)) errors.phone = "Invalid phone format"
+    setBillingErrors(errors)
+    return Object.keys(errors).length === 0
+  }, [billing])
+  
+  // Step handlers
+  const goToStep = (step: CheckoutStep) => {
+    if (step < currentStep || canProceed(step - 1 as CheckoutStep)) {
+      setCurrentStep(step)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+  
+  const canProceed = (fromStep: CheckoutStep): boolean => {
+    if (fromStep === 1) return cart.length > 0
+    if (fromStep === 2) return true
+    if (fromStep === 3) return validateBilling()
+    return false
+  }
+  
+  const handleStep1Continue = () => {
+    if (cart.length > 0) goToStep(2)
+  }
+  
+  const handleStep2Continue = () => {
+    goToStep(3)
+  }
+  
+  const handleStep3Continue = () => {
+    if (validateBilling()) goToStep(4)
+  }
+  
+  const handlePay = async () => {
+    if (paymentMethod === "card") {
+      const validation = validateCard(card)
+      setCardErrors(validation.errors)
+      if (!validation.isValid) return
+    }
+    setIsProcessing(true)
+    await new Promise(r => setTimeout(r, 2500))
+    const newOrderId = `DP-${Date.now().toString(36).toUpperCase()}`
+    setOrderId(newOrderId)
+    setOrderComplete(true)
+    setCart([])
+    setIsProcessing(false)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+  
+  // Populate email from user
+  useEffect(() => {
+    if (user?.email && !billing.email) {
+      setBilling(prev => ({ ...prev, email: user.email }))
+    }
+  }, [user, billing.email])
+  
+  // Initialize cart with sample items for demo
+  useEffect(() => {
+    if (cart.length === 0) {
+      setCart(SAMPLE_CART)
+    }
+  }, [])
+
   // Order complete view
   if (orderComplete) {
     return (
