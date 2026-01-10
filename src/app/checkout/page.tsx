@@ -1367,6 +1367,8 @@ setCart(prev => {
 // MAIN CHECKOUT CONTENT COMPONENT
 // ===========================================================================
 const CheckoutContent = () => {
+    // State declarations
+  const [cart, setCart] = useState<CartItem[]>([])
   // Order complete view
   if (orderComplete) {
     return (
