@@ -2088,3 +2088,4 @@ export default function ResetPasswordPage() {
 
 // Force dynamic rendering to support useSearchParams
 export const dynamic = 'force-dynamic'
+
