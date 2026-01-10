@@ -187,3 +187,5 @@ const timelineOptions = [
 }
 
 const initialDomains = []
+
+export default function DashboardPage() { return <div>Dashboard Coming Soon</div> }
