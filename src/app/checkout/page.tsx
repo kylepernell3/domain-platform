@@ -1285,17 +1285,3 @@ function AuthRequired({ theme }: { theme: Theme }) {
     </div>
   )
 }
-    // State declarations
-}
-
-// ============================================================================
-// MAIN PAGE EXPORT WITH SUSPENSE
-// ============================================================================
-
-export default function CheckoutPage() {
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <CheckoutContent />
-    </Suspense>
-  )
-}
