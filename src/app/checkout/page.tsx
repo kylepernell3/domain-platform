@@ -1291,16 +1291,18 @@ function AuthRequired({ theme }: { theme: Theme }) {
     const errors: FormErrors = {}
         // TODO: Fix billing validation once billing state is properly defined
         return true
-    if (!billing.firstName.trim()) errors.firstName = "First name is required"
-    if (!billing.lastName.trim()) errors.lastName = "Last name is required"
-    if (!billing.email.trim()) errors.email = "Email is required"
+        /*
+    // $&.firstName.trim()) errors.firstName = "First name is required"
+    // $&.lastName.trim()) errors.lastName = "Last name is required"
+    // $&.email.trim()) errors.email = "Email is required"
     else if (!validateEmail(billing.email)) errors.email = "Invalid email format"
-    if (!billing.address1.trim()) errors.address1 = "Address is required"
-    if (!billing.city.trim()) errors.city = "City is required"
-    if (!billing.state.trim()) errors.state = "State is required"
-    if (!billing.zip.trim()) errors.zip = "ZIP code is required"
-    if (!billing.phone.trim()) errors.phone = "Phone is required"
+    // $&.address1.trim()) errors.address1 = "Address is required"
+    // $&.city.trim()) errors.city = "City is required"
+    // $&.state.trim()) errors.state = "State is required"
+    // $&.zip.trim()) errors.zip = "ZIP code is required"
+    // $&.phone.trim()) errors.phone = "Phone is required"
     else if (!validatePhone(billing.phone)) errors.phone = "Invalid phone format"
+        */
     setBillingErrors(errors)
     return Object.keys(errors).length === 0
   }, []) // Removed billing dependency - function returns true until billing state is defined
