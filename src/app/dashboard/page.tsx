@@ -2927,6 +2927,14 @@ export default function DashboardPage() {
                 <h3 className={`text-sm font-medium ${textSecondary}`}>Your Domain Portfolio Cost</h3>
                 {domains.slice(0, 4).map((domain) => {
                   const totalCost = domain.initialPrice + (domain.renewalPrice * (calculatorYears - 1))
+  if (isLoadingUser) {
+    return (
+      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+      </div>
+    )
+  }
+
                   return (
                     <div key={domain.id} className={`flex items-center justify-between p-3 ${theme === 'dark' ? 'bg-neutral-800/50' : 'bg-gray-100'} rounded-lg`}>
                       <div>
