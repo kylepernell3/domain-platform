@@ -365,11 +365,11 @@ const initialEmailForwarding = [
 
 // Access History for security tab
 const accessHistory = [
-  { action: "DNS Record Updated", user: {userProfile?.full_name || 'User'}, ip: "192.168.1.100", time: "2 hours ago" },
-  { action: "Auto-Renew Enabled", user: {userProfile?.full_name || 'User'}, ip: "192.168.1.100", time: "1 day ago" },
+  { action: "DNS Record Updated", user: userProfile?.full_name || 'User', ip: "192.168.1.100", time: "2 hours ago" },
+  { action: "Auto-Renew Enabled", user: userProfile?.full_name || 'User', ip: "192.168.1.100", time: "1 day ago" },
   { action: "SSL Certificate Renewed", user: "System", ip: "N/A", time: "5 days ago" },
-  { action: "Domain Lock Enabled", user: {userProfile?.full_name || 'User'}, ip: "192.168.1.100", time: "1 week ago" },
-  { action: "Contact Info Updated", user: {userProfile?.full_name || 'User'}, ip: "192.168.1.100", time: "2 weeks ago" },
+  { action: "Domain Lock Enabled", user: userProfile?.full_name || 'User', ip: "192.168.1.100", time: "1 week ago" },
+  { action: "Contact Info Updated", user: userProfile?.full_name || 'User', ip: "192.168.1.100", time: "2 weeks ago" },
 ]
 
 const integrations = [
