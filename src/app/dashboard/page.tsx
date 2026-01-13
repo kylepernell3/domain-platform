@@ -842,9 +842,6 @@ export default function DashboardPage() {
     loadDomains()
   }, [userProfile])
 
-  const router = useRouter()
-  const [userProfile, setUserProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null)
-  const [isLoadingUser, setIsLoadingUser] = useState(true)
 
   // Fetch current user and profile
   useEffect(() => {
