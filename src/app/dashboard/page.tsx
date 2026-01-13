@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import type { Database } from "@/lib/supabase/types"
-import { useRouter } from "next/navigation"
 import {
   Globe, 
   TrendingUp, 
@@ -771,7 +770,6 @@ export default function DashboardPage() {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null)
   const [domains, setDomains] = useState(initialDomains)
 
-  const router = useRouter()
   const [userProfile, setUserProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
 
