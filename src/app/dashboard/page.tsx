@@ -95,7 +95,7 @@ import {
   Webhook,
   FileJson,
   Upload,
-  Database,
+  Database as DatabaseIcon,
   Network,
   Smartphone,
   MessageSquare,
@@ -3105,7 +3105,7 @@ export default function DashboardPage() {
                   </div>
                   <div className={`p-4 ${theme === 'dark' ? 'bg-neutral-800/50' : 'bg-gray-100'} rounded-xl`}>
                     <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3"><Database className="h-5 w-5 text-red-400" /><div><p className={`text-sm font-medium ${textPrimary}`}>DNS Records</p><p className={`text-xs ${textSecondary}`}>Manage A, AAAA, CNAME, MX, TXT records</p></div></div>
+                      <div className="flex items-center gap-3"><DatabaseIcon className="h-5 w-5 text-red-400" /><div><p className={`text-sm font-medium ${textPrimary}`}>DNS Records</p><p className={`text-xs ${textSecondary}`}>Manage A, AAAA, CNAME, MX, TXT records</p></div></div>
                       <button onClick={() => setAddDnsRecordOpen(true)} className="btn-swipe-red flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg"><Plus className="h-3 w-3" />Add Record</button>
                     </div>
                     <div className="overflow-x-auto">
