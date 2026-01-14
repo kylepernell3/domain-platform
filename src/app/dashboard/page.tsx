@@ -824,13 +824,27 @@ export default function DashboardPage() {
         } else if (domainsData) {
           const transformedDomains = domainsData.map((d: any) => ({
             id: d.id,
-            domain: d.domain_name,
+            name: d.domain_name,
             status: d.status as 'active' | 'pending' | 'expired',
-            registrar: 'DomainPro',
+            ssl: false,
+            expiry: d.expires_at,
             expiryDate: d.expires_at,
+            visits: "0",
+            visitsNum: 0,
+            sslExpiry: null,
+            initialPrice: 12.99,
+            renewalPrice: 14.99,
+            emailCount: 0,
+            locked: true,
             autoRenew: true,
+            marketValue: 0,
+            purchasePrice: 12.99,
+            pinned: false,
+            lastViewed: new Date().toISOString(),
             privacy: true,
-            nameservers: []
+            dnssec: false,
+            registrationYears: 1,
+            nameservers: ["ns1.domainpro.com", "ns2.domainpro.com"]
           }))
           setDomains(transformedDomains)
         }
