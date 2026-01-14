@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import type { Database } from "@/lib/supabase/types"
 import {
   Globe, 
   TrendingUp, 
