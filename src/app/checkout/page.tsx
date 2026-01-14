@@ -1307,6 +1307,7 @@ function AuthRequired({ theme }: { theme: Theme }) {
         */
   }, []) // Removed billing dependency - function returns true until billing state is defined
   // Step handlers
+  /*
   const goToStep = (step: CheckoutStep) => {
     if (step < currentStep || canProceed(step - 1 as CheckoutStep)) {
       setCurrentStep(step)
@@ -1332,6 +1333,7 @@ function AuthRequired({ theme }: { theme: Theme }) {
   const handleStep3Continue = () => {
     if (validateBilling()) goToStep(4)
   }
+  */
 
   const handlePay = async () => {
     if (paymentMethod === "card") {
