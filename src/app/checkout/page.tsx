@@ -1302,9 +1302,9 @@ function AuthRequired({ theme }: { theme: Theme }) {
     // $&.zip.trim()) errors.zip = "ZIP code is required"
     // $&.phone.trim()) errors.phone = "Phone is required"
     else if (!validatePhone(billing.phone)) errors.phone = "Invalid phone format"
-        */
     setBillingErrors(errors)
     return Object.keys(errors).length === 0
+        */
   }, []) // Removed billing dependency - function returns true until billing state is defined
   // Step handlers
   const goToStep = (step: CheckoutStep) => {
