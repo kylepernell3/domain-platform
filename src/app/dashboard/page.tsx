@@ -822,7 +822,7 @@ export default function DashboardPage() {
         if (error) {
           console.error('Error fetching domains:', error)
         } else if (domainsData) {
-          const transformedDomains = domainsData.map(d => ({
+          const transformedDomains = domainsData.map((d: any) => ({
             id: d.id,
             domain: d.domain_name,
             status: d.status as 'active' | 'pending' | 'expired',
@@ -890,7 +890,7 @@ export default function DashboardPage() {
         if (error) {
           console.error('Error fetching domains:', error)
         } else if (domainsData) {
-          const transformedDomains = domainsData.map(d => ({
+          const transformedDomains = domainsData.map((d: any) => ({
             id: d.id,
             domain: d.domain_name,
             status: d.status as 'active' | 'pending' | 'expired',
