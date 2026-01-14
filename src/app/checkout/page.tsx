@@ -1336,6 +1336,7 @@ function AuthRequired({ theme }: { theme: Theme }) {
   */
 
   const handlePay = async () => {
+    /*
     if (paymentMethod === "card") {
       const validation = validateCard(card)
       setCardErrors(validation.errors)
@@ -1354,6 +1355,7 @@ function AuthRequired({ theme }: { theme: Theme }) {
     setIsProcessing(false)
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
+  */
 
   // Populate email from user
   useEffect(() => {
