@@ -357,13 +357,8 @@ const initialEmailForwarding = [
 ]
 
 // Access History for security tab
-const accessHistory = [
-  { action: "DNS Record Updated", user: 'User', ip: "192.168.1.100", time: "2 hours ago" },
-  { action: "Auto-Renew Enabled", user: 'User', ip: "192.168.1.100", time: "1 day ago" },
-  { action: "SSL Certificate Renewed", user: "System", ip: "N/A", time: "5 days ago" },
-  { action: "Domain Lock Enabled", user: 'User', ip: "192.168.1.100", time: "1 week ago" },
-  { action: "Contact Info Updated", user: 'User', ip: "192.168.1.100", time: "2 weeks ago" },
-]
+// TODO: Fetch from activity_log table in Supabase
+const accessHistory: any[] = []
 
 const integrations = [
   { name: "WordPress", icon: Code, connected: true, description: "One-click WordPress setup" },
@@ -395,56 +390,19 @@ const keyboardShortcuts = [
 ]
 
 const chartData = {
-  domainGrowth: [
-    { month: "Jul", value: 4 },
-    { month: "Aug", value: 5 },
-    { month: "Sep", value: 6 },
-    { month: "Oct", value: 8 },
-    { month: "Nov", value: 10 },
-    { month: "Dec", value: 12 },
-  ],
-  sslStatus: [
-    { label: "Active", value: 8, color: "bg-emerald-500" },
-    { label: "Expiring Soon", value: 2, color: "bg-yellow-500" },
-    { label: "Expired", value: 0, color: "bg-red-500" },
-    { label: "None", value: 2, color: "bg-neutral-600" },
-  ],
-  trafficTrends: [
-    { month: "Jul", value: 15200 },
-    { month: "Aug", value: 18400 },
-    { month: "Sep", value: 16800 },
-    { month: "Oct", value: 21500 },
-    { month: "Nov", value: 19200 },
-    { month: "Dec", value: 24500 },
-  ],
-  uptimeHistory: [
-    { month: "Jul", value: 99.8 },
-    { month: "Aug", value: 99.9 },
-    { month: "Sep", value: 99.7 },
-    { month: "Oct", value: 100 },
-    { month: "Nov", value: 99.9 },
-    { month: "Dec", value: 99.9 },
-  ],
+  domainGrowth: // TODO: Fetch real analytics data from Supabase
+  domainGrowth: [],
+  sslStatus: [],
+  trafficTrends: []
+  uptimeHistory:[]
 }
 
-const activities = [
-  { action: "SSL Certificate renewed", domain: "example.com", time: "2 hours ago" },
-  { action: "Domain registered", domain: "newsite.io", time: "1 day ago" },
-  { action: "DNS updated", domain: "mystore.io", time: "3 days ago" },
+const activities = []
+
+const insights =[]
 ]
 
-const insights = [
-  { id: 1, type: "action", icon: AlertCircle, title: "2 SSL certificates expiring soon", description: "Renew before Jan 18 to avoid downtime", color: "text-yellow-400", bgColor: "bg-yellow-500/10", read: false },
-  { id: 2, type: "security", icon: Shield, title: "Enable 2FA for better security", description: "Protect your account with multi-factor authentication", color: "text-red-400", bgColor: "bg-red-500/10", read: false },
-  { id: 3, type: "savings", icon: DollarSign, title: "Save 20% with annual billing", description: "Switch to yearly payment and save $28.80", color: "text-emerald-400", bgColor: "bg-emerald-500/10", read: true },
-  { id: 4, type: "performance", icon: Zap, title: "Enable CDN for faster loading", description: "Improve load times by up to 60%", color: "text-blue-400", bgColor: "bg-blue-500/10", read: true },
-]
-
-const initialNotifications = [
-  { id: 1, type: "warning", icon: AlertTriangle, title: "SSL expiring in 5 days", description: "example.com SSL certificate expires Jan 18", time: "2 hours ago", read: false },
-  { id: 2, type: "info", icon: BellRing, title: "Domain renewal reminder", description: "example.com renews in 17 days", time: "5 hours ago", read: false },
-  { id: 3, type: "success", icon: CheckCircle, title: "Payment successful", description: "$69.99 charged for SSL certificate", time: "1 day ago", read: true },
-  { id: 4, type: "info", icon: Mail, title: "New email account created", description: "admin@example.com is now active", time: "2 days ago", read: true },
+const initialNotifications = []
 ]
 
 const settingsOptions = [
