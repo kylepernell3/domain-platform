@@ -727,7 +727,7 @@ export default function DashboardPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeChart, setActiveChart] = useState("domainGrowth")
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null)
-  const [domains, setDomains] = useState(initialDomains)
+  const [domains, setDomains] = useState([])
 
   const [userProfile, setUserProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
