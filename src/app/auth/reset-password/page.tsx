@@ -1671,4 +1671,12 @@ function ResetPasswordContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [theme, toggleTheme, mounted] = useTheme()
+
+  return (
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <Loader2 className="h-8 w-8 text-red-500 animate-spin" aria-label="Loading" />
+    </div>
+  )
+}
   
+
