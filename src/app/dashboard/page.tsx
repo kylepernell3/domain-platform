@@ -825,7 +825,7 @@ export default function DashboardPage() {
           const transformedDomains = domainsData.map((d: any) => ({
             id: d.id,
             name: d.domain_name,
-            status: d.status as 'active' | 'pending' | 'expired',
+                        status: (d.status || 'pending') as 'active' | 'pending' | 'expired'
             ssl: false,
             expiry: d.expires_at,
             expiryDate: d.expires_at,
@@ -907,7 +907,7 @@ export default function DashboardPage() {
           const transformedDomains = domainsData.map((d: any) => ({
             id: d.id,
             domain: d.domain_name,
-            status: d.status as 'active' | 'pending' | 'expired',
+                        status: (d.status || 'pending') as 'active' | 'pending' | 'expired'
             registrar: 'DomainPro',
             expiryDate: d.expires_at,
             autoRenew: true,
@@ -1313,8 +1313,42 @@ export default function DashboardPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
   
-  const stats = getStatsForTimeline(selectedTimeline)
+  // Calculate dynamic stats from actual domain data
+  const totalDomains = domains.length
+  const sslCertificates = domains.filter(d => d.ssl).length
+  const totalVisits = domains.reduce((sum, d) => sum + (d.visitsNum || 0), 0)
+  const uptime = "99.9%" // This would come from monitoring service
   
+  const stats = [
+    { 
+      label: "Total Domains", 
+      icon: Globe, 
+      trend: "up" as const,
+      value: totalDomains.toString(),
+      change: `${domains.filter(d => d.status === 'active').length} active`
+    },
+    { 
+      label: "SSL Certificates", 
+      icon: Shield, 
+      trend: "neutral" as const,
+      value: `${sslCertificates}/${totalDomains}`,
+      change: sslExpiringCount > 0 ? `${sslExpiringCount} expiring soon` : "All up to date"
+    },
+    { 
+      label: "Total Visits", 
+      icon: TrendingUp, 
+      trend: "up" as const,
+      value: totalVisits > 1000 ? `${(totalVisits/1000).toFixed(1)}K` : totalVisits.toString(),
+      change: "Lifetime total"
+    },
+    { 
+      label: "Uptime", 
+      icon: Activity, 
+      trend: "up" as const,
+      value: uptime,
+      change: "Last 30 days"
+    },
+  ]  
   const handleSort = (key: string) => {
     let direction: "asc" | "desc" = "asc"
     if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
