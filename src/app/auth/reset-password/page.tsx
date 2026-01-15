@@ -1671,4 +1671,4 @@ function ResetPasswordContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [theme, toggleTheme, mounted] = useTheme()
-  function ResetPasswordContent
+  
