@@ -825,7 +825,7 @@ export default function DashboardPage() {
           const transformedDomains = domainsData.map((d: any) => ({
             id: d.id,
             name: d.domain_name,
-                        status: (d.status || 'pending') as 'active' | 'pending' | 'expired',
+                        status: (d.status || 'pending'),
             ssl: false,
             expiry: d.expires_at,
             expiryDate: d.expires_at,
