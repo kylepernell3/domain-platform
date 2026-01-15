@@ -393,11 +393,11 @@ const keyboardShortcuts = [
 const chartData = {
   domainGrowth: [],
   sslStatus: [],
-  trafficTrends: []
+  trafficTrends: [],
   uptimeHistory:[]
 }
 
-const activities = []
+const activities = ,[]
 
 const insights =[]
 ]
@@ -1967,6 +1967,7 @@ setUser({ name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 
                 <div className="relative" ref={userDropdownRef}>
                   <button className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${userDropdownOpen ? `${textPrimary} ${theme === 'dark' ? 'bg-neutral-800' : 'bg-gray-200'}` : `${textSecondary} ${bgHover}`}`} onClick={() => setUserDropdownOpen(!userDropdownOpen)}>
                     <User className="h-5 w-5" />
+                                      <span className="hidden lg:block text-sm ${textPrimary}">{user?.name}</span>
                     <ChevronDown className={`h-4 w-4 transition-transform ${userDropdownOpen ? "rotate-180" : ""}`} />
                   </button>
                   
