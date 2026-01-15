@@ -3,6 +3,7 @@ import Link from "next/link"
 import type { Database } from "@/lib/supabase/types"
 
 import { useState, useEffect, useRef, useCallback } from "react"
+// Build fix: ensure no duplicate variable declarations
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
