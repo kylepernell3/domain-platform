@@ -391,7 +391,6 @@ const keyboardShortcuts = [
 ]
 
 const chartData = {
-  domainGrowth: // TODO: Fetch real analytics data from Supabase
   domainGrowth: [],
   sslStatus: [],
   trafficTrends: []
