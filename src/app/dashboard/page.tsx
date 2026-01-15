@@ -2017,7 +2017,7 @@ setUser({ name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'U
                     <div className={`absolute right-0 top-full mt-2 w-64 ${bgDropdown} border rounded-xl overflow-hidden z-50`} style={{ animation: "scaleIn 0.2s ease-out" }}>
                       <div className={`p-3 border-b ${borderColor}`}>
                         <p className={`text-sm font-medium ${textPrimary}`}>{user.name || 'User'}</p>
-                        <p className={`text-xs ${textSecondary}`}>{user.email}
+                        <p className={`text-xs ${textSecondary}`}>{user.email}</p>
                       </div>
                       <div className="py-2">
                         <button className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm ${textSecondary} ${bgHover}`}>
