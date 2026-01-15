@@ -397,8 +397,7 @@ const chartData = {
   uptimeHistory:[]
 }
 
-const activities = ,[]
-
+const activities = []
 const insights =[]
 ]
 
