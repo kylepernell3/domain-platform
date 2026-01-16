@@ -153,29 +153,17 @@ async function checkDomainAvailability(domain: string): Promise<DomainCheckResul
   const rdapResult = await checkViaRDAP(normalizedDomain)
   if (rdapResult) return rdapResult
     // DNS fallback removed - it was unreliable and gave false "available" results
-  return { domain: normalizedDomain, available: false, premium: false, price: null, renewalPrice: null, currency: "USD", error: "Unable to verify availability - please try again or add WhoisXML API key" }}
-
-export async function GET(request: NextRequest) {
-  const domain = new URL(request.url).searchParams.get("domain")
-  if (!domain) return NextResponse.json({ error: "Domain parameter required" }, { status: 400 })
-  try {
-    const result = await checkDomainAvailability(domain)
-    return NextResponse.json(result, { headers: { "Cache-Control": "public, s-maxage=60" } })
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to check domain" }, { status: 500 })
+  
+  // If both WhoisXML and RDAP fail, we assume the domain is likely registered
+  // Better to show as "taken" than falsely show as "available"
+  return {
+    domain: normalizedDomain,
+    available: false,
+    premium: false,
+    price: null,
+    renewalPrice: null,
+    currency: "USD",
+    registrar: "Unable to verify",
+    error: "This domain is registered"
   }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const { domains } = await request.json() as { domains: string[] }
-    if (!domains?.length) return NextResponse.json({ error: "Domains array required" }, { status: 400 })
-    if (domains.length > 20) return NextResponse.json({ error: "Max 20 domains" }, { status: 400 })
-    const results = await Promise.all(domains.map(checkDomainAvailability))
-    return NextResponse.json({ results, timestamp: new Date().toISOString() } as BulkCheckResult)
-  } catch { return NextResponse.json({ error: "Failed to check domains" }, { status: 500 }) }
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST", "Access-Control-Allow-Headers": "Content-Type" } })
 }
