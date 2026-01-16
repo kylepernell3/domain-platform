@@ -87,6 +87,15 @@ const RDAP_SERVERS: Record<string, string> = {
   "dev": "https://rdap.nic.google/domain/",
   "me": "https://rdap.nic.me/domain/",
   "info": "https://rdap.afilias.net/rdap/info/domain/",
+    "ai": "https://rdap.nic.ai/domain/",
+    "tech": "https://rdap.nic.tech/domain/",
+    "online": "https://rdap.nic.online/domain/",
+    "store": "https://rdap.nic.store/domain/",
+  "shop": "https://rdap.nic.shop/domain/",
+  "site": "https://rdap.nic.site/domain/",
+  "xyz": "https://rdap.nic.xyz/domain/",
+  "cloud": "https://rdap.nic.cloud/domain/",
+  "digital": "https://rdap.nic.digital/domain/",
 }
 
 function extractTLD(domain: string): string {
@@ -156,13 +165,12 @@ async function checkDomainAvailability(domain: string): Promise<DomainCheckResul
   const rdapResult = await checkViaRDAP(normalizedDomain)
   if (rdapResult) return rdapResult
     // DNS fallback removed - it was unreliable and gave false "available" results
+      // If both WhoisXML and RDAP fail, assume domain is AVAILABLE with disclaimer
+    // This is more user-friendly than showing false "taken" status
   
-  // If both WhoisXML and RDAP fail, we assume the domain is likely registered
-  // Better to show as "taken" than falsely show as "available"
   return {
     domain: normalizedDomain,
-    available: false,
-    premium: false,
+    available: true,    premium: false,
     price: null,
     renewalPrice: null,
     currency: "USD",
