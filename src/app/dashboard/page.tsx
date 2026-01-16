@@ -730,6 +730,9 @@ export default function DashboardPage() {
 
   const [userProfile, setUserProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
+    const [activities, setActivities] = useState([])
+    const [insights, setInsights] = useState([])
+    const [chartData, setChartData] = useState({ domainGrowth: [], sslStatus: [], trafficTrends: [], uptimeHistory: [] })
 
   // Fetch current user and profile
   useEffect(() => {
@@ -811,6 +814,56 @@ export default function DashboardPage() {
     }
     loadDomains()
   }, [userProfile])
+
+    // Fetch activity log, insights, and analytics data
+    useEffect(() => {
+          async function loadDashboardData() {
+                  if (!userProfile) return
+
+                  try {
+                            const supabase = createClient()
+
+                            // Fetch recent activity log
+                            const { data: activityData } = await supabase
+                              .from('activity_log')
+                              .select('*')
+                              .eq('user_id', userProfile.id)
+                              .order('created_at', { ascending: false })
+                              .limit(10)
+
+                            // Fetch insights
+                            const { data: insightsData } = await supabase
+                              .from('insights')
+                              .select('*')
+                              .eq('user_id', userProfile.id)
+                              .eq('is_active', true)
+                              .order('created_at', { ascending: false })
+
+                            // Fetch domain analytics for charts
+                            const { data: analyticsData } = await supabase
+                              .from('domain_analytics')
+                              .select('*')
+                              .in('domain_id', domains.map(d => d.id))
+                              .order('date', { ascending: true })
+
+                            // Update state with fetched data
+                            if (activityData) setActivities(activityData)
+                            if (insightsData) setInsights(insightsData)
+                            if (analyticsData) {
+                                        setChartData({
+                                                      trafficTrends: analyticsData.map(d => ({ date: d.date, visits: d.visits, pageviews: d.pageviews })),
+                                                      domainGrowth: [],
+                                                      sslStatus: [],
+                                                      uptimeHistory: []
+                                                                  })
+                                      }
+                          } catch (error) {
+                            console.error('Error loading dashboard data:', error)
+                          }
+                }
+
+          loadDashboardData()
+        }, [userProfile, domains])
 
 
   const [searchMode, setSearchMode] = useState<"domains" | "settings">("domains")
@@ -995,6 +1048,7 @@ setUser({ name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 
   
   // Load pinned domains from localStorage on mount
   useEffect(() => {
+    
     const savedPinned = localStorage.getItem('domainpro-pinned')
     if (savedPinned) {
       try {
