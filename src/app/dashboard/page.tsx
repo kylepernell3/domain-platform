@@ -935,6 +935,8 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user?.email) {
 setUser({ name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User', email: user?.email })    }
+            }
+        }
     getUser()
   }, [supabase.auth])
   // Load theme and widget visibility from localStorage
