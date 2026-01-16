@@ -934,8 +934,7 @@ export default function DashboardPage() {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user?.email) {
-setUser({ name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User', email: user?.email })    }
-            }
+setUser({ name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User', email: user?.email })       
         }
     getUser()
   }, [supabase.auth])
