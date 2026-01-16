@@ -16,6 +16,7 @@ import {
   MessageCircle, BarChart3, Network, Zap, Twitter, Instagram, Facebook,
   Eye, ArrowRight, Info, Tag, Clock, Award, CheckCircle, Database,
 } from "lucide-react"
+import { Toaster, toast } from "sonner"
 
 // ============================================================================
 // TYPES
@@ -31,6 +32,25 @@ interface DomainResult {
   available: boolean
   premium: boolean
   price: number | null
+
+  interface WatchlistItem {
+  domain: string
+  addedAt: string
+  lastChecked?: string
+  lastStatus?: AvailabilityStatus
+}
+
+interface SearchHistoryItem {
+  query: string
+  timestamp: string
+  resultCount: number
+}
+
+interface BulkCheckItem {
+  domain: string
+  status: 'pending' | 'checking' | 'complete' | 'error'
+  result?: DomainResult
+}
   renewalPrice: number | null
   status: AvailabilityStatus
   error?: string
@@ -72,6 +92,35 @@ interface FooterSection {
 
 const POPULAR_TLDS = [
   { tld: "com", name: ".com", price: 12.99, discount: 40 },
+
+  // ============================================================================
+// CUSTOM HOOKS
+// ============================================================================
+function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    if (typeof window === 'undefined') return initialValue
+    try {
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialValue
+    } catch (error) {
+      return initialValue
+    }
+  })
+
+  const setValue = (value: T) => {
+    try {
+      setStoredValue(value)
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(key, JSON.stringify(value))
+      }
+    } catch (error) {
+      console.error('Error saving to localStorage:', error)
+    }
+  }
+
+  return [storedValue, setValue]
+}
+
   { tld: "net", name: ".net", price: 15.99 },
   { tld: "org", name: ".org", price: 13.99 },
   { tld: "io", name: ".io", price: 54.99, popular: true },
@@ -287,8 +336,28 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
       <div className="flex items-center gap-2">
         <div className="flex-1 relative">
           <Search className={"absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 " + (theme === "dark" ? "text-gray-500" : "text-gray-400")} />
-          <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown} placeholder="Search for your perfect domain..." className={"w-full pl-12 pr-4 py-4 text-lg rounded-xl border-0 " + (theme === "dark" ? "bg-gray-900 text-white placeholder-gray-500" : "bg-gray-50 text-gray-900 placeholder-gray-400") + " focus:outline-none focus:ring-2 focus:ring-red-500"} />
+          <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown} placeholder onFocus={() => setShowSuggestions(true)}="Search for your perfect domain..." className={"w-full pl-12 pr-4 py-4 text-lg rounded-xl border-0 " + (theme === "dark" ? "bg-gray-900 text-white placeholder-gray-500" : "bg-gray-50 text-gray-900 placeholder-gray-400") + " focus:outline-none focus:ring-2 focus:ring-red-500"} />
         </div>
+                  {/* Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-64 overflow-y-auto z-50">
+              {suggestions.map((suggestion, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setQuery(suggestion)
+                    setShowSuggestions(false)
+                  }}
+                  className={`w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${idx === selectedSuggestionIndex ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    <span className="font-medium">{suggestion}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         <button onClick={onSearch} disabled={isSearching || !query.trim()} className="px-8 py-4 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 text-white font-bold text-lg rounded-xl flex items-center gap-2 transition-all">
           {isSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}<span className="hidden sm:inline">Search</span>
         </button>
@@ -299,8 +368,91 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
         ))}
       </div>
     </div>
+
+            {/* Action Buttons Row */}
+        <div className="flex gap-3 items-center">
+          <button
+            onClick={() => setShowBulkCheck(!showBulkCheck)}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all"
+          >
+            <Layers className="h-4 w-4" />
+            Bulk Check
+          </button>
+          <button
+            onClick={checkWatchlist}
+            disabled={watchlist.length === 0}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium flex items-center gap-2 transition-all"
+          >
+            <Heart className="h-4 w-4" />
+            Check Watchlist ({watchlist.length})
+          </button>
+          {searchHistory.length > 0 && (
+            <button
+              onClick={clearHistory}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Clear History
+            </button>
+          )}
+          <div className="ml-auto text-sm text-gray-600 dark:text-gray-400">
+            <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Ctrl+K</kbd> or <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">/</kbd> to search
+          </div>
+        </div>
   )
 }
+
+        {/* Bulk Check Modal */}
+        {showBulkCheck && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <Layers className="h-5 w-5 text-purple-600" />
+                Bulk Domain Check
+              </h3>
+              <button onClick={() => setShowBulkCheck(false)} className="text-gray-500 hover:text-gray-700">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <textarea
+              className="w-full h-32 p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-900 mb-3"
+              placeholder="Enter domains, one per line:\nexample.com\nanother-domain.net\ncool-startup.io"
+              onChange={(e) => {
+                const domains = e.target.value.split('\n').filter(d => d.trim())
+                setBulkCheckList(domains.map(d => ({ domain: d.trim(), status: 'pending' })))
+              }}
+            />
+            <button
+              onClick={() => {
+                const domains = bulkCheckList.map(item => item.domain)
+                if (domains.length > 0) handleBulkCheck(domains)
+              }}
+              disabled={bulkCheckList.length === 0}
+              className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg font-bold flex items-center justify-center gap-2"
+            >
+              <Zap className="h-4 w-4" />
+              Check {bulkCheckList.length} Domain{bulkCheckList.length !== 1 ? 's' : ''}
+            </button>
+            
+            {/* Bulk Check Results */}
+            {bulkCheckList.length > 0 && bulkCheckList.some(item => item.status !== 'pending') && (
+              <div className="mt-4 space-y-2 max-h-96 overflow-y-auto">
+                {bulkCheckList.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <span className="font-medium">{item.domain}</span>
+                    {item.status === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+                    {item.status === 'complete' && item.result && (
+                      <span className={item.result.available ? 'text-green-600 font-bold' : 'text-gray-600'}>
+                        {item.result.available ? '✓ Available' : '✗ Taken'}
+                      </span>
+                    )}
+                    {item.status === 'error' && <span className="text-red-600">Error</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
 function TrustBadges({ theme }: { theme: Theme }) {
   return (
@@ -453,14 +605,191 @@ function DomainSearchContent() {
   const [filterOpen, setFilterOpen] = useState(false)
   const [cart, setCart] = useLocalStorage<CartItem[]>("domainpro-cart", [])
   const [watchlist, setWatchlist] = useLocalStorage<string[]>("domainpro-watchlist", [])
+    const [searchHistory, setSearchHistory] = useLocalStorage<SearchHistoryItem[]>("domainpro-search-history", [])
+  const [bulkCheckList, setBulkCheckList] = useState<BulkCheckItem[]>([])
+  const [showBulkCheck, setShowBulkCheck] = useState(false)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
 
   const checkDomains = useCallback(async (domains: string[]) => {
     setResults(domains.map(d => ({ domain: d, available: false, premium: false, price: null, renewalPrice: null, status: "checking" as AvailabilityStatus })))
     try {
       const response = await fetch("/api/domain-check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ domains }) })
       if (!response.ok) throw new Error("API error")
+
+        // ============================================================================
+  // DOMAIN SUGGESTIONS
+  // ============================================================================
+  const generateSuggestions = useCallback((searchTerm: string) => {
+    if (!searchTerm || searchTerm.length < 2) {
+      setSuggestions([])
+      return
+    }
+    
+    const term = searchTerm.toLowerCase().replace(/\s+/g, '')
+    const suggestedDomains: string[] = []
+    
+    // Add exact term with popular TLDs
+    POPULAR_TLDS.slice(0, 5).forEach(tld => {
+      suggestedDomains.push(`${term}${tld.tld}`)
+    })
+    
+    // Add variations
+    const variations = [
+      `get${term}`,
+      `${term}app`,
+      `${term}hq`,
+      `${term}pro`,
+      `${term}online`,
+      `my${term}`,
+      `the${term}`,
+    ]
+    
+    variations.slice(0, 3).forEach(v => {
+      suggestedDomains.push(`${v}.com`)
+    })
+    
+    setSuggestions(suggestedDomains.slice(0, 8))
+  }, [])
+
+  // Debounced suggestion generator
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (query && !isSearching) {
+        generateSuggestions(query)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [query, isSearching, generateSuggestions])
+
+        // ============================================================================
+  // BULK DOMAIN CHECKING
+  // ============================================================================
+  const handleBulkCheck = useCallback(async (domains: string[]) => {
+    setShowBulkCheck(true)
+    const items: BulkCheckItem[] = domains.map(d => ({ domain: d, status: 'pending' }))
+    setBulkCheckList(items)
+    
+    toast.info(`Checking ${domains.length} domains...`)
+    
+    for (let i = 0; i < domains.length; i++) {
+      setBulkCheckList(prev => prev.map((item, idx) => 
+        idx === i ? { ...item, status: 'checking' } : item
+      ))
+      
+      try {
+        const response = await fetch(`/api/domain-check?domain=${encodeURIComponent(domains[i])}`)
+        const data = await response.json()
+        
+        setBulkCheckList(prev => prev.map((item, idx) => 
+          idx === i ? { ...item, status: 'complete', result: data } : item
+        ))
+      } catch (error) {
+        setBulkCheckList(prev => prev.map((item, idx) => 
+          idx === i ? { ...item, status: 'error' } : item
+        ))
+      }
+    }
+    
+    toast.success('Bulk check complete!')
+  }, [])
+
+        // ============================================================================
+  // WATCHLIST MANAGEMENT
+  // ============================================================================
+  const addToWatchlist = useCallback((domain: string) => {
+    const existing = watchlist.find(item => item === domain)
+    if (existing) {
+      toast.error('Domain already in watchlist')
+      return
+    }
+    setWatchlist([...watchlist, domain])
+    toast.success(`Added ${domain} to watchlist`)
+  }, [watchlist, setWatchlist])
+
+  const removeFromWatchlist = useCallback((domain: string) => {
+    setWatchlist(watchlist.filter(item => item !== domain))
+    toast.success(`Removed ${domain} from watchlist`)
+  }, [watchlist, setWatchlist])
+
+  const checkWatchlist = useCallback(async () => {
+    if (watchlist.length === 0) {
+      toast.error('Watchlist is empty')
+      return
+    }
+    toast.info('Checking watchlist domains...')
+    await handleBulkCheck(watchlist)
+  }, [watchlist, handleBulkCheck])
+
+        // ============================================================================
+  // SEARCH HISTORY
+  // ============================================================================
+  const addToHistory = useCallback((searchQuery: string, count: number) => {
+    const newItem: SearchHistoryItem = {
+      query: searchQuery,
+      timestamp: new Date().toISOString(),
+      resultCount: count
+    }
+    setSearchHistory([newItem, ...searchHistory.filter(h => h.query !== searchQuery)].slice(0, 10))
+  }, [searchHistory, setSearchHistory])
+
+  const clearHistory = useCallback(() => {
+    setSearchHistory([])
+    toast.success('Search history cleared')
+  }, [setSearchHistory])
+
+  // ============================================================================
+  // KEYBOARD SHORTCUTS
+  // ============================================================================
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + K: Focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        document.querySelector<HTMLInputElement>('input[type="search"]')?.focus()
+        toast('Press / to search, Esc to close', { duration: 2000 })
+      }
+      
+      // Forward slash: Focus search
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
+        e.preventDefault()
+        document.querySelector<HTMLInputElement>('input[type="search"]')?.focus()
+      }
+      
+      // Escape: Clear and blur search
+      if (e.key === 'Escape') {
+        setQuery('')
+        setShowSuggestions(false)
+        document.querySelector<HTMLInputElement>('input[type="search"]')?.blur()
+      }
+      
+      // Arrow keys for suggestion navigation
+      if (showSuggestions && suggestions.length > 0) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault()
+          setSelectedSuggestionIndex(prev => 
+            prev < suggestions.length - 1 ? prev + 1 : 0
+          )
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault()
+          setSelectedSuggestionIndex(prev => 
+            prev > 0 ? prev - 1 : suggestions.length - 1
+          )
+        } else if (e.key === 'Enter' && selectedSuggestionIndex >= 0) {
+          e.preventDefault()
+          setQuery(suggestions[selectedSuggestionIndex])
+          setShowSuggestions(false)
+        }
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [showSuggestions, suggestions, selectedSuggestionIndex, setQuery])
       const data = await response.json()
-      setResults(data.results.map((r: any) => ({ domain: r.domain, available: r.available, premium: r.premium, price: r.price, renewalPrice: r.renewalPrice, status: r.error ? "error" : r.available ? (r.premium ? "premium" : "available") : "taken", error: r.error, expirationDate: r.expirationDate })))
+      setResults(data.results.map((r: any) => ({ domain: r.domain, available: r.available, premium: r.premium, price: r.p
+              addToHistory(domains[0], data.results.length)rice, renewalPrice: r.renewalPrice, status: r.error ? "error" : r.available ? (r.premium ? "premium" : "available") : "taken", error: r.error, expirationDate: r.expirationDate })))
     } catch (error) {
       console.error("Domain check failed:", error)
       for (let i = 0; i < domains.length; i++) {
@@ -557,6 +886,7 @@ function DomainSearchContent() {
       {!hasSearched && <section className="py-12 px-4"><div className="max-w-7xl mx-auto"><TLDPromoSection theme={theme} /></div></section>}
       <Footer theme={theme} />
     </div>
+          <Toaster position="top-right" richColors closeButton />
   )
 }
 
