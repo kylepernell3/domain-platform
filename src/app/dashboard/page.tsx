@@ -1,4 +1,5 @@
-"use client"
+402
+  "use client"
 import Link from "next/link"
 import type { Database } from "@/lib/supabase/types"
 
@@ -399,10 +400,8 @@ const chartData = {
 
 const activities = []
 const insights =[]
-]
 
 const initialNotifications = []
-]
 
 const settingsOptions = [
   { label: "Account Settings", icon: User, path: "/settings/account" },
