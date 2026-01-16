@@ -479,7 +479,7 @@ function DomainSearchContent() {
     setHasSearched(true)
     const normalized = normalizeDomain(query)
     const domains = normalized.includes(".") ? [normalized] : generateDomainVariations(normalized)
-    router.push("/domains?q=" + encodeURIComponent(query), { scroll: false })
+    router.push("/search?q=" + encodeURIComponent(query), { scroll: false })
     checkDomains(domains).finally(() => setIsSearching(false))
   }, [query, router, checkDomains])
 
