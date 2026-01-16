@@ -770,14 +770,14 @@ export default function DashboardPage() {
   // Fetch domains for current user
   useEffect(() => {
     async function loadDomains() {
-      if (!userProfile) return
+      // Get user from session directly     const { data: { user } } = await supabase.auth.getUser()     if (!user) {       router.push('/login')       return     }
       
       try {
         const supabase = createClient()
         const { data: domainsData, error } = await supabase
           .from('domains')
           .select('*')
-          .eq('user_id', userProfile.id)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
 
         if (error) {
@@ -800,7 +800,7 @@ export default function DashboardPage() {
       }
     }
     loadDomains()
-  }, [userProfile])
+  }, [])
 
   const [userProfile, setUserProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
@@ -840,14 +840,18 @@ export default function DashboardPage() {
   // Fetch domains for current user
   useEffect(() => {
     async function loadDomains() {
-      if (!userProfile) return
-      
+    // Get user from session directly
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/login')
+      return
+    }      
       try {
         const supabase = createClient()
         const { data: domainsData, error } = await supabase
           .from('domains')
           .select('*')
-          .eq('user_id', userProfile.id)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
 
         if (error) {
