@@ -2,6 +2,9 @@
 import Link from "next/link"
 import type { Database } from "@/lib/supabase/types"
 
+import { createClient } from "@/lib/supabase/client"
+import type { Database } from "@/lib/supabase/types"
+import { useRouter } from "next/navigation"
 import { useState, useEffect, useRef, useCallback } from "react"
 // Build fix: ensure no duplicate variable declarations
 import { useRouter } from "next/navigation"
@@ -726,6 +729,7 @@ export default function DashboardPage() {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null)
   const [domains, setDomains] = useState([])
 
+  const router = useRouter()
   const [userProfile, setUserProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
     const [activities, setActivities] = useState([])
@@ -767,14 +771,88 @@ export default function DashboardPage() {
   // Fetch domains for current user
   useEffect(() => {
     async function loadDomains() {
-      if (!userProfile) return
+      // Get user from session directly     const { data: { user } } = await supabase.auth.getUser()     if (!user) {       router.push('/login')       return     }
       
       try {
         const supabase = createClient()
         const { data: domainsData, error } = await supabase
           .from('domains')
           .select('*')
-          .eq('user_id', userProfile.id)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          console.error('Error fetching domains:', error)
+        } else if (domainsData) {
+          const transformedDomains = domainsData.map(d => ({
+            id: d.id,
+            domain: d.domain_name,
+            status: d.status as 'active' | 'pending' | 'expired',
+            registrar: 'DomainPro',
+            expiryDate: d.expires_at,
+            autoRenew: true,
+            privacy: true,
+            nameservers: []
+          }))
+          setDomains(transformedDomains)
+        }
+      } catch (error) {
+        console.error('Error loading domains:', error)
+      }
+    }
+    loadDomains()
+  }, [])
+
+  const [userProfile, setUserProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null)
+  const [isLoadingUser, setIsLoadingUser] = useState(true)
+
+  // Fetch current user and profile
+  useEffect(() => {
+    async function loadUserProfile() {
+      try {
+        const supabase = createClient()
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError || !session) {
+          router.push('/login')
+          return
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError)
+        } else {
+          setUserProfile(profile)
+        }
+      } catch (error) {
+        console.error('Error loading user:', error)
+      } finally {
+        setIsLoadingUser(false)
+      }
+    }
+    loadUserProfile()
+  }, [router])
+
+  // Fetch domains for current user
+  useEffect(() => {
+    async function loadDomains() {
+    // Get user from session directly
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/login')
+      return
+    }      
+      try {
+        const supabase = createClient()
+        const { data: domainsData, error } = await supabase
+          .from('domains')
+          .select('*')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
 
         if (error) {
