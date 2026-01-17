@@ -368,7 +368,7 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
       </div>
       <div className="flex flex-wrap gap-2 mt-3 px-2">
         {POPULAR_TLDS.slice(0, 8).map(t => (
-            <button key={t.tld} onClick={() => { if (query) setQuery(extractName(query) + "." + t.tld) }} className={`px-3 py-1 text-sm rounded-full transition-all ${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-gray-300" : "bg-gray-100 hover:bg-gray-200 text-gray-600"}`}>{t.name} <span className="text-green-500 ml-1">{formatPrice(t.price)}</span></button>:371
+            <button key={t.tld} onClick={() => { if (query) setQuery(extractName(query) + "." + t.tld) }} className={`px-3 py-1 text-sm rounded-full transition-all ${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-gray-300" : "bg-gray-100 hover:bg-gray-200 text-gray-600"}`}>{t.name} <span className="text-green-500 ml-1">{formatPrice(t.price)}</span></button>
         ))}
       </div>
 
