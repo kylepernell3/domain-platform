@@ -397,12 +397,9 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
             <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Ctrl+K</kbd> or <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">/</kbd> to search
           </div>
         </div>
-  )
-}
 
         {/* Bulk Check Modal */}
         {showBulkCheck && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold flex items-center gap-2">
                 <Layers className="h-5 w-5 text-purple-600" />
@@ -450,11 +447,11 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
               </div>
             )}
           </div>
-        )}
-
+  )        
+}
 function TrustBadges({ theme }: { theme: Theme }) {
   return (
-    <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-8">
+   <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-8">
       {TRUST_BADGES.map((badge, i) => (
         <div key={i} className="flex items-center gap-3">
           <div className={"p-2 rounded-lg " + (theme === "dark" ? "bg-green-500/20 text-green-400" : "bg-green-100 text-green-600")}>{badge.icon}</div>
