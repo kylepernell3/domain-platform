@@ -331,11 +331,13 @@ function Footer({ theme }: { theme: Theme }) {
 
 function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: Theme; query: string; setQuery: (q: string) => void; onSearch: () => void; isSearching: boolean }) {
   return (
-      const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault()
       onSearch()
     }
+  }
+
   }
     <div className={"p-2 rounded-2xl " + (theme === "dark" ? "bg-gray-800/80 border border-gray-700" : "bg-white border border-gray-200 shadow-lg")}>
       <div className="flex items-center gap-2">
