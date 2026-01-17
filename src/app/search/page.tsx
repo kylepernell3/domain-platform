@@ -400,6 +400,7 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
 
         {/* Bulk Check Modal */}
         {showBulkCheck && (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold flex items-center gap-2">
                 <Layers className="h-5 w-5 text-purple-600" />
