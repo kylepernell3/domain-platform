@@ -330,12 +330,10 @@ function Footer({ theme }: { theme: Theme }) {
 // ============================================================================
 
 function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: Theme; query: string; setQuery: (q: string) => void; onSearch: () => void; isSearching: boolean }) {
-  const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === "Enter") onSearch() }
   return (
     <div className={"p-2 rounded-2xl " + (theme === "dark" ? "bg-gray-800/80 border border-gray-700" : "bg-white border border-gray-200 shadow-lg")}>
       <div className="flex items-center gap-2">
-        <div className="flex-1 relative">
-          <Search className={"absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 " + (theme === "dark" ? "text-gray-500" : "text-gray-400")} />
+  const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === "Enter") { e.preventDefault(); onSearch() } }          <Search className={"absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 " + (theme === "dark" ? "text-gray-500" : "text-gray-400")} />
             <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown} onFocus={() => setShowSuggestions(true)} placeholder="Search for your perfect domain..." className={"w-full pl-12 pr-4 py-4 text-lg rounded-xl border-0 " + (theme === "dark" ? "bg-gray-900 text-white placeholder-gray-500" : "bg-gray-50 text-gray-900 placeholder-gray-400") + " focus:outline-none focus:ring-2 focus:ring-red-500"} />        </div>
                   {/* Suggestions Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
