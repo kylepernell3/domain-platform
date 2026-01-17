@@ -32,6 +32,7 @@ interface DomainResult {
   available: boolean
   premium: boolean
   price: number | null
+  }
 
   interface WatchlistItem {
   domain: string
