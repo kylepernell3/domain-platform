@@ -362,8 +362,12 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
               ))}
             </div>
           )
-            </div>
-            onClick={() => setShowBulkCheck(!showBulkCheck)}
+      </div>
+      <button onClick={onSearch} disabled={isSearching || !query.trim()} className="px-8 py-4 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 text-white font-bold text-lg rounded-xl transition-all">
+        {isSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}<span className="hidden sm:inline">Search</span>
+      </button>
+    </div>
+  )
             className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all"
           >
             <Layers className="h-4 w-4" />
