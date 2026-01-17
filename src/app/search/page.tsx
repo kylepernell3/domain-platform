@@ -51,11 +51,10 @@ interface BulkCheckItem {
   domain: string
   status: 'pending' | 'checking' | 'complete' | 'error'
   result?: DomainResult
-}
   renewalPrice: number | null
   status: AvailabilityStatus
-  error?: string
-  expirationDate?: string
+  error?: string 
+expirationDate?: string
 }
 
 interface FilterState {
