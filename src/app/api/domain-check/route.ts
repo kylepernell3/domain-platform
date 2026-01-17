@@ -146,12 +146,11 @@ async function checkViaRDAP(domain: string): Promise<DomainCheckResult | null> {
     const pricing = getPrice(tld, premium)
     if (response.status === 404) return { domain, available: true, premium, price: pricing.register, renewalPrice: pricing.renew, currency: "USD" }
     if (!response.ok) return null
-        // If we got a 200 response with data, the domain is registered
-    if (response.status === 200 && data) return { domain, available: false, premium: false, price: null, renewalPrice: null, currency: "USD", expirationDate, createdDate }
-        // For other status codes or errors, assume available (better UX than false positive "taken")
-    const data: RDAPResponse = await response.json()
-    let expirationDate: string | undefined, createdDate: string | undefined
-    data.events?.forEach(e => { if (e.eventAction === "expiration") expirationDate = e.eventDate; if (e.eventAction === "registration") createdDate = e.eventDate })
+
+        // Parse JSON response first
+        const data: RDAPResponse = await response.json()
+        let expirationDate: string | undefined, createdDate: string | undefined
+        data.events?.forEach(e => { if (e.eventAction === "expiration") expirationDate = e.eventDate; if (e.eventAction === "registration") createdDate = e.eventDate })
     return { domain, available: false, premium: false, price: null, renewalPrice: null, currency: "USD", expirationDate, createdDate }
   } catch { return null }
 }
