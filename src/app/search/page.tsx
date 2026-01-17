@@ -336,8 +336,7 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
       <div className="flex items-center gap-2">
         <div className="flex-1 relative">
           <Search className={"absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 " + (theme === "dark" ? "text-gray-500" : "text-gray-400")} />
-          <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown} placeholder onFocus={() => setShowSuggestions(true)}="Search for your perfect domain..." className={"w-full pl-12 pr-4 py-4 text-lg rounded-xl border-0 " + (theme === "dark" ? "bg-gray-900 text-white placeholder-gray-500" : "bg-gray-50 text-gray-900 placeholder-gray-400") + " focus:outline-none focus:ring-2 focus:ring-red-500"} />
-        </div>
+            <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown} onFocus={() => setShowSuggestions(true)} placeholder="Search for your perfect domain..." className={"w-full pl-12 pr-4 py-4 text-lg rounded-xl border-0 " + (theme === "dark" ? "bg-gray-900 text-white placeholder-gray-500" : "bg-gray-50 text-gray-900 placeholder-gray-400") + " focus:outline-none focus:ring-2 focus:ring-red-500"} />        </div>
                   {/* Suggestions Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-64 overflow-y-auto z-50">
