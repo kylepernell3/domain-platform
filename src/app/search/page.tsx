@@ -331,9 +331,14 @@ function Footer({ theme }: { theme: Theme }) {
 
 function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: Theme; query: string; setQuery: (q: string) => void; onSearch: () => void; isSearching: boolean }) {
   return (
+      const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      onSearch()
+    }
+  }
     <div className={"p-2 rounded-2xl " + (theme === "dark" ? "bg-gray-800/80 border border-gray-700" : "bg-white border border-gray-200 shadow-lg")}>
       <div className="flex items-center gap-2">
-  const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === "Enter") { e.preventDefault(); onSearch() } }          <Search className={"absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 " + (theme === "dark" ? "text-gray-500" : "text-gray-400")} />
             <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown} onFocus={() => setShowSuggestions(true)} placeholder="Search for your perfect domain..." className={"w-full pl-12 pr-4 py-4 text-lg rounded-xl border-0 " + (theme === "dark" ? "bg-gray-900 text-white placeholder-gray-500" : "bg-gray-50 text-gray-900 placeholder-gray-400") + " focus:outline-none focus:ring-2 focus:ring-red-500"} />        </div>
                   {/* Suggestions Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
@@ -606,7 +611,52 @@ function DomainSearchContent() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
 
-  const checkDomains = useCallback(async (domains: string[]) => {
+  // ============================================================================
+  // API ERROR HANDLING WITH RETRY LOGIC
+  // ============================================================================
+  const checkSingleDomainWithRetry = useCallback(async (domain: string, maxRetries = 3) => {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await fetch(`/api/domain-check?domain=${encodeURIComponent(domain)}`)
+        
+        // Handle rate limiting with exponential backoff
+        if (response.status === 429) {
+          const waitTime = Math.pow(2, attempt) * 1000
+          toast.warning(`Rate limited. Retrying in ${waitTime/1000}s...`)
+          await new Promise(r => setTimeout(r, waitTime))
+          continue
+        }
+        
+        if (!response.ok) {
+          if (attempt === maxRetries - 1) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+          }
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+          continue
+        }
+        
+        const data = await response.json()
+        return data
+      } catch (error) {
+        if (attempt === maxRetries - 1) {
+          console.error(`Failed to check ${domain}:`, error)
+          return {
+            domain,
+            available: false,
+            premium: false,
+            price: null,
+            renewalPrice: null,
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Network error'
+          }
+        }
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+      }
+    }
+  }, [])
+
+
+    const checkDomains = useCallback(async (domains: string[]) => {
     setResults(domains.map(d => ({ domain: d, available: false, premium: false, price: null, renewalPrice: null, status: "checking" as AvailabilityStatus })))
     try {
       const response = await fetch("/api/domain-check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ domains }) })
@@ -626,7 +676,7 @@ function DomainSearchContent() {
     
     // Add exact term with popular TLDs
     POPULAR_TLDS.slice(0, 5).forEach(tld => {
-      suggestedDomains.push(`${term}${tld.tld}`)
+      suggestedDomains.push(`${term}.${tld.tld}`)
     })
     
     // Add variations
@@ -673,8 +723,7 @@ function DomainSearchContent() {
       ))
       
       try {
-        const response = await fetch(`/api/domain-check?domain=${encodeURIComponent(domains[i])}`)
-        const data = await response.json()
+        const data = await checkSingleDomainWithRetry(domains[i])
         
         setBulkCheckList(prev => prev.map((item, idx) => 
           idx === i ? { ...item, status: 'complete', result: data } : item
@@ -687,8 +736,7 @@ function DomainSearchContent() {
     }
     
     toast.success('Bulk check complete!')
-  }, [])
-
+  }, [checkSingleDomainWithRetry])
         // ============================================================================
   // WATCHLIST MANAGEMENT
   // ============================================================================
@@ -794,7 +842,23 @@ function DomainSearchContent() {
         } catch { setResults(prev => prev.map((r, idx) => idx === i ? { ...r, status: "error", error: "Check failed" } : r)) }
       }
     }
-  }, [])
+      // Use retry logic for failed batch check
+      toast.error('Batch check failed. Retrying with individual checks...')
+      for (let i = 0; i < domains.length; i++) {
+        const data = await checkSingleDomainWithRetry(domains[i])
+        setResults(prev => prev.map((r, idx) => idx === i ? { 
+          domain: data.domain, 
+          available: data.available, 
+          premium: data.premium, 
+          price: data.price, 
+          renewalPrice: data.renewalPrice, 
+          status: data.error ? "error" : data.available ? (data.premium ? "premium" : "available") : "taken", 
+          error: data.error,
+          expirationDate: data.expirationDate 
+        } : r))
+      }
+    }
+  }, [checkSingleDomainWithRetry])
 
   const handleSearch = useCallback(() => {
     if (!query.trim()) return
