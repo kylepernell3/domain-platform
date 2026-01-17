@@ -330,12 +330,13 @@ function Footer({ theme }: { theme: Theme }) {
 // ============================================================================
 
 function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: Theme; query: string; setQuery: (q: string) => void; onSearch: () => void; isSearching: boolean }) {
-  return (
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault()
       onSearch()
     }
+
+  return (
   }
 
   }
