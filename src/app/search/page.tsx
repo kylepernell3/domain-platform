@@ -92,6 +92,22 @@ interface FooterSection {
 
 const POPULAR_TLDS = [
   { tld: "com", name: ".com", price: 12.99, discount: 40 },
+    { tld: "net", name: ".net", price: 15.99 },
+  { tld: "org", name: ".org", price: 13.99 },
+  { tld: "io", name: ".io", price: 54.99, popular: true },
+  { tld: "co", name: ".co", price: 30.99 },
+  { tld: "ai", name: ".ai", price: 89.99, hot: true },
+  { tld: "app", name: ".app", price: 18.99 },
+  { tld: "dev", name: ".dev", price: 16.99 },
+  { tld: "tech", name: ".tech", price: 12.99 },
+  { tld: "online", name: ".online", price: 3.99 },
+  { tld: "store", name: ".store", price: 3.99 },
+  { tld: "shop", name: ".shop", price: 3.99 },
+  { tld: "xyz", name: ".xyz", price: 9.99 },
+  { tld: "site", name: ".site", price: 3.99 },
+  { tld: "cloud", name: ".cloud", price: 11.99 },
+  { tld: "digital", name: ".digital", price: 9.99 },
+]
 
   // ============================================================================
 // CUSTOM HOOKS
@@ -121,22 +137,6 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => voi
   return [storedValue, setValue]
 }
 
-  { tld: "net", name: ".net", price: 15.99 },
-  { tld: "org", name: ".org", price: 13.99 },
-  { tld: "io", name: ".io", price: 54.99, popular: true },
-  { tld: "co", name: ".co", price: 30.99 },
-  { tld: "ai", name: ".ai", price: 89.99, hot: true },
-  { tld: "app", name: ".app", price: 18.99 },
-  { tld: "dev", name: ".dev", price: 16.99 },
-  { tld: "tech", name: ".tech", price: 12.99 },
-  { tld: "online", name: ".online", price: 3.99 },
-  { tld: "store", name: ".store", price: 3.99 },
-  { tld: "shop", name: ".shop", price: 3.99 },
-  { tld: "xyz", name: ".xyz", price: 9.99 },
-  { tld: "site", name: ".site", price: 3.99 },
-  { tld: "cloud", name: ".cloud", price: 11.99 },
-  { tld: "digital", name: ".digital", price: 9.99 },
-]
 
 const DEFAULT_FILTERS: FilterState = {
   tlds: [], maxPrice: 100, minLength: 1, maxLength: 63,
