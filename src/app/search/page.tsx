@@ -367,11 +367,6 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
         {isSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}<span className="hidden sm:inline">Search</span>
       </button>
     </div>
-  )
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all"
-          >
-            <Layers className="h-4 w-4" />
-            Bulk Check
           </button>
           <button
             onClick={checkWatchlist}
