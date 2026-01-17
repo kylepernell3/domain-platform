@@ -366,7 +366,6 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
           <button key={t.tld} onClick={() => { if (query) setQuery(extractName(query) + "." + t.tld) }} className={"px-3 py-1 text-sm rounded-full transition-all " + (theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-gray-300" : "bg-gray-100 hover:bg-gray-200 text-gray-600")}>{t.name} <span className="text-green-500 ml-1">{formatPrice(t.price)}</span></button>
         ))}
       </div>
-    </div>
 
             {/* Action Buttons Row */}
         <div className="flex gap-3 items-center">
