@@ -362,9 +362,7 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
               ))}
             </div>
           )
-      <div className="flex flex-wrap gap-2 mt-3 px-2">
-        <div className="flex gap-3 items-center">
-          <button
+            </div>
             onClick={() => setShowBulkCheck(!showBulkCheck)}
             className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all"
           >
