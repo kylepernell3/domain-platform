@@ -360,13 +360,12 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
                   </div>
                 </button>
               ))}
-      <button onClick={onSearch} disabled={isSearching || !query.trim()} className="px-8 py-4 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 text-white font-bold text-lg rounded-xl transition-all">
-        {isSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}<span className="hidden sm:inline">Search</span>
-      </button>
       <div className="flex flex-wrap gap-2 mt-3 px-2">
         {POPULAR_TLDS.slice(0, 8).map(t => (
             <button key={t.tld} onClick={() => { if (query) setQuery(extractName(query) + "." + t.tld) }} className={`px-3 py-1 text-sm rounded-full transition-all ${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-gray-300" : "bg-gray-100 hover:bg-gray-200 text-gray-600"}`}>{t.name} <span className="text-green-500 ml-1">{formatPrice(t.price)}</span></button>
-        ))}
+      <button onClick={onSearch} disabled={isSearching || !query.trim()} className="px-8 py-4 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 text-white font-bold text-lg rounded-xl transition-all">
+        {isSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}<span className="hidden sm:inline">Search</span>
+      </button>
       </div>
 
             {/* Action Buttons Row */}
