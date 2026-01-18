@@ -363,7 +363,7 @@ lreturn (
                 </button>
               ))}
             </div>
-                    )}
+            </div>
           {searchHistory.length > 0 && (
             <button
               onClick={clearHistory}
@@ -376,11 +376,10 @@ lreturn (
           <div className="ml-auto text-sm text-gray-600 dark:text-gray-400">
             <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Ctrl+K</kbd> or <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">/</kbd> to search
           </div>
+        </div>
 
         {/* Bulk Check Modal */}
-        390
-      430
-      && (
+        {showBulkCheck && (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold flex items-center gap-2">
@@ -429,11 +428,12 @@ lreturn (
               </div>
             )}
           </div>
-      </div>
-      )        
+  )        
+}
 function TrustBadges({ theme }: { theme: Theme }) {
   return (
-   <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-8">      {TRUST_BADGES.map((badge, i) => (
+   <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-8">
+      {TRUST_BADGES.map((badge, i) => (
         <div key={i} className="flex items-center gap-3">
           <div className={"p-2 rounded-lg " + (theme === "dark" ? "bg-green-500/20 text-green-400" : "bg-green-100 text-green-600")}>{badge.icon}</div>
           <div><div className={"font-bold " + (theme === "dark" ? "text-white" : "text-gray-900")}>{badge.label}</div><div className={"text-xs " + (theme === "dark" ? "text-gray-500" : "text-gray-400")}>{badge.sublabel}</div></div>
