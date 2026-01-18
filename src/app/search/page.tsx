@@ -364,6 +364,7 @@ lreturn (
               ))}
             </div>
             </div>
+            </div>
           {searchHistory.length > 0 && (
             <button
               onClick={clearHistory}
