@@ -337,9 +337,6 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
     }
 
   
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
 
   }
 
