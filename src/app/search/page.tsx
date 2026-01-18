@@ -361,7 +361,7 @@ lreturn (
                     <span className="font-medium">{suggestion}</span>
                   </div>
                 </button>
-              )))}
+              ))}
             </div>
             </div>
           {searchHistory.length > 0 && (
