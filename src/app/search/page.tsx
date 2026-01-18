@@ -363,10 +363,6 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
                 </button>
               ))}
             </div>
-      <button onClick={onSearch} disabled={isSearching || !query.trim()} className="px-8 py-4 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 text-white font-bold text-lg rounded-xl transition-all">
-        {isSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}<span className="hidden sm:inline">Search</span>
-      </button>
-          </button>
           <button
             onClick={checkWatchlist}
             disabled={watchlist.length === 0}
