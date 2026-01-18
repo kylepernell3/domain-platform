@@ -433,7 +433,7 @@ lreturn (
       )        
 function TrustBadges({ theme }: { theme: Theme }) {
   return (
-   <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-8">}      {TRUST_BADGES.map((badge, i) => (
+   <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-8">      {TRUST_BADGES.map((badge, i) => (
         <div key={i} className="flex items-center gap-3">
           <div className={"p-2 rounded-lg " + (theme === "dark" ? "bg-green-500/20 text-green-400" : "bg-green-100 text-green-600")}>{badge.icon}</div>
           <div><div className={"font-bold " + (theme === "dark" ? "text-white" : "text-gray-900")}>{badge.label}</div><div className={"text-xs " + (theme === "dark" ? "text-gray-500" : "text-gray-400")}>{badge.sublabel}</div></div>
