@@ -363,6 +363,7 @@ lreturn (
                 </button>
               ))}
             </div>
+          )}
           {searchHistory.length > 0 && (
             <button
               onClick={clearHistory}
@@ -375,6 +376,7 @@ lreturn (
           <div className="ml-auto text-sm text-gray-600 dark:text-gray-400">
             <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Ctrl+K</kbd> or <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">/</kbd> to search
           </div>
+        </div>
         </div>
 
         {/* Bulk Check Modal */}
