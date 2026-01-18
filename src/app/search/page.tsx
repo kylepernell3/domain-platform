@@ -429,7 +429,8 @@ lreturn (
               </div>
             )}
           </div>
-  )        
+      </div>
+      )        
 function TrustBadges({ theme }: { theme: Theme }) {
   return (
    <div className="flex flex-wrap justify-center gap-6 md:gap-12 mt-8">}      {TRUST_BADGES.map((badge, i) => (
