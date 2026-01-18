@@ -363,14 +363,6 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
                 </button>
               ))}
             </div>
-          <button
-            onClick={checkWatchlist}
-            disabled={watchlist.length === 0}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium flex items-center gap-2 transition-all"
-          >
-            <Heart className="h-4 w-4" />
-            Check Watchlist ({watchlist.length})
-          </button>
           {searchHistory.length > 0 && (
             <button
               onClick={clearHistory}
