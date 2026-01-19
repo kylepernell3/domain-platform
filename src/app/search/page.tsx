@@ -367,6 +367,7 @@ lreturn (
             <button
               onClick={clearHistory}
               className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium flex items-center gap-2 transition-all"
+                        )}
             >
               <RefreshCw className="h-4 w-4" />
               Clear History
