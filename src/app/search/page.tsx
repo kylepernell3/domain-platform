@@ -52,7 +52,6 @@ interface BulkCheckItem {
   status: 'pending' | 'checking' | 'complete' | 'error'
   result?: DomainResult
   renewalPrice: number | null
-  status: AvailabilityStatus
   error?: string 
 expirationDate?: string
 }
@@ -340,7 +339,7 @@ function SearchBar({ theme, query, setQuery, onSearch, isSearching }: { theme: T
 
   }
 
-lreturn (
+return (
     <div className={"p-2 rounded-2xl " + (theme === "dark" ? "bg-gray-800/80 border border-gray-700" : "bg-white border border-gray-200 shadow-lg")}>
       <div className="flex items-center gap-2">
             <input type="text" value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKeyDown} onFocus={() => setShowSuggestions(true)} placeholder="Search for your perfect domain..." className={"w-full pl-12 pr-4 py-4 text-lg rounded-xl border-0 " + (theme === "dark" ? "bg-gray-900 text-white placeholder-gray-500" : "bg-gray-50 text-gray-900 placeholder-gray-400") + " focus:outline-none focus:ring-2 focus:ring-red-500"} />        </div>
