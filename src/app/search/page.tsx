@@ -755,18 +755,20 @@ function DomainSearchContent() {
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [showSuggestions, suggestions, selectedSuggestionIndex, setQuery])
       const data = await response.json()
-      setResults(data.results.map((r: any) => ({ domain: r.domain, available: r.available, premium: r.premium, price: r.p
-              addToHistory(domains[0], data.results.length)rice, renewalPrice: r.renewalPrice, status: r.error ? "error" : r.available ? (r.premium ? "premium" : "available") : "taken", error: r.error, expirationDate: r.expirationDate })))
-    } catch (error) {
-      console.error("Domain check failed:", error)
-      for (let i = 0; i < domains.length; i++) {
-        try {
-          const res = await fetch("/api/domain-check?domain=" + encodeURIComponent(domains[i]))
-          const data = await res.json()
-          setResults(prev => prev.map((r, idx) => idx === i ? { domain: data.domain, available: data.available, premium: data.premium, price: data.price, renewalPrice: data.renewalPrice, status: data.error ? "error" : data.available ? (data.premium ? "premium" : "available") : "taken", error: data.error, expirationDate: data.expirationDate } : r))
-        } catch { setResults(prev => prev.map((r, idx) => idx === i ? { ...r, status: "error", error: "Check failed" } : r)) }
-      }
-    }
+      setResults(data.results.map((r: any) => ({
+              domain: r.domain,
+              available: r.available,
+              price: r.price,
+              renewalPrice: r.renewalPrice,
+              status: r.error ? 'error' : (r.available ? 'available' : 'taken')
+            })))
+            addToHistory(domains[0], data.results.length)console.error("Domain check failed:", error)
+}
+          } catch (error) {
+            console.error("Domain check failed:", error)
+            toast.error('Batch check failed. Retrying failed domains...')
+            // Use retry logic for failed batch
+            for (let i = 0; i < domains.length; i++) {    }
       // Use retry logic for failed batch check
       toast.error('Batch check failed. Retrying with individual checks...')
       for (let i = 0; i < domains.length; i++) {
