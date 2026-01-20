@@ -376,56 +376,6 @@ return (
             <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Ctrl+K</kbd> or <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">/</kbd> to search
           </div>
         </div>
-
-        {/* Bulk Check Modal */}
-        {showBulkCheck && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                <Layers className="h-5 w-5 text-purple-600" />
-                Bulk Domain Check
-              </h3>
-              <button onClick={() => setShowBulkCheck(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <textarea
-              className="w-full h-32 p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-900 mb-3"
-              placeholder="Enter domains, one per line:\nexample.com\nanother-domain.net\ncool-startup.io"
-              onChange={(e) => {
-                const domains = e.target.value.split('\n').filter(d => d.trim())
-                setBulkCheckList(domains.map(d => ({ domain: d.trim(), status: 'pending' })))
-              }}
-            />
-            <button
-              onClick={() => {
-                const domains = bulkCheckList.map(item => item.domain)
-                if (domains.length > 0) handleBulkCheck(domains)
-              }}
-              disabled={bulkCheckList.length === 0}
-              className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg font-bold flex items-center justify-center gap-2"
-            >
-              <Zap className="h-4 w-4" />
-              Check {bulkCheckList.length} Domain{bulkCheckList.length !== 1 ? 's' : ''}
-            </button>
-            
-            {/* Bulk Check Results */}
-            {bulkCheckList.length > 0 && bulkCheckList.some(item => item.status !== 'pending') && (
-              <div className="mt-4 space-y-2 max-h-96 overflow-y-auto">
-                {bulkCheckList.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                    <span className="font-medium">{item.domain}</span>
-                    {item.status === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
-                    {item.status === 'complete' && item.result && (
-                      <span className={item.result.available ? 'text-green-600 font-bold' : 'text-gray-600'}>
-                        {item.result.available ? '✓ Available' : '✗ Taken'}
-                      </span>
-                    )}
-                    {item.status === 'error' && <span className="text-red-600">Error</span>}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
   )        
 }
