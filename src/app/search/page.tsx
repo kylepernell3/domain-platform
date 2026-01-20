@@ -761,15 +761,13 @@ function DomainSearchContent() {
               price: r.price,
               renewalPrice: r.renewalPrice,
                         })))
-            addToHistory(domains[0], data.results.length)
-                    }
+                        addToHistory(domains[0], data.results.length)
+          }
           } catch (error) {
             console.error("Domain check failed:", error)
             toast.error('Batch check failed. Retrying failed domains...')
             // Use retry logic for failed batch
-            for (let i = 0; i < domains.length; i++) {  toast.error('Batch check failed. Retrying failed domains...')    domain: data.domain, 
-          available: data.available, 
-          premium: data.premium, 
+            for (let i = 0; i < domains.length; i++) {emium: data.premium, 
           price: data.price, 
           renewalPrice: data.renewalPrice, 
           status: data.error ? "error" : data.available ? (data.premium ? "premium" : "available") : "taken", 
