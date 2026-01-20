@@ -760,17 +760,15 @@ function DomainSearchContent() {
               available: r.available,
               price: r.price,
               renewalPrice: r.renewalPrice,
-            })))            addToHistory(domains[0], data.results.length)            addToHistory(domains[0], data.results.length)
-          }toast.error('Batch check failed. Retrying failed domains...')
-          
-            // Use retry logic for failed batch
+                        })))
+            addToHistory(domains[0], data.results.length)
+          }// Use retry logic for failed batch
             for (let i = 0; i < domains.length; i++) {    }
       // Use retry logic for failed batch check
-      toast.error('Batch check failed. Retrying with individual checks...')
-      for (let i = 0; i < domains.length; i++) {
-        const data = await checkSingleDomainWithRetry(domains[i])
-        setResults(prev => prev.map((r, idx) => idx === i ? { 
-          domain: data.domain, 
+                }
+          } catch (error) {
+            console.error("Domain check failed:", error)
+            toast.error('Batch check failed. Retrying failed domains...')    domain: data.domain, 
           available: data.available, 
           premium: data.premium, 
           price: data.price, 
