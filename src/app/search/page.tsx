@@ -762,13 +762,12 @@ function DomainSearchContent() {
               renewalPrice: r.renewalPrice,
                         })))
             addToHistory(domains[0], data.results.length)
-          }// Use retry logic for failed batch
-            for (let i = 0; i < domains.length; i++) {    }
-      // Use retry logic for failed batch check
-                }
+                    }
           } catch (error) {
             console.error("Domain check failed:", error)
-            toast.error('Batch check failed. Retrying failed domains...')    domain: data.domain, 
+            toast.error('Batch check failed. Retrying failed domains...')
+            // Use retry logic for failed batch
+            for (let i = 0; i < domains.length; i++) {  toast.error('Batch check failed. Retrying failed domains...')    domain: data.domain, 
           available: data.available, 
           premium: data.premium, 
           price: data.price, 
