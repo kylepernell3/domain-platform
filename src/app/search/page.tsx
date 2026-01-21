@@ -763,8 +763,7 @@ function DomainSearchContent() {
                         })))
                         addToHistory(domains[0], data.results.length)
           }
-          } catch (error) {
-            console.error("Domain check failed:", error)
+          catch (error) {            console.error("Domain check failed:", error)
             toast.error('Batch check failed. Retrying failed domains...')
             // Use retry logic for failed batch
             for (let i = 0; i < domains.length; i++) {emium: data.premium, 
