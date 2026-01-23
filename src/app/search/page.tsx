@@ -766,19 +766,31 @@ function DomainSearchContent() {
           catch (error) {            console.error("Domain check failed:", error)
             toast.error('Batch check failed. Retrying failed domains...')
             // Use retry logic for failed batch
-            for (let i = 0; i < domains.length; i++) {emium: data.premium, 
-          price: data.price, 
-          renewalPrice: data.renewalPrice, 
-          status: data.error ? "error" : data.available ? (data.premium ? "premium" : "available") : "taken", 
-          error: data.error,
-          expirationDate: data.expirationDate 
-        } : r))
-      }
-    }
-  }, [checkSingleDomainWithRetry])
+                        for (let i = 0; i < domains.length; i++) {
+              try {
+                const data = await checkSingleDomainWithRetry(domains[i])
+                setResults(prev => prev.map((r, idx) => idx === i ? {
+                  domain: data.domain,
+                  available: data.available,
+                  premium: data.premium,
+                  price: data.price,
+                  renewalPrice: data.renewalPrice,
+                  status: data.error ? "error" : data.available ? (data.premium ? "premium" : "available") : "taken",
+                  error: data.error,
+                  expirationDate: data.expirationDate
+                } : r))
+              } catch (error) {
+                console.error(`Failed to check ${domains[i]}:`, error)
+              }
+            }
+          }
+        } finally {
+          setIsSearching(false)
+        }
+      },
+      [checkSingleDomainWithRetry])
 
-  const handleSearch = useCallback(() => {
-    if (!query.trim()) return
+      const handleSearch = useCallback(() => {ry.trim()) return
     setIsSearching(true)
     setHasSearched(true)
     const normalized = normalizeDomain(query)
