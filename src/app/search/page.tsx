@@ -779,7 +779,7 @@ function LoadingFallback() {
                   expirationDate: data.expirationDate
         } : r))
       }
-              } catch (error) {
+              catch (error) {
                           console.error('Retry failed:', error)
                                   }
                                         }
