@@ -866,8 +866,9 @@ function LoadingFallback() {
       )}
       {!hasSearched && <section className="py-12 px-4"><div className="max-w-7xl mx-auto"><TLDPromoSection theme={theme} /></div></section>}
       <Footer theme={theme} />
-    </div>
           <Toaster position="top-right" richColors closeButton />
+    
+    </div>
   )
 }
 
