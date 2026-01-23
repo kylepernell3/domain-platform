@@ -515,7 +515,6 @@ function LoadingFallback() {
 // MAIN CONTENT
 // ============================================================================
 
-Fix line 769-780: Correct corrupted object structure - replace {emium with proper try-catch and domain propertiesfunction DomainSearchContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [theme, toggleTheme, mounted] = useTheme()
