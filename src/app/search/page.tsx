@@ -515,6 +515,7 @@ function LoadingFallback() {
 // MAIN CONTENT
 // ============================================================================
 
+function DomainSearchContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [theme, toggleTheme, mounted] = useTheme()
