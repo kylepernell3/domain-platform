@@ -779,6 +779,10 @@ function LoadingFallback() {
                   expirationDate: data.expirationDate
         } : r))
       }
+              } catch (error) {
+                          console.error('Retry failed:', error)
+                                  }
+                                        }
   }, [checkSingleDomainWithRetry])
 
   const handleSearch = useCallback(() => {
