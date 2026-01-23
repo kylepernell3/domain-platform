@@ -515,7 +515,7 @@ function LoadingFallback() {
 // MAIN CONTENT
 // ============================================================================
 
-function DomainSearchContent() {
+Fix line 769-780: Correct corrupted object structure - replace {emium with proper try-catch and domain propertiesfunction DomainSearchContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [theme, toggleTheme, mounted] = useTheme()
@@ -766,12 +766,18 @@ function DomainSearchContent() {
           catch (error) {            console.error("Domain check failed:", error)
             toast.error('Batch check failed. Retrying failed domains...')
             // Use retry logic for failed batch
-            for (let i = 0; i < domains.length; i++) {emium: data.premium, 
-          price: data.price, 
-          renewalPrice: data.renewalPrice, 
-          status: data.error ? "error" : data.available ? (data.premium ? "premium" : "available") : "taken", 
-          error: data.error,
-          expirationDate: data.expirationDate 
+            for (let i = 0; i < domains.length; i++) 
+              try {
+                const data = await checkSingleDomainWithRetry(domains[i])
+                setResults(prev => prev.map((r, idx) => idx === i ? {
+                  domain: data.domain,
+                  available: data.available,
+                  premium: data.premium,
+                  price: data.price,
+                  renewalPrice: data.renewalPrice,
+                  status: data.error ? "error" : data.available ? (data.premium ? "premium" : "available") : "taken",
+                  error: data.error,
+                  expirationDate: data.expirationDate
         } : r))
       }
     }
