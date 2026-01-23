@@ -779,7 +779,6 @@ function LoadingFallback() {
                   expirationDate: data.expirationDate
         } : r))
       }
-    }
   }, [checkSingleDomainWithRetry])
 
   const handleSearch = useCallback(() => {
@@ -830,7 +829,6 @@ function LoadingFallback() {
     return filtered
   }, [results, filters, sortBy])
 
-  if (!mounted) return <LoadingFallback />
 
   return (
     <div className={"min-h-screen " + (theme === "dark" ? "bg-gray-900" : "bg-gray-50")}>
