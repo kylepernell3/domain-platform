@@ -398,7 +398,6 @@ const chartData = {
 }
 
 const activities = []
-const insights =[]
 
 const initialNotifications = []
 
@@ -676,7 +675,10 @@ function ToggleSwitch({ enabled, onChange, theme }: { enabled: boolean; onChange
 // MAIN COMPONENT
 // ============================================
 
-export default function DashboardPage() {
+717
+718
+733
+ function DashboardPage() {
   // Router and Supabase
     const router = useRouter()
   const supabase = createClient()
