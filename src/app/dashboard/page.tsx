@@ -678,7 +678,7 @@ function ToggleSwitch({ enabled, onChange, theme }: { enabled: boolean; onChange
 717
 718
 733
- function DashboardPage() {
+ export default function DashboardPage() {
   // Router and Supabase
     const router = useRouter()
   const supabase = createClient()
