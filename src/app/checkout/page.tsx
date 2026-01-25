@@ -51,7 +51,8 @@ export default function CheckoutPage() {
     country: 'United States',
     phone: '',
     company: '',
-    cardNumber: '',
+    190
+      : '',
     cardholderName: '',
     expiry: '',
     cvv: '',
