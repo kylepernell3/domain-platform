@@ -1315,12 +1315,3 @@ function CheckoutContent() {
   )
 }
 export default function CheckoutPage() { return <Suspense fallback={null}><CheckoutContent /></Suspense>; }
-tail -n 1 src/app/checkout/page.tsx
-
-git add src/app/checkout/page.tsx && git commit -m "Fix syntax error in Suspense wrapper" && git push
-
-git log -n 3
-
-
-vercel list
-
