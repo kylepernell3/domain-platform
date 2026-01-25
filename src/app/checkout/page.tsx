@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 import { 
   CreditCard, ShieldCheck, Lock, ChevronLeft, 
   CheckCircle2, AlertCircle, Info, Trash2, 
@@ -33,7 +33,7 @@ const getCardBrand = (number: string) => {
 };
 
 export default function CheckoutPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const router = useRouter();
   
   const [loading, setLoading] = useState(true);
