@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { 
@@ -41,7 +40,6 @@ export default function CheckoutPage() {
   const [savePayment, setSavePayment] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -103,12 +101,15 @@ export default function CheckoutPage() {
     if (!formData.address) newErrors.address = 'Required';
     if (!formData.city) newErrors.city = 'Required';
     if (!formData.zip) newErrors.zip = 'Required';
+    
     if (paymentType === 'card') {
       if (formData.cardNumber.replace(/\s/g, '').length < 15) newErrors.cardNumber = 'Invalid Card';
       if (!formData.expiry.includes('/')) newErrors.expiry = 'MM/YY';
       if (formData.cvv.length < 3) newErrors.cvv = 'CVV';
     }
+    
     if (!formData.agreed) newErrors.agreed = 'Terms required';
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -131,12 +132,14 @@ export default function CheckoutPage() {
           <button onClick={() => router.back()} className="flex items-center text-gray-400 hover:text-white transition-colors">
             <ChevronLeft className="w-4 h-4 mr-1" /> Back to Domains
           </button>
+          
           <header>
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <Lock className="w-8 h-8 text-red-500" /> Secure Checkout
             </h1>
             <p className="text-gray-400 mt-2">Complete your domain purchase</p>
           </header>
+
           <section className="bg-[#111] border border-white/5 rounded-2xl p-6">
             <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-red-500" /> Billing Information
@@ -160,32 +163,52 @@ export default function CheckoutPage() {
               </div>
             </div>
           </section>
+
           <section className="bg-[#111] border border-white/5 rounded-2xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-red-500" /> Payment Method
               </h2>
-              <div className="flex gap-2">
-                <div className={`px-2 py-1 border rounded text-[10px] font-bold ${cardBrand === 'Visa' ? 'bg-blue-600 border-blue-400' : 'bg-gray-800 opacity-20'}`}>VISA</div>
-                <div className={`px-2 py-1 border rounded text-[10px] font-bold ${cardBrand === 'Mastercard' ? 'bg-orange-600 border-orange-400' : 'bg-gray-800 opacity-20'}`}>MC</div>
-                <div className={`px-2 py-1 border rounded text-[10px] font-bold ${cardBrand === 'AMEX' ? 'bg-cyan-600 border-cyan-400' : 'bg-gray-800 opacity-20'}`}>AMEX</div>
-              </div>
             </div>
+
             <div className="grid grid-cols-2 gap-4 mb-6">
               <button onClick={() => setPaymentType('apple_pay')} className={`flex items-center justify-center gap-2 p-4 rounded-xl border transition-all ${paymentType === 'apple_pay' ? 'bg-white text-black border-white' : 'bg-[#1a1a1a] border-white/10 text-white hover:border-white/30'}`}><Apple className="w-5 h-5" /> Apple Pay</button>
               <button onClick={() => setPaymentType('google_pay')} className={`flex items-center justify-center gap-2 p-4 rounded-xl border transition-all ${paymentType === 'google_pay' ? 'bg-white text-black border-white' : 'bg-[#1a1a1a] border-white/10 text-white hover:border-white/30'}`}><Smartphone className="w-5 h-5" /> Google Pay</button>
             </div>
+
             {paymentType === 'card' && (
               <div className="space-y-4">
                 <div>
                   <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Card Number *</label>
-                  <input className={`w-full bg-[#1a1a1a] border ${errors.cardNumber ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 mt-1`} value={formData.cardNumber} onChange={e => setFormData({...formData, cardNumber: e.target.value})} />
-                  {cardBrand && <p className="text-[10px] text-red-500 mt-1 font-bold tracking-widest uppercase">Detecting: {cardBrand}</p>}
+                  <div className="relative mt-1">
+                    <input 
+                      className={`w-full bg-[#1a1a1a] border ${errors.cardNumber ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 pr-16 transition-all`} 
+                      value={formData.cardNumber} 
+                      onChange={e => setFormData({...formData, cardNumber: e.target.value})} 
+                      placeholder="0000 0000 0000 0000"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                      {cardBrand ? (
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded border shadow-sm ${
+                          cardBrand === 'Visa' ? 'bg-blue-600 border-blue-400 text-white' :
+                          cardBrand === 'Mastercard' ? 'bg-orange-600 border-orange-400 text-white' :
+                          cardBrand === 'AMEX' ? 'bg-cyan-600 border-cyan-400 text-white' :
+                          'bg-gray-700 border-gray-500 text-gray-200'
+                        }`}>
+                          {cardBrand.toUpperCase()}
+                        </span>
+                      ) : (
+                        <CreditCard className="w-5 h-5 text-gray-600" />
+                      )}
+                    </div>
+                  </div>
                 </div>
+                
                 <div className="grid grid-cols-2 gap-4">
                   <input className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg p-3 mt-1" placeholder="MM/YY" value={formData.expiry} onChange={e => setFormData({...formData, expiry: e.target.value})} />
                   <input className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg p-3 mt-1" placeholder="CVV" value={formData.cvv} onChange={e => setFormData({...formData, cvv: e.target.value})} />
                 </div>
+                
                 <label className="flex items-center gap-3 p-4 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-colors">
                   <input type="checkbox" checked={savePayment} onChange={e => setSavePayment(e.target.checked)} className="w-5 h-5 rounded accent-red-500" />
                   <div>
@@ -196,12 +219,14 @@ export default function CheckoutPage() {
               </div>
             )}
           </section>
+
           <div className="flex items-start gap-3">
             <input type="checkbox" checked={formData.agreed} onChange={e => setFormData({...formData, agreed: e.target.checked})} className="mt-1" />
             <p className="text-xs text-gray-400 leading-relaxed">I agree to the <a href="/terms" className="text-white underline">Terms of Service</a> and <a href="/privacy" className="text-white underline">Privacy Policy</a>. I understand that domain registrations are non-refundable.</p>
           </div>
           {errors.agreed && <p className="text-red-500 text-xs">{errors.agreed}</p>}
         </div>
+
         <div className="space-y-6">
           <div className="bg-[#111] border border-white/5 rounded-2xl p-6 sticky top-8">
             <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
@@ -212,12 +237,16 @@ export default function CheckoutPage() {
               </div>
               <p className="font-bold">$12.99</p>
             </div>
+            
             <div className="space-y-3 py-6 text-sm text-gray-400">
               <div className="flex justify-between"><span>Subtotal</span><span>$12.99</span></div>
               <div className="flex justify-between"><span>Tax</span><span>$0.00</span></div>
               <div className="flex justify-between text-xl font-bold text-white pt-3 border-t border-white/5"><span>Total Due</span><span>$12.99</span></div>
             </div>
-            <button onClick={handlePay} disabled={isSubmitting} className="w-full bg-red-600 hover:bg-red-50 text-white py-4 rounded-xl font-bold transition-all disabled:opacity-50">{isSubmitting ? 'Processing...' : 'Pay $12.99'}</button>
+
+            <button onClick={handlePay} disabled={isSubmitting} className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold transition-all disabled:opacity-50">
+              {isSubmitting ? 'Processing...' : 'Pay $12.99'}
+            </button>
           </div>
         </div>
       </div>
