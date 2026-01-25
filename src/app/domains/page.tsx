@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { </h3>createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Globe, ArrowRight, Lock, AlertCircle, Trash2, Edit3 } from 'lucide-react';
 
@@ -147,7 +147,7 @@ export default function DomainsPage() {
         {filteredDomains.length === 0 && !error && (
           <div className="bg-[#111] border border-white/5 rounded-2xl p-12 text-center">
             <Globe className="w-16 h-16 text-gray-600 mx-auto mb-4 opacity-50" />
-            <h3 className="text-xl font-semibold mb-2 text-gray-300">No domains yet</n            <p className="text-gray-500 mb-6">Start by registering your first domain or transferring an existing one</p>
+            <h3 className="text-xl font-semibold mb-2 text-gray-300">No domains yet            <p className="text-gray-500 mb-6">Start by registering your first domain or transferring an existing one</p>
             <button
               onClick={() => router.push('/search')}
               className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
