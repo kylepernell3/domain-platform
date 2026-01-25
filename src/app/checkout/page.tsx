@@ -187,19 +187,22 @@ export default function CheckoutPage() {
                       onChange={e => setFormData({...formData, cardNumber: e.target.value})} 
                       placeholder="0000 0000 0000 0000"
                     />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
-                      {cardBrand ? (
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded border shadow-sm ${
-                          cardBrand === 'Visa' ? 'bg-blue-600 border-blue-400 text-white' :
-                          cardBrand === 'Mastercard' ? 'bg-orange-600 border-orange-400 text-white' :
-                          cardBrand === 'AMEX' ? 'bg-cyan-600 border-cyan-400 text-white' :
-                          'bg-gray-700 border-gray-500 text-gray-200'
-                        }`}>
-                          {cardBrand.toUpperCase()}
-                        </span>
-                      ) : (
-                        <CreditCard className="w-5 h-5 text-gray-600" />
-                      )}
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none transition-all duration-300">
+                  {cardBrand ? (
+                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 duration-300">
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded border shadow-sm transition-all ${
+                        cardBrand === 'Visa' ? 'bg-blue-600 border-blue-400 text-white' :
+                        cardBrand === 'Mastercard' ? 'bg-orange-600 border-orange-400 text-white' :
+                        cardBrand === 'AMEX' ? 'bg-cyan-600 border-cyan-400 text-white' :
+                        'bg-gray-700 border-gray-500 text-gray-200'
+                      }`}>
+                        {cardBrand.toUpperCase()}
+                      </span>
+                    </div>
+                  ) : (
+                    <CreditCard className="w-5 h-5 text-gray-600 opacity-50 transition-opacity duration-300" />
+                  )}
+                </div>
                     </div>
                   </div>
                 </div>
