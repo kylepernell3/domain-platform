@@ -10,7 +10,7 @@
  * Tech Stack: Next.js 14+, TypeScript, Tailwind CSS, Supabase, Lucide React
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
@@ -511,7 +511,7 @@ function PromoCodeInput({
 // MAIN COMPONENT
 // ============================================================================
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -1314,3 +1314,4 @@ export default function CheckoutPage() {
     </div>
   )
 }
+export default function CheckoutPage() { return <Suspense fallback={null}><CheckoutContent /><\/Suspense>; }
