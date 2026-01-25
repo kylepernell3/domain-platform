@@ -17,7 +17,7 @@ interface Domain {
 }
 
 export default function DomainsPage() {
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [domains, setDomains] = useState<Domain[]>([]);
