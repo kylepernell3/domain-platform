@@ -515,6 +515,11 @@ function CheckoutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+    const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
   // -------------------------------------------------------------------------
   // STATE
   // -------------------------------------------------------------------------
@@ -654,6 +659,51 @@ function CheckoutContent() {
   }, [router, searchParams])
 
   // Initial data fetch
+
+    // Authentication and user data prefilling
+  useEffect(() => {
+    const checkAuthAndFetchUserData = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (!session) {
+          // Redirect to login if not authenticated
+          router.push('/welcome?redirect=/checkout')
+          return
+        }
+        
+        setIsAuthenticated(true)
+        
+        // Fetch user profile data from Supabase
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        
+        if (profile && !error) {
+          // Prefill billing information with user data
+          setBillingInfo({
+            firstName: profile.first_name || '',
+            lastName: profile.last_name || '',
+            email: session.user.email || '',
+            company: profile.company || '',
+            address: profile.address || '',
+            city: profile.city || '',
+            state: profile.state || '',
+            zipCode: profile.zip_code || '',
+            country: profile.country || 'US',
+            phone: profile.phone || '',
+          })
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.push('/welcome?redirect=/checkout')
+      }
+    }
+    
+    checkAuthAndFetchUserData()
+  }, [router, supabase])
   useEffect(() => {
     fetchData()
   }, [fetchData])
