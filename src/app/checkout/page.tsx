@@ -127,7 +127,7 @@ export default function CheckoutPage() {
     }, 2000);
   };
 
-      = ({ brand }: { brand: string | null }) => {
+       const CardBrandIcon  = ({ brand }: { brand: string | null }) => {
           if (brand === 'Visa') {
                   return (
                                         <rect width="48" height="32" rx="4" fill="#1A1F71"/>
