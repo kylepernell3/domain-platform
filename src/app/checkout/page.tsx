@@ -130,7 +130,8 @@ export default function CheckoutPage() {
        const CardBrandIcon  = ({ brand }: { brand: string | null }) => {
           if (brand === 'Visa') {
                   return (
-                                        <rect width="48" height="32" rx="4" fill="#1A1F71"/>
+                                        <svg width="40" height="24" viewBox="0 0 48 32" className="animate-in fade-in slide-in-from-right-2 duration-300">
+            <rect width="48" height="32" rx="4" fill="#1A1F71"/>
                                         <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">VISA</text>
                                       </svg>
                           );
