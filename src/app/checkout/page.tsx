@@ -170,7 +170,8 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-white p-4 md:p-8 font-sans">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          <button onClick={() => router.back()} className="flex items-center text-gray-400 hover:text-white transition-colors">
+          <button onClick={() => router.back()} className="flex items-center text-gray-400
+            hover:text-white transition-colors">
             <ChevronLeft className="w-4 h-4 mr-1" /> Back to Domains
           </button>
           
@@ -281,6 +282,33 @@ export default function CheckoutPage() {
             </button>
           </div>
         </div>
+              <section className="bg-[#111] border border-white/5 rounded-2xl p-6 mt-8">
+            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+              <Globe className="w-5 h-5 text-red-500" /> DNS Onboarding
+            </h2>
+            <div className="space-y-4">
+              <p className="text-gray-400 text-sm">Configure your DNS records to point your domain to our servers.</p>
+              <div className="bg-black/40 rounded-xl p-4 border border-white/5">
+                <div className="grid grid-cols-3 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                  <div>Type</div>
+                  <div>Name</div>
+                  <div>Value</div>
+                </div>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-3 gap-4 text-sm py-2 border-t border-white/5">
+                    <div className="text-red-400">A</div>
+                    <div className="text-gray-300">@</div>
+                    <div className="text-gray-300">76.76.21.21</div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-sm py-2 border-t border-white/5">
+                    <div className="text-red-400">CNAME</div>
+                    <div className="text-gray-300">www</div>
+                    <div className="text-gray-300">cname.vercel-dns.com</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
       </div>
     </div>
   );
