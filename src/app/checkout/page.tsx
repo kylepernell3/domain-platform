@@ -51,12 +51,11 @@ export default function CheckoutPage() {
     country: 'United States',
     phone: '',
     company: '',
-    190
-      : '',
     cardholderName: '',
     expiry: '',
+        cardNumber: '',
     cvv: '',
-    agreed: false
+agreed: false
   });
 
   useEffect(() => {
@@ -233,8 +232,7 @@ export default function CheckoutPage() {
                     />
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none transition-all duration-300">
                   <CardBrandIcon brand={cardBrand} />
-                  )}
-                </div>
+                    </div>            </div>
                     </div>
                   </div>
                 </div>
@@ -252,7 +250,6 @@ export default function CheckoutPage() {
                   </div>
                 </label>
               </div>
-            )}
           </section>
 
           <div className="flex items-start gap-3">
