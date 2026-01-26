@@ -3,8 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { 
   CreditCard, ShieldCheck, Lock, ChevronLeft, 
-  CheckCircle2, AlertCircle, Info, Trash2, 
-  Apple, Smartphone, Globe
+CheckCircle2, AlertCircle, Info, Trash2, ShieldCheck,  Apple, Smartphone, Globe
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
