@@ -1,4 +1,5 @@
-"use client";
+235
+  "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { 
@@ -232,7 +233,7 @@ agreed: false
                     />
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none transition-all duration-300">
                   <CardBrandIcon brand={cardBrand} />
-                    </div>            </div>
+                    </div>  
                     </div>
                   </div>
                 </div>
