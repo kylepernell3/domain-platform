@@ -39,6 +39,7 @@ export default function CheckoutPage() {
   const [savePayment, setSavePayment] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+    const [addedRecommendations, setAddedRecommendations] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
