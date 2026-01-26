@@ -263,7 +263,43 @@ export default function CheckoutPage() {
           <div className="bg-[#111] border border-white/5 rounded-2xl p-6 sticky top-8">
             <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
             <div className="flex justify-between items-center pb-4 border-b border-white/5">
-              <div>
+             
+                                <section className="mt-8 bg-[#111] border border-white/5 rounded-2xl p-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-red-500" /> Recommended for You
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-black/40 rounded-xl border border-white/5 hover:border-red-500/30 transition-all group">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-red-500/10 rounded-lg">
+                            <ShieldCheck className="w-6 h-6 text-red-500" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-white group-hover:text-red-400 transition-colors">Privacy Protection</h4>
+                            <p className="text-xs text-gray-500">Hide your personal info on WHOIS</p>
+                          </div>
+                        </div>
+                        <button className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm transition-all border border-white/10">
+                          Add $4.99
+                        </button>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-black/40 rounded-xl border border-white/5 hover:border-red-500/30 transition-all group">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-red-500/10 rounded-lg">
+                            <Lock className="w-6 h-6 text-red-500" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-white group-hover:text-red-400 transition-colors">Premium SSL</h4>
+                            <p className="text-xs text-gray-500">Enhanced security for your visitors</p>
+                          </div>
+                        </div>
+                        <button className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm transition-all border border-white/10">
+                          Add $19.99
+                        </button>
+                      </div>
+                    </div>
+                  </section><div>
                 <p className="font-medium text-white">example-domain.com</p>
                 <p className="text-xs text-gray-500 uppercase tracking-widest">New Registration • 1 Year</p>
               </div>
