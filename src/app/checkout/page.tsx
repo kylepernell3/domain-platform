@@ -237,6 +237,7 @@ agreed: false
                     </div>
                   </div>
                 </div>
+                )}
                 
                 <div className="grid grid-cols-2 gap-4">
                   <input className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg p-3 mt-1" placeholder="MM/YY" value={formData.expiry} onChange={e => setFormData({...formData, expiry: e.target.value})} />
