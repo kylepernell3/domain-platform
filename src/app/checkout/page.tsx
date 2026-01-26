@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/client';
 import { 
   CreditCard, ShieldCheck, Lock, ChevronLeft, 
   CheckCircle2, AlertCircle, Info, Trash2, 
-  Apple, Smartphone
+  Apple, Smartphone, Globe
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
