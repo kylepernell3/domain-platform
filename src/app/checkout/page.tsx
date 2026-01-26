@@ -124,6 +124,46 @@ export default function CheckoutPage() {
     }, 2000);
   };
 
+    127
+      = ({ brand }: { brand: string | null }) => {
+          if (brand === 'Visa') {
+                  return (
+                            <svg width="40" height="24" viewBox="0 0 48 32" className="animate-in fade-in slide-in-from-right-2 duration-300">
+                                        <rect width="48" height="32" rx="4" fill="#1A1F71"/>
+                                        <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">VISA</text>
+                                      </svg>
+                          );
+                }
+          if (brand === 'Mastercard') {
+                  return (
+                            <svg width="40" height="24" viewBox="0 0 48 32" className="animate-in fade-in slide-in-from-right-2 duration-300">
+                                        <circle cx="18" cy="16" r="10" fill="#EB001B"/>
+                                        <circle cx="30" cy="16" r="10" fill="#F79E1B"/>
+                                      </svg>
+                          );
+                }
+          if (brand === 'AMEX') {
+                  return (
+                            <svg width="40" height="24" viewBox="0 0 48 32" className="animate-in fade-in slide-in-from-right-2 duration-300">
+                                        <rect width="48" height="32" rx="4" fill="#006FCF"/>
+                                        <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">AMEX</text>
+                                      </svg>
+                          );
+                }
+          if (brand === 'Discover') {
+                  return (
+                            <svg width="40" height="24" viewBox="0 0 48 32" className="animate-in fade-in slide-in-from-right-2 duration-300">
+                                        <rect width="48" height="32" rx="4" fill="#FF6000"/>
+                                        <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">DISC</text>
+                                      </svg>
+                          );
+                }
+          return (
+                  <CreditCard className="w-5 h-5 text-gray-600 opacity-50 transition-opacity duration-300" />
+                );
+        };
+  
+
   if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading Secure Checkout...</div>;
 
   return (
@@ -189,19 +229,7 @@ export default function CheckoutPage() {
                       placeholder="0000 0000 0000 0000"
                     />
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none transition-all duration-300">
-                  {cardBrand ? (
-                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 duration-300">
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded border shadow-sm transition-all ${
-                        cardBrand === 'Visa' ? 'bg-blue-600 border-blue-400 text-white' :
-                        cardBrand === 'Mastercard' ? 'bg-orange-600 border-orange-400 text-white' :
-                        cardBrand === 'AMEX' ? 'bg-cyan-600 border-cyan-400 text-white' :
-                        'bg-gray-700 border-gray-500 text-gray-200'
-                      }`}>
-                        {cardBrand.toUpperCase()}
-                      </span>
-                    </div>
-                  ) : (
-                    <CreditCard className="w-5 h-5 text-gray-600 opacity-50 transition-opacity duration-300" />
+                  <CardBrandIcon brand={cardBrand} />
                   )}
                 </div>
                     </div>
