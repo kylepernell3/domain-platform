@@ -117,10 +117,14 @@ export default function CheckoutPage() {
 
   const handlePay = async () => {
     if (!validate()) return;
-    setIsSubmitting(true)   setIsSubmitting(false);
-      alert('Order
-    router.push('/onboarding');
-  router.push('/onboarding');}, 2000);
+        setIsSubmitting(true);
+    
+    // Simulate payment processing
+    setTimeout(() => {
+      setIsSubmitting(false);
+      alert('Order completed successfully!');
+      router.push('/onboarding');
+    }, 2000);
   };
 
     127
