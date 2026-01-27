@@ -6,6 +6,7 @@ import {
   CheckCircle2, AlertCircle, Info, Trash2, Apple, Smartphone, Globe
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
 
 interface Profile {
   first_name: string;
@@ -192,11 +193,51 @@ try {
       // In production, use Stripe.js to confirm payment with clientSecret
       setIsSubmitting(false);
       router.push('/onboarding');
-    } catch (error) {
-      console.error('Payment error:', error);
-      setErrors({ payment: 'Payment failed. Please try again.' });
-      setIsSubmitting(false);
-    }    
+      // Load Stripe and confirm payment
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+      
+      if (!stripe) {
+        setErrors({ payment: 'Failed to load payment processor' });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Confirm the payment with the card details
+      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: {
+            number: formData.cardNumber.replace(/\s/g, ''),
+            exp_month: parseInt(formData.expiry.split('/')[0]),
+            exp_year: parseInt('20' + formData.expiry.split('/')[1]),
+            cvc: formData.cvv,
+          },
+          billing_details: {
+            name: `${formData.firstName} ${formData.lastName}`,
+            email: formData.email,
+            address: {
+              line1: formData.address,
+              city: formData.city,
+              state: formData.state,
+              postal_code: formData.zip,
+              country: 'US',
+            },
+          },
+        },
+      });
+
+      if (confirmError) {
+        setErrors({ payment: confirmError.message || 'Payment failed' });
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // Payment successful - redirect to onboarding
+        router.push('/onboarding');
+      } else {
+        setErrors({ payment: 'Payment was not successful' });
+        setIsSubmitting(false);
+      }    }    
     
       };
 
