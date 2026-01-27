@@ -215,6 +215,7 @@ try {
             },
           },
         },
+              });
       });
 
       if (confirmError) {
