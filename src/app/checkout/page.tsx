@@ -196,7 +196,12 @@ try {
       console.error('Payment error:', error);
       setErrors({ payment: 'Payment failed. Please try again.' });
       setIsSubmitting(false);
-    }      return (
+    }    
+    
+      };
+
+  const CardBrandIcon = ({ brand }: { brand: string | null }) => {
+    if (brand === 'Visa') {return (
         <svg width="40" height="24" viewBox="0 0 48 32" className="animate-in fade-in slide-in-from-right-2">
           <rect width="48" height="32" rx="4" fill="#1A1F71"/>
           <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">VISA</text>
