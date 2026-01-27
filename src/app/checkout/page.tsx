@@ -169,16 +169,34 @@ export default function CheckoutPage() {
     if (!validate()) return;
     setIsSubmitting(true);
     
-    // Simulate payment processing
-    setTimeout(() => {
+try {
+      // Call payment intent API
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: total,
+          description: `Domain Platform Purchase - ${cart.map(i => i.name).join(', ')}`
+        })
+      });
+
+      const { clientSecret, error } = await response.json();
+      
+      if (error) {
+        setErrors({ payment: error });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // For now, simulate successful payment
+      // In production, use Stripe.js to confirm payment with clientSecret
       setIsSubmitting(false);
       router.push('/onboarding');
-    }, 2000);
-  };
-
-  const CardBrandIcon = ({ brand }: { brand: string | null }) => {
-    if (brand === 'Visa') {
-      return (
+    } catch (error) {
+      console.error('Payment error:', error);
+      setErrors({ payment: 'Payment failed. Please try again.' });
+      setIsSubmitting(false);
+    }      return (
         <svg width="40" height="24" viewBox="0 0 48 32" className="animate-in fade-in slide-in-from-right-2">
           <rect width="48" height="32" rx="4" fill="#1A1F71"/>
           <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">VISA</text>
