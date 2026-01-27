@@ -160,7 +160,6 @@ export default function CheckoutPage() {
       if (formData.cvv.length < 3) newErrors.cvv = 'CVV';
     }
     
-    if (!formData.agreed) newErrors.agreed = 'Terms required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
