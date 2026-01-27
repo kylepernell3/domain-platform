@@ -234,6 +234,14 @@ export default function CheckoutPage() {
                 <label className="text-xs font-medium text-gray-500 uppercase">Address *</label>
                 <input className={`w-full bg-[#1a1a1a] border ${errors.address ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 mt-1`} value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
               </div>
+               <div>
+ <label className="text-xs font-medium text-gray-500 uppercase">City *</label>
+ <input className={`w-full bg-[#1a1a1a] border ${errors.city ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 mt-1`} value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
+ </div>
+ <div>
+ <label className="text-xs font-medium text-gray-500 uppercase">Zip Code *</label>
+ <input className={`w-full bg-[#1a1a1a] border ${errors.zip ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 mt-1`} value={formData.zip} onChange={e => setFormData({...formData, zip: e.target.value})} />
+ </div>
             </div>
           </section>
 
