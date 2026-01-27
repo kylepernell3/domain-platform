@@ -229,9 +229,10 @@ try {
       } else {
         setErrors({ payment: 'Payment was not successful' });
         setIsSubmitting(false);
-      }    }    
+          
     
       }
+        }
  catch (error) {
       setErrors({ payment: 'Payment failed. Please try again.' });
       setIsSubmitting(false);
