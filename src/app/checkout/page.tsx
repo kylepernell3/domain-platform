@@ -189,14 +189,6 @@ try {
         return;
       }
 
-      // For now, simulate successful payment
-      // In production, use Stripe.js to confirm payment with clientSecret
-      setIsSubmitting(false);
-      router.push('/onboarding');
-      // Load Stripe and confirm payment
-      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-      
-      if (!stripe) {
         setErrors({ payment: 'Failed to load payment processor' });
         setIsSubmitting(false);
         return;
@@ -239,7 +231,12 @@ try {
         setIsSubmitting(false);
       }    }    
     
-      };
+      }
+ catch (error) {
+      setErrors({ payment: 'Payment failed. Please try again.' });
+      setIsSubmitting(false);
+    }
+  };
 
   const CardBrandIcon = ({ brand }: { brand: string | null }) => {
     if (brand === 'Visa') {return (
