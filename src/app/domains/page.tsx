@@ -228,12 +228,6 @@ const NavigationHeader: React.FC<{
                 <ChevronDown className={`w-4 h-4 hidden sm:block transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-[#111] border border-white/10 rounded-xl shadow-2xl py-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-4 py-3 border-b border-white/5">
-                    <p className="text-sm font-medium text-white">John Doe</p>
-                    <p className="text-xs text-gray-500">john@example.com</p>
-                  </div>
                   <a href="/account" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
                     <User className="w-4 h-4" />
                     Account Settings
