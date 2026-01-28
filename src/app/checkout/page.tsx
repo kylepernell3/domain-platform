@@ -265,9 +265,6 @@ try {
         // setIsSubmitting(false);
           
     
-      }
-        }
- catch (error) {
       setErrors({ payment: 'Payment failed. Please try again.' });
       setIsSubmitting(false);
     }
