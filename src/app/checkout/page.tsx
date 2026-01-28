@@ -422,6 +422,6 @@ try {
       </div>
     </div>
   );
-}
+};
 
 export default CheckoutPage;
