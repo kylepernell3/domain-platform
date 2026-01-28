@@ -219,7 +219,37 @@ try {
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
         // Payment successful - redirect to onboarding
-        router.push('/onboarding');
+              // Create order in database
+      try {
+        const orderResponse = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentIntentId: paymentIntent.id,
+            domainName: cart[0]?.name || 'example.com',
+            addons: {
+              privacy: cart.some(item => item.type === 'protection'),
+              ssl: cart.some(item => item.name === 'Premium SSL'),
+              vpn: false,
+            },
+            amountTotal: paymentIntent.amount,
+            currency: paymentIntent.currency,
+          }),
+        });
+
+        const orderResult = await orderResponse.json();
+
+        if (orderResponse.ok) {
+          // Redirect to onboarding with order and domain IDs
+          router.push(`/onboarding?orderId=${orderResult.orderId}&domainId=${orderResult.domainId}`);
+        } else {
+          setErrors({ payment: 'Order creation failed' });
+          setIsSubmitting(false);
+        }
+      } catch (orderError) {
+        console.error('Order creation error:', orderError);
+        setErrors({ payment: 'Failed to create order' });
+        setIsSubmitting(false);
       } else {
         setErrors({ payment: 'Payment was not successful' });
         setIsSubmitting(false);

@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/na
+import { useSearchParams } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';vigation';
 import { 
   Bot, 
   ChevronRight, 
@@ -15,6 +17,48 @@ import {
 
 export default function OnboardingPage() {
   const router = useRouter();
+    const searchParams = useSearchParams();
+  const supabase = createClientComponentClient();
+  const [domain, setDomain] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  
+  const domainId = searchParams.get('domainId');
+  const orderId = searchParams.get('orderId');
+  
+  useEffect(() => {
+    async function loadDomain() {
+      if (!domainId) {
+        setLoading(false);
+        return;
+      }
+      
+      const { data, error } = await supabase
+        .from('domains')
+        .select('*')
+        .eq('id', domainId)
+        .single();
+      
+      if (data) setDomain(data);
+      setLoading(false);
+    }
+    
+    loadDomain();
+  }, [domainId]);
+  
+  const completeOnboarding = async () => {
+    // Save any onboarding configuration
+    if (domainId) {
+      await supabase
+        .from('domain_settings')
+        .upsert({
+          domain_id: domainId,
+          preferred_dns_mode: 'managed',
+        });
+    }
+    
+    // Redirect to domains dashboard
+    router.push('/domains');
+  };
   const [step, setStep] = useState(1);
   const [experience, setExperience] = useState<string | null>(null);
   const [showBot, setShowBot] = useState(false);
@@ -33,7 +77,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-red-500/30">
       <nav className="border-b border-white/5 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/dashboard')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => completeOnboarding()
             <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-red-600/20">
               D
             </div>

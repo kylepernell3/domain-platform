@@ -1052,6 +1052,64 @@ export default function DomainsPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+    const handleBulkDelete = async () => {
+    if (selectedDomainIds.length === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedDomainIds.length} domains?`)) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('domains')
+        .delete()
+        .in('id', selectedDomainIds);
+
+      if (error) throw error;
+      setDomains(prev => prev.filter(d => !selectedDomainIds.includes(d.id)));
+      setSelectedDomainIds([]);
+    } catch (err: any) {
+      console.error('Error deleting domains:', err);
+      alert('Failed to delete domains: ' + err.message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleBulkAutoRenew = async (value: boolean) => {
+    if (selectedDomainIds.length === 0) return;
+    
+    try {
+      const { error } = await supabase
+        .from('domains')
+        .update({ auto_renew: value })
+        .in('id', selectedDomainIds);
+
+      if (error) throw error;
+      setDomains(prev => prev.map(d => 
+        selectedDomainIds.includes(d.id) ? { ...d, auto_renew: value } : d
+      ));
+      setSelectedDomainIds([]);
+    } catch (err: any) {
+      console.error('Error updating domains:', err);
+      alert('Failed to update domains: ' + err.message);
+    }
+  };
+
+  const exportToCSV = () => {
+    const headers = ['Name', 'Status', 'Expires', 'Auto Renew'];
+    const data = domains.map(d => [d.domain_name, d.status, d.expires_at, d.auto_renew]);
+    const csvContent = [headers, ...data].map(e => e.join(',')).join('\
+');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'domains_export.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
   // Calculate Stats
   const stats: StatsData = useMemo(() => {
     return {
