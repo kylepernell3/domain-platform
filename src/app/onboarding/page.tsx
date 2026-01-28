@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/na
 import { useSearchParams } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';vigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs
 import { 
   Bot, 
   ChevronRight, 
