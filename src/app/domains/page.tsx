@@ -928,6 +928,7 @@ export default function DomainsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [user, setUser] = useState<any>(null);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [deleteModalDomain, setDeleteModalDomain] = useState<Domain | null>(null);
@@ -939,6 +940,9 @@ export default function DomainsPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+            // Get user data
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
       if (!session) {
         router.push('/login');
       }
@@ -1176,6 +1180,39 @@ export default function DomainsPage() {
         userMenuOpen={userMenuOpen}
         setUserMenuOpen={setUserMenuOpen}
       />
+
+        {/* User Account Dropdown */}
+        {userMenuOpen && (
+          <div className="absolute top-16 right-4 w-64 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-xl z-50">
+            <div className="p-4 border-b border-white/10">
+              <p className="text-sm text-gray-400">Signed in as</p>
+              <p className="text-white font-medium truncate">{user?.email || 'Loading...'}</p>
+            </div>
+            <div className="p-2">
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 rounded-lg transition-colors"
+              >
+                Main Dashboard
+              </button>
+              <button
+                onClick={() => router.push('/domains')}
+                className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/5 rounded-lg transition-colors"
+              >
+                Domain Management
+              </button>
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  router.push('/login');
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 rounded-lg transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        )}
 
       {/* Main Content */}
       <main className="flex-1">
