@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { 
-  CreditCard, ShieldCheck, Lock, ChevronLeft, 
+import {
+  CreditCard, ShieldCheck, Lock, ChevronLeft,
   CheckCircle2, AlertCircle, Info, Trash2, Apple, Smartphone, Globe
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -68,13 +68,8 @@ const RECOMMENDATIONS = [
 export default function CheckoutPage() {
   const supabase = createClient();
   const router = useRouter();
-    const [user, setUser] = useState<any>(null);
   
-  useEffect(() => {
-    async function getUser() {
-            // @ts-ignore - Supabase client types issue
-      const response = await supabase.auth.getUser();
-      if (response.data?.user) setUser(response.data.user);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [paymentType, setPaymentType] = useState<PaymentMethod>('card');
   const [savePayment, setSavePayment] = useState(true);
@@ -82,11 +77,8 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([
     { id: '1', name: 'example-domain.com', price: 12.99, type: 'domain' }
-        }
-  },  []);432
+  ]);
 
-    
-  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -106,9 +98,19 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
+    async function getUser() {
+      // @ts-ignore - Supabase client types issue
+      const response = await supabase.auth.getUser();
+      if (response.data?.user) setUser(response.data.user);
+    }
+    getUser();
+  }, []);
+
+  useEffect(() => {
     async function getSessionAndProfile() {
-          // @ts-ignore - Supabase client types issue
+      // @ts-ignore - Supabase client types issue
       const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
         router.push('/login?redirect=/checkout');
         return;
@@ -135,8 +137,10 @@ export default function CheckoutPage() {
           company: profileData.company || ''
         }));
       }
+
       setLoading(false);
     }
+
     getSessionAndProfile();
   }, [supabase, router]);
 
@@ -158,6 +162,7 @@ export default function CheckoutPage() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
+    
     if (!formData.firstName) newErrors.firstName = 'Required';
     if (!formData.lastName) newErrors.lastName = 'Required';
     if (!formData.address) newErrors.address = 'Required';
@@ -171,7 +176,6 @@ export default function CheckoutPage() {
       if (formData.cvv.length < 3) newErrors.cvv = 'CVV';
     }
     
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -179,8 +183,14 @@ export default function CheckoutPage() {
   const handlePay = async () => {
     if (!validate()) return;
     setIsSubmitting(true);
-    
-try {
+
+    try {
+      // Initialize Stripe
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+      if (!stripe) {
+        throw new Error('Stripe failed to load');
+      }
+
       // Call payment intent API
       const response = await fetch('/api/create-payment-intent', {
         method: 'POST',
@@ -190,24 +200,21 @@ try {
           description: `Domain Platform Purchase - ${cart.map(i => i.name).join(', ')}`
         })
       });
-        } catch (error) {
-    console.error('Payment intent creation failed:', error);
-    setErrors({ payment: 'Failed to initialize payment' });
-    setIsSubmitting(false);
-    return;
-  }
-    };
+
+      if (!response.ok) {
+        throw new Error('Payment initialization failed');
+      }
 
       const { clientSecret, error } = await response.json();
-      
+
       if (error) {
         setErrors({ payment: error });
         setIsSubmitting(false);
         return;
       }
 
-        // Confirm the payment with the card details                  
-  const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      // Confirm the payment with the card details
+      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: {
             number: formData.cardNumber.replace(/\s/g, ''),
@@ -227,7 +234,8 @@ try {
             },
           },
         },
-              });
+      });
+
       if (confirmError) {
         setErrors({ payment: confirmError.message || 'Payment failed' });
         setIsSubmitting(false);
@@ -235,51 +243,52 @@ try {
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Payment successful - redirect to onboarding
-              // Create order in database
-      try {
-        const orderResponse = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            paymentIntentId: paymentIntent.id,
-                        userId: user?.id,
-            domainName: cart[0]?.name || 'example.com',
-            addons: {
-              privacy: cart.some(item => item.type === 'protection'),
-              ssl: cart.some(item => item.name === 'Premium SSL'),
-              vpn: false,
-            },
-            amountTotal: paymentIntent.amount,
-            currency: paymentIntent.currency,
-          }),
-        });
+        // Create order in database
+        try {
+          const orderResponse = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              paymentIntentId: paymentIntent.id,
+              userId: user?.id,
+              domainName: cart[0]?.name || 'example.com',
+              addons: {
+                privacy: cart.some(item => item.type === 'protection'),
+                ssl: cart.some(item => item.name === 'Premium SSL'),
+                vpn: false,
+              },
+              amountTotal: paymentIntent.amount,
+              currency: paymentIntent.currency,
+            }),
+          });
 
-        const orderResult = await orderResponse.json();
+          const orderResult = await orderResponse.json();
 
-        if (orderResponse.ok) {
-          // Redirect to onboarding with order and domain IDs
-          router.push(`/onboarding?orderId=${orderResult.orderId}&domainId=${orderResult.domainId}`);
-        } else {
-          setErrors({ payment: 'Order creation failed' });
+          if (orderResponse.ok) {
+            router.push(`/onboarding?orderId=${orderResult.orderId}&domainId=${orderResult.domainId}`);
+          } else {
+            setErrors({ payment: 'Order creation failed' });
+            setIsSubmitting(false);
+          }
+        } catch (orderError) {
+          console.error('Order creation error:', orderError);
+          setErrors({ payment: 'Failed to create order' });
           setIsSubmitting(false);
         }
-      } catch (orderError) {
-        console.error('Order creation error:', orderError);
-        setErrors({ payment: 'Failed to create order' });
+      } else {
+        setErrors({ payment: 'Payment failed. Please try again.' });
         setIsSubmitting(false);
-      }  {
-        // setErrors({ payment: 'Payment was not successful' });
-        // setIsSubmitting(false);
-          
-    
-      setErrors({ payment: 'Payment failed. Please try again.' });
+      }
+    } catch (error) {
+      console.error('Payment process error:', error);
+      setErrors({ payment: 'Failed to initialize payment. Please try again.' });
       setIsSubmitting(false);
     }
   };
 
   const CardBrandIcon = ({ brand }: { brand: string | null }) => {
-    if (brand === 'Visa') {return (
+    if (brand === 'Visa') {
+      return (
         <svg width="40" height="24" viewBox="0 0 48 32" className="animate-in fade-in slide-in-from-right-2">
           <rect width="48" height="32" rx="4" fill="#1A1F71"/>
           <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">VISA</text>
@@ -334,14 +343,14 @@ try {
                 <label className="text-xs font-medium text-gray-500 uppercase">Address *</label>
                 <input className={`w-full bg-[#1a1a1a] border ${errors.address ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 mt-1`} value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
               </div>
-               <div>
- <label className="text-xs font-medium text-gray-500 uppercase">City *</label>
- <input className={`w-full bg-[#1a1a1a] border ${errors.city ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 mt-1`} value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
- </div>
- <div>
- <label className="text-xs font-medium text-gray-500 uppercase">Zip Code *</label>
- <input className={`w-full bg-[#1a1a1a] border ${errors.zip ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 mt-1`} value={formData.zip} onChange={e => setFormData({...formData, zip: e.target.value})} />
- </div>
+              <div>
+                <label className="text-xs font-medium text-gray-500 uppercase">City *</label>
+                <input className={`w-full bg-[#1a1a1a] border ${errors.city ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 mt-1`} value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-500 uppercase">Zip Code *</label>
+                <input className={`w-full bg-[#1a1a1a] border ${errors.zip ? 'border-red-500' : 'border-white/10'} rounded-lg p-3 mt-1`} value={formData.zip} onChange={e => setFormData({...formData, zip: e.target.value})} />
+              </div>
             </div>
           </section>
 
@@ -353,7 +362,6 @@ try {
               <button onClick={() => setPaymentType('apple_pay')} className={`flex items-center justify-center gap-2 p-4 rounded-xl border transition-all ${paymentType === 'apple_pay' ? 'bg-white text-black border-white' : 'bg-[#1a1a1a] border-white/10'}`}><Apple className="w-5 h-5" /> Apple Pay</button>
               <button onClick={() => setPaymentType('google_pay')} className={`flex items-center justify-center gap-2 p-4 rounded-xl border transition-all ${paymentType === 'google_pay' ? 'bg-white text-black border-white' : 'bg-[#1a1a1a] border-white/10'}`}><Smartphone className="w-5 h-5" /> Google Pay</button>
             </div>
-
             {paymentType === 'card' && (
               <div className="space-y-4">
                 <div className="relative">
@@ -384,12 +392,10 @@ try {
                 </div>
               ))}
             </div>
-
             <div className="border-t border-white/5 pt-4 space-y-3">
               <div className="flex justify-between text-gray-400 text-sm"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
               <div className="flex justify-between text-xl font-bold pt-2"><span>Total</span><span>${total.toFixed(2)}</span></div>
             </div>
-
             <button onClick={handlePay} disabled={isSubmitting} className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold mt-6 transition-all disabled:opacity-50">
               {isSubmitting ? 'Processing...' : `Pay $${total.toFixed(2)}`}
             </button>
@@ -430,3 +436,4 @@ try {
       </div>
     </div>
   );
+}
