@@ -260,9 +260,9 @@ try {
         console.error('Order creation error:', orderError);
         setErrors({ payment: 'Failed to create order' });
         setIsSubmitting(false);
-      } else {
-        setErrors({ payment: 'Payment was not successful' });
-        setIsSubmitting(false);
+      }  {
+        // setErrors({ payment: 'Payment was not successful' });
+        // setIsSubmitting(false);
           
     
       }
