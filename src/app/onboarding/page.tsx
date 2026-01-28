@@ -1,4 +1,5 @@
 'use client';
+import { createClient } from '@/lib/supabase/client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,7 +18,7 @@ import {
 export default function OnboardingPage() {
   const router = useRouter();
     const searchParams = useSearchParams();
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const [domain, setDomain] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
