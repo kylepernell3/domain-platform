@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -9,14 +8,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
     // Get the current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Get user ID from request body (passed from client after auth)
+    const { paymentIntentId, domainName, addons, amountTotal, currency = 'usd', userId } = await request.json();
     
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID required' }, { status: 401 });
+    }    
 
     const { paymentIntentId, domainName, addons, amountTotal, currency = 'usd' } = await request.json();
 
@@ -42,8 +42,7 @@ export async function POST(request: NextRequest) {
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
-        user_id: user.id,
-        stripe_payment_intent_id: paymentIntentId,
+        user_id: userId,        stripe_payment_intent_id: paymentIntentId,
         domain_name: domainName,
         addons: addons || {},
         amount_total: amountTotal,
@@ -62,8 +61,7 @@ export async function POST(request: NextRequest) {
     const { data: domain, error: domainError } = await supabase
       .from('domains')
       .insert({
-        user_id: user.id,
-        domain_name: domainName,
+        user_id: userId,        domain_name: domainName,
         registrar: 'DomainPro',
         status: 'active',
         expires_at: expiresAt.toISOString(),

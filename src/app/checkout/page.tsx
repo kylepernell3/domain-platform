@@ -68,6 +68,15 @@ const RECOMMENDATIONS = [
 export default function CheckoutPage() {
   const supabase = createClient();
   const router = useRouter();
+    const [user, setUser] = useState<any>(null);
+  
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    }
+    getUser();
+  }, []);
   
   const [loading, setLoading] = useState(true);
   const [paymentType, setPaymentType] = useState<PaymentMethod>('card');
@@ -226,6 +235,7 @@ try {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             paymentIntentId: paymentIntent.id,
+                        userId: user?.id,
             domainName: cart[0]?.name || 'example.com',
             addons: {
               privacy: cart.some(item => item.type === 'protection'),
