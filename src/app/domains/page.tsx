@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react
+import { useRouter } from 'next/navigation';';
 import {
   Globe,
   Search,
@@ -932,6 +933,18 @@ export default function DomainsPage() {
   const [deleteModalDomain, setDeleteModalDomain] = useState<Domain | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    // Authentication Protection
+  const router = useRouter();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   // Fetch Domains from Supabase
   const fetchDomains = useCallback(async () => {
