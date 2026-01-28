@@ -228,6 +228,8 @@ const NavigationHeader: React.FC<{
                 <ChevronDown className={`w-4 h-4 hidden sm:block transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
+              {userMenuOpen && (
+                                <div className="absolute right-0 mt-2 w-56 bg-gray-900 border border-white/10 rounded-lg shadow-lg py-1 z-50">
                   <a href="/help" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
                     <HelpCircle className="w-4 h-4" />
                     Help Center
@@ -238,6 +240,8 @@ const NavigationHeader: React.FC<{
                       Sign Out
                     </button>
                   </div>
+                                  </div>
+                                )}
                 </div>
               )}
             </div>
