@@ -189,13 +189,8 @@ try {
         return;
       }
 
-        setErrors({ payment: 'Failed to load payment processor' });
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Confirm the payment with the card details
-      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        // Confirm the payment with the card details                  
+  const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: {
             number: formData.cardNumber.replace(/\s/g, ''),
@@ -216,8 +211,6 @@ try {
           },
         },
               });
-      });
-
       if (confirmError) {
         setErrors({ payment: confirmError.message || 'Payment failed' });
         setIsSubmitting(false);
