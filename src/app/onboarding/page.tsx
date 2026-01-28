@@ -76,7 +76,7 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-red-500/30">
       <nav className="border-b border-white/5 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => completeOnboarding()
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => completeOnboarding())}>
             <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center font-bold text-xl shadow-lg shadow-red-600/20">
               D
             </div>
