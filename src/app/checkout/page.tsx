@@ -423,3 +423,5 @@ try {
     </div>
   );
 }
+
+export default CheckoutPage;
