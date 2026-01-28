@@ -72,12 +72,9 @@ export default function CheckoutPage() {
   
   useEffect(() => {
     async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    }
-    getUser();
-  }, []);
-  
+            // @ts-ignore - Supabase client types issue
+      const response = await supabase.auth.getUser();
+      if (response.data?.user) setUser(response.data.user);
   const [loading, setLoading] = useState(true);
   const [paymentType, setPaymentType] = useState<PaymentMethod>('card');
   const [savePayment, setSavePayment] = useState(true);
@@ -85,7 +82,10 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([
     { id: '1', name: 'example-domain.com', price: 12.99, type: 'domain' }
-  ]);
+        }
+  },  []);432
+
+    
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -107,6 +107,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     async function getSessionAndProfile() {
+          // @ts-ignore - Supabase client types issue
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.push('/login?redirect=/checkout');
@@ -189,6 +190,13 @@ try {
           description: `Domain Platform Purchase - ${cart.map(i => i.name).join(', ')}`
         })
       });
+        } catch (error) {
+    console.error('Payment intent creation failed:', error);
+    setErrors({ payment: 'Failed to initialize payment' });
+    setIsSubmitting(false);
+    return;
+  }
+    };
 
       const { clientSecret, error } = await response.json();
       
@@ -422,4 +430,3 @@ try {
       </div>
     </div>
   );
-}
