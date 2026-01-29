@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Globe, Check, Crown, Zap } from 'lucide-react';
@@ -59,8 +59,7 @@ const PRICING_TIERS: PricingTier[] = [
   },
 ];
 
-export default function PricingPage() {
-  const router = useRouter();
+function PricingContent() {  const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
   
@@ -261,5 +260,14 @@ export default function PricingPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+// Wrap with Suspense for useSearchParams
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading pricing...</div>}>
+      <PricingContent />
+    </Suspense>
   );
 }
