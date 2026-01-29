@@ -34,7 +34,6 @@ interface DomainResult {
   price: number | null
   renewalPrice: number | null
   status: AvailabilityStatus
-  error?: string
   expirationDate?: string
 }
 
