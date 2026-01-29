@@ -15,6 +15,8 @@ import {
   MessageSquare
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function OnboardingPage() {
   const router = useRouter();
     const searchParams = useSearchParams();
