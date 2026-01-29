@@ -173,6 +173,5 @@ async function checkDomainAvailability(domain: string): Promise<DomainCheckResul
     price: null,
     renewalPrice: null,
     currency: "USD",
-    registrar: "Unable to verify",
-    error: "Unable to verify availability - domain may be registered"  }
+    registrar: "Unable to verify"
 }
