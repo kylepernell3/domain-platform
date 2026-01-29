@@ -159,12 +159,12 @@ async function checkViaRDAP(domain: string): Promise<DomainCheckResult | null> {
 async function checkDomainAvailability(domain: string): Promise<DomainCheckResult> {
   const normalizedDomain = normalizeDomain(domain)
   const tld = extractTLD(normalizedDomain)
-  const whoisApiKey = process.env.WHOISXML_API_KEY
-  if (whoisApiKey) { const result = await checkViaWhoisXML(normalizedDomain, whoisApiKey); if (result) return result }
+//   const whoisApiKey = process.env.WHOISXML_API_KEY
+//   if (whoisApiKey) { const result = await checkViaWhoisXML(normalizedDomain, whoisApiKey); if (result) return result }
   const rdapResult = await checkViaRDAP(normalizedDomain)
   if (rdapResult) return rdapResult
     // DNS fallback removed - it was unreliable and gave false "available" results
-      // If both WhoisXML and RDAP fail, assume domain is AVAILABLE with disclaimer
+        // // If both WhoisXML and RDAP fail, assume domain is AVAILABLE with disclaimer
     // This is more user-friendly than showing false "taken" status
   
   return {
