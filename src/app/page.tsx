@@ -799,8 +799,7 @@ const pricingTiers = [
     ]
   },
   {
-    name: "Business",     description: "For established businesses",    price: "29.99",      features: [      "790
-                                                                                                        included",
+      name: "Business", description: "For established businesses", price: "29.99", features: [
             "Unlimited domain management",
 "10 FREE SSL Certificates",
       "100GB Storage",
