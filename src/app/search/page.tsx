@@ -1314,7 +1314,7 @@ function DomainSearchContent() {
         premium: r.premium,
         price: r.price,
         renewalPrice: r.renewalPrice,
-        status: r.error ? "error" : r.available ? (r.premium ? "premium" : "available") : "taken",
+        status:  r.available ? (r.premium ? "premium" : "available") : "taken",
         error: r.error,
         expirationDate: r.expirationDate
       })))
