@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
-
+export const fetchCache = 'force-no-store';
 export default function OnboardingPage() {
   const router = useRouter();
     const searchParams = useSearchParams();
