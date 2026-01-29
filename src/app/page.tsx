@@ -790,7 +790,7 @@ const pricingTiers = [
   {
     name: "Starter",
     description: "Perfect for individuals",
-    price: "6.99",
+    price: "14.99
     features: [
       "1 Custom domain included",
       "2 SSL Certificates",
@@ -804,7 +804,7 @@ const pricingTiers = [
   {
     name: "Professional",
     description: "Ideal for growing businesses",
-    price: "19.99",
+    price: "29.99
     features: [
       "20 Domains included",
       "10 FREE SSL Certificates",
@@ -820,7 +820,7 @@ const pricingTiers = [
   {
     name: "Enterprise",
     description: "For agencies and organizations",
-    price: "79.99",
+    price: "99.99
     features: [
       "Unlimited Domains",
       "Unlimited SSL Certificates",
