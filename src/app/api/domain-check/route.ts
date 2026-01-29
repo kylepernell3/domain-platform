@@ -16,7 +16,6 @@ interface DomainCheckResult {
   registrar?: string
   expirationDate?: string
   createdDate?: string
-  error?: string
 }
 
 interface BulkCheckResult {
