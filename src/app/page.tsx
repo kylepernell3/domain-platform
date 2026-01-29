@@ -788,18 +788,21 @@ const pricingTiers = [
   },
   {
     name: "Professional",   description: "Ideal for growing businesses",    price: "19.99", features: [
-      "1 Custom domain included",
+      "Unlimited domain management",
       "2 SSL Certificates",
       "10GB Storage",
       "Basic DNS Management",
+      
       "Email Forwarding",
       "Standard Support",
       "No branding"
     ]
   },
   {
-    name: "Business",     description: "For established businesses",    price: "29.99",      features: [      "20 Domains included",
-      "10 FREE SSL Certificates",
+    name: "Business",     description: "For established businesses",    price: "29.99",      features: [      "790
+                                                                                                        included",
+            "Unlimited domain management",
+"10 FREE SSL Certificates",
       "100GB Storage",
       "Advanced DNS Management",
       "Professional Email (5 accounts)",
