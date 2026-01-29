@@ -122,6 +122,18 @@ export default function CheckoutPage() {
         .eq('id', session.user.id)
         .single();
 
+          // Check for plan verification - paid plans required for real TLDs
+    const urlParams = new URLSearchParams(window.location.search);
+    const domainParam = urlParams.get('domain');
+    const userPlan = profileData?.plan || 'free';
+    
+    // If user has free plan and trying to checkout a domain that's NOT .flowmain.site
+    if (domainParam && !domainParam.endsWith('.flowmain.site') && userPlan === 'free') {
+      // Redirect to pricing page to upgrade
+      router.push(`/pricing?redirect=/checkout&domain=${encodeURIComponent(domainParam)}`);
+      return;
+    }
+
       if (profileData) {
         setFormData(prev => ({
           ...prev,
