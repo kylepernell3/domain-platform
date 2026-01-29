@@ -775,8 +775,7 @@ const usps = [
 
 const pricingTiers = [
   {
-    name: "Free",
-    description: "Get started with zero cost",
+    name: "Starter",    description: "Get started with zero cost",
     price: "0",
     features: [
       "Free subdomain (yoursite.domainpro.site)",
@@ -788,10 +787,7 @@ const pricingTiers = [
     ]
   },
   {
-    name: "Starter",
-    description: "Perfect for individuals",
-    price: "14.99
-    features: [
+    name: "Professional",   description: "Ideal for growing businesses",    price: "14.99    features: [
       "1 Custom domain included",
       "2 SSL Certificates",
       "10GB Storage",
@@ -802,11 +798,7 @@ const pricingTiers = [
     ]
   },
   {
-    name: "Professional",
-    description: "Ideal for growing businesses",
-    price: "29.99
-    features: [
-      "20 Domains included",
+    name: "Business",     description: "For established businesses",    price: "29.99",      features: [      "20 Domains included",
       "10 FREE SSL Certificates",
       "100GB Storage",
       "Advanced DNS Management",
@@ -820,9 +812,7 @@ const pricingTiers = [
   {
     name: "Enterprise",
     description: "For agencies and organizations",
-    price: "99.99
-    features: [
-      "Unlimited Domains",
+    price: "99.99",      features: [      "Unlimited Domains",
       "Unlimited SSL Certificates",
       "Unlimited Storage",
       "Premium DNS with DDoS Protection",
