@@ -1,3 +1,4 @@
+150
 // ============================================================================
 // DOMAIN AVAILABILITY CHECK API ROUTE
 // Real domain checking via WhoisXMLAPI + RDAP fallback
@@ -158,8 +159,8 @@ async function checkViaRDAP(domain: string): Promise<DomainCheckResult | null> {
 async function checkDomainAvailability(domain: string): Promise<DomainCheckResult> {
   const normalizedDomain = normalizeDomain(domain)
   const tld = extractTLD(normalizedDomain)
-//   const whoisApiKey = process.env.WHOISXML_API_KEY
-//   if (whoisApiKey) { const result = await checkViaWhoisXML(normalizedDomain, whoisApiKey); if (result) return result }
+  const whoisApiKey = process.env.WHOISXML_API_KEY
+  if (whoisApiKey) { const result = await checkViaWhoisXML(normalizedDomain, whoisApiKey); if (result) return result }
   const rdapResult = await checkViaRDAP(normalizedDomain)
   if (rdapResult) return rdapResult
     // DNS fallback removed - it was unreliable and gave false "available" results
