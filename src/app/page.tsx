@@ -787,9 +787,9 @@ const pricingTiers = [
     ]
   },
   {
-    name: "Professional",   description: "Ideal for growing businesses",    price: "14.99    features: [
+    name: "Professional",    description: "Ideal for growing businesses",    price: "14.99",    features: [
       "1 Custom domain included",
-      "2 SSL Certificates",
+            "2 SSL Certificates",
       "10GB Storage",
       "Basic DNS Management",
       "Email Forwarding",
