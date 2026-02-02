@@ -374,7 +374,20 @@ function PricingContent() {
         </div>
       </section>
 
-      {/* Feature Comparison */}
-      <section className="py-16 px-4 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto">
+      {/* Footer */}
+      <footer className="border-t border-gray-800 py-8 px-4">
+        <div className="max-w-7xl mx-auto text-center text-gray-400">
+          <p>© 2026 DomainPro. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
 
+export default function PricingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    }>
