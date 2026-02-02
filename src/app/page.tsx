@@ -776,54 +776,80 @@ const usps = [
 
 const pricingTiers = [
   {
-    name: "Starter",    description: "Get started with zero cost",
+    name: "Starter",
+    description: "Get online free with Automatic HTTPS",
     price: "0",
     features: [
-      "Free subdomain (yoursite.domainpro.site)",
-      "1 Page website",
-      "Basic SSL Certificate",
-      "500MB Storage",
-      "Community support",
-      "DomainPro branding"
+      "Automatic HTTPS (DV certificates for your .domainpro.site subdomain)",
+      "Basic DNS management",
+      "1 GB storage",
+      "10 GB bandwidth",
+      "Free subdomain (yourname.domainpro.site)",
+      "DomainPro branding",
+      "Community support"
     ]
   },
   {
-    name: "Professional",   description: "Ideal for growing businesses",    price: "19.99", features: [
+    name: "Professional",
+    description: "Everything you need for a small business site",
+    price: "19.99",
+    features: [
+      "Automatic HTTPS for all connected domains",
       "Unlimited domain management",
-      "2 SSL Certificates",
-      "10GB Storage",
-      "Basic DNS Management",
-      
-      "Email Forwarding",
-      "Standard Support",
-      "No branding"
+      "10 email forwards included",
+      "Advanced DNS management",
+      "Beginner website builder",
+      "80 GB storage",
+      "100 GB bandwidth",
+      "Basic analytics dashboard",
+      "Domain transfer tools",
+      "1-click DNS templates",
+      "Email support (24-hour response)"
     ]
   },
   {
-      name: "Business", description: "For established businesses", price: "29.99", features: [
-            "Unlimited domain management",
-"10 FREE SSL Certificates",
-      "100GB Storage",
-      "Advanced DNS Management",
-      "Professional Email (5 accounts)",
-      "Priority 24/7 Support",
-      "Full Analytics Dashboard",
-      "One-Click WordPress Deploy",
-      "API Access"
+    name: "Developer",
+    description: "For developers shipping serious projects",
+    price: "79.99",
+    features: [
+      "Everything in Professional",
+      "Automatic HTTPS for unlimited sites",
+      "Advanced website builder",
+      "Host unlimited websites",
+      "Version history & rollback",
+      "5 Gmail inboxes (30 GB each)",
+      "API access (domains, DNS, billing)",
+      "Custom DNS templates"
     ]
   },
   {
     name: "Enterprise",
-    description: "For agencies and organizations",
-    price: "99.99",      features: [      "Unlimited Domains",
-      "Unlimited SSL Certificates",
-      "Unlimited Storage",
-      "Premium DNS with DDoS Protection",
-      "Professional Email (Unlimited)",
-      "Dedicated Account Manager",
-      "White-label Solutions",
-      "Custom Integrations",
-      "SLA Guarantee"
+    description: "Scalable, managed hosting for teams",
+    price: "249.99",
+    features: [
+      "Everything in Developer",
+      "Multi-site management dashboard",
+      "Multi-client dashboard",
+      "Team collaboration",
+      "10 Gmail inboxes (30 GB each)",
+      "500 GB storage per website",
+      "Premium DNS & DDoS protection",
+      "Dedicated account manager",
+      "Custom certificate management"
+    ]
+  },
+  {
+    name: "White Label",
+    description: "Run your own DomainPro under your brand",
+    price: "499",
+    features: [
+      "Custom-branded control panel",
+      "Everything in Enterprise, rebranded",
+      "Whitelabel billing and invoices",
+      "API and provisioning support",
+      "Priority support and onboarding",
+      "Custom limits and pricing",
+      "Revenue-share options"
     ]
   }
 ]
