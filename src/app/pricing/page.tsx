@@ -3,7 +3,7 @@
 import React, { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Globe, Check, Crown, Zap, Building2, Code } from 'lucide-react';
+import { Globe, Check } from 'lucide-react';
 
 interface PricingTier {
   name: string;
@@ -149,7 +149,6 @@ function PricingContent() {
   }, [supabase, router]);
 
   const handleUpgrade = async (plan: string, isContactSales: boolean = false) => {
-    // For White Label, redirect to contact form
     if (isContactSales || plan === 'white_label') {
       router.push('/contact?plan=white-label');
       return;
@@ -164,7 +163,6 @@ function PricingContent() {
         return;
       }
 
-      // Update user's plan
       const { error } = await supabase
         .from('profiles')
         .update({ 
@@ -175,7 +173,6 @@ function PricingContent() {
 
       if (error) throw error;
 
-      // Redirect based on context
       if (redirectDomain && redirectUrl) {
         router.push(`${redirectUrl}?domain=${redirectDomain}`);
       } else if (redirectUrl) {
@@ -212,7 +209,6 @@ function PricingContent() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
       <header className="border-b border-gray-800 backdrop-blur-xl bg-gray-900/80 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -230,7 +226,6 @@ function PricingContent() {
         </div>
       </header>
 
-      {/* Hero */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -248,7 +243,6 @@ function PricingContent() {
             </div>
           )}
 
-          {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-4 mb-8">
             <button
               onClick={() => setBillingCycle('monthly')}
@@ -277,7 +271,6 @@ function PricingContent() {
         </div>
       </section>
 
-      {/* Pricing Cards */}
       <section className="pb-16 px-4">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {PRICING_TIERS.map((tier) => {
@@ -287,7 +280,6 @@ function PricingContent() {
             const isDowngrade = tierLevel < currentLevel;
             const isDisabled = isCurrent || isDowngrade;
             
-            // Calculate display price based on billing cycle
             const displayPrice = billingCycle === 'annual' && tier.annualPrice 
               ? tier.annualPrice 
               : tier.price;
@@ -373,13 +365,6 @@ function PricingContent() {
           })}
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-800 py-8 px-4">
-        <div className="max-w-7xl mx-auto text-center text-gray-400">
-          <p>© 2026 DomainPro. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }
@@ -391,3 +376,7 @@ export default function PricingPage() {
         <div className="text-white">Loading...</div>
       </div>
     }>
+      <PricingContent />
+    </Suspense>
+  );
+}
