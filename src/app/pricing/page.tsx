@@ -376,4 +376,5 @@ function PricingContent() {
 
       {/* Feature Comparison */}
       <section className="py-16 px-4 border-t border-gray-800">
-        <div className="max-w-7xl
+        <div className="max-w-7xl mx-auto">
+
