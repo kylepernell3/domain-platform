@@ -744,42 +744,59 @@ function PricingCard({ plan, selected, billingCycle, onSelect, theme }: { plan: 
 }
 
 function WhiteLabelUpsell({ enabled, onToggle, theme }: { enabled: boolean; onToggle: () => void; theme: Theme }) {
+  const features = [
+    "Custom domain login portal for your clients",
+    "Your logo, colors, and brand throughout the dashboard",
+    "Remove all DomainPro branding and references",
+    "Branded email notifications sent on your behalf",
+  ]
+
   return (
-    <div className="max-w-2xl mx-auto mt-8">
+    <div className="max-w-3xl mx-auto mt-10">
       <button
         type="button"
         onClick={onToggle}
-        className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 flex items-start gap-4 ${
+        className={`w-full p-7 rounded-2xl border-2 text-left transition-all duration-300 flex items-start gap-5 ${
           enabled
-            ? "border-red-500 shadow-lg shadow-red-500/20"
+            ? "border-red-500 shadow-xl shadow-red-500/20"
             : theme === "dark"
             ? "border-gray-700 hover:border-gray-600"
             : "border-gray-200 hover:border-gray-300"
         } ${theme === "dark" ? "bg-gray-800/50" : "bg-white"}`}
         role="switch"
         aria-checked={enabled}
-        aria-label="Toggle white-label client dashboard add-on"
+        aria-label="Toggle white-label client dashboard add-on for $29 per month"
       >
-        <div className={`flex-shrink-0 p-3 rounded-xl bg-gradient-to-br ${enabled ? "from-red-500 to-orange-500" : "from-gray-500 to-gray-600"}`}>
-          <Palette className="h-6 w-6 text-white" />
+        <div className={`flex-shrink-0 p-4 rounded-xl bg-gradient-to-br ${enabled ? "from-red-500 to-orange-500" : "from-gray-500 to-gray-600"} transition-all duration-300`}>
+          <Palette className="h-7 w-7 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-              White‑label client dashboard
-            </h3>
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <span className={`text-sm font-semibold ${enabled ? "text-red-500" : theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                White‑label client dashboard
+              </h3>
+              <p className={`text-base font-semibold mt-0.5 ${enabled ? "text-red-500" : theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
                 + $29/mo
-              </span>
-              <div className={`w-10 h-6 rounded-full transition-colors duration-300 flex items-center ${enabled ? "bg-red-500 justify-end" : theme === "dark" ? "bg-gray-600 justify-start" : "bg-gray-300 justify-start"}`}>
-                <div className="w-4 h-4 mx-1 bg-white rounded-full shadow transition-all duration-300" />
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <div className={`w-12 h-7 rounded-full transition-colors duration-300 flex items-center ${enabled ? "bg-red-500 justify-end" : theme === "dark" ? "bg-gray-600 justify-start" : "bg-gray-300 justify-start"}`}>
+                <div className="w-5 h-5 mx-1 bg-white rounded-full shadow transition-all duration-300" />
               </div>
             </div>
           </div>
-          <p className={`text-sm mt-1 ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
-            Let clients log in on your own domain with your branding. Remove all DomainPro references and present a fully custom experience.
+          <p className={`text-base mt-3 leading-relaxed ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+            Let clients log in on your own domain with your branding. Present a fully custom, professional experience with no trace of DomainPro.
           </p>
+          <ul className="mt-4 space-y-2">
+            {features.map((feature, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <Check className={`h-4 w-4 mt-0.5 flex-shrink-0 ${enabled ? "text-red-500" : "text-green-500"}`} />
+                <span className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{feature}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </button>
     </div>
@@ -865,7 +882,7 @@ function SocialSignupButtons({ onSignup, loadingProvider, theme, disabled }: { o
   )
 }
 
-function OrderSummary({ plan, billingCycle, theme }: { plan: PricingPlan; billingCycle: BillingCycle; theme: Theme }) {
+function OrderSummary({ plan, billingCycle, theme, enableWhiteLabel }: { plan: PricingPlan; billingCycle: BillingCycle; theme: Theme; enableWhiteLabel?: boolean }) {
   const price = billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice
   const monthlyEquivalent = billingCycle === "annual" ? getMonthlyEquivalent(plan.annualPrice) : null
   const savings = billingCycle === "annual" && plan.monthlyPrice > 0 ? plan.monthlyPrice * 12 - plan.annualPrice : 0
@@ -878,10 +895,13 @@ function OrderSummary({ plan, billingCycle, theme }: { plan: PricingPlan; billin
         <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Billing</span><span className={`font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{billingCycle === "monthly" ? "Monthly" : "Annual"}</span></div>
         {monthlyEquivalent && <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Monthly equivalent</span><span className={`font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>${monthlyEquivalent}/mo</span></div>}
         {savings > 0 && <div className="flex justify-between text-green-500"><span>Annual savings</span><span className="font-medium">-${formatPrice(savings)}</span></div>}
+        {enableWhiteLabel && (
+          <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label add‑on</span><span className={`font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>$29.00/mo</span></div>
+        )}
         <div className={`pt-3 border-t ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
           <div className="flex justify-between">
             <span className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Total</span>
-            <div className="text-right"><span className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{price === 0 ? "Free" : `$${formatPrice(price)}`}</span>{price > 0 && <span className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>/{billingCycle === "annual" ? "year" : "month"}</span>}</div>
+            <div className="text-right"><span className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{price === 0 ? "Free" : `$${formatPrice(price)}`}</span>{price > 0 && <span className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>/{billingCycle === "annual" ? "year" : "month"}</span>}{enableWhiteLabel && <div className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>+ $29.00/mo white‑label</div>}</div>
           </div>
         </div>
       </div>
@@ -1280,7 +1300,7 @@ export default function SignupPage() {
                       <SecurityBadges theme={theme} />
                     </div>
                   </div>
-                  <div className="lg:col-span-2"><OrderSummary plan={selectedPlan} billingCycle={formData.billingCycle} theme={theme} /></div>
+                  <div className="lg:col-span-2"><OrderSummary plan={selectedPlan} billingCycle={formData.billingCycle} theme={theme} enableWhiteLabel={formData.enableWhiteLabel} /></div>
                 </div>
               </div>
             )}
@@ -1289,7 +1309,7 @@ export default function SignupPage() {
               <div className="max-w-2xl mx-auto">
                 <div className={`p-8 rounded-2xl border ${theme === "dark" ? "bg-gray-800/50 border-gray-700" : "bg-white border-gray-200"}`}>
                   <h2 className={`text-2xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Review Your Order</h2>
-                  <OrderSummary plan={selectedPlan} billingCycle={formData.billingCycle} theme={theme} />
+                  <OrderSummary plan={selectedPlan} billingCycle={formData.billingCycle} theme={theme} enableWhiteLabel={formData.enableWhiteLabel} />
                   <div className={`mt-6 p-4 rounded-xl ${theme === "dark" ? "bg-gray-700/50" : "bg-gray-100"}`}>
                     <h3 className={`font-semibold mb-3 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Account Details</h3>
                     <div className="space-y-2">
@@ -1297,7 +1317,7 @@ export default function SignupPage() {
                       <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Email</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.email}</span></div>
                       {formData.companyName && <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Company</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.companyName}</span></div>}
                       <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Account Type</span><span className={`capitalize ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.accountType}</span></div>
-                      <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label</span><span className={`font-medium ${formData.enableWhiteLabel ? "text-green-500" : theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.enableWhiteLabel ? "On (+$29/mo)" : "Off"}</span></div>
+                      <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label add‑on</span><span className={`font-medium ${formData.enableWhiteLabel ? "text-green-500" : theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.enableWhiteLabel ? "Enabled — $29/mo" : "Off"}</span></div>
                     </div>
                   </div>
                   {!skipPayment && (
