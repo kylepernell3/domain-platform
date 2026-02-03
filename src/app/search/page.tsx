@@ -34,7 +34,6 @@ interface DomainResult {
   price: number | null
   renewalPrice: number | null
   status: AvailabilityStatus
-  error?: string
   expirationDate?: string
 }
 
@@ -1315,8 +1314,7 @@ function DomainSearchContent() {
         premium: r.premium,
         price: r.price,
         renewalPrice: r.renewalPrice,
-        status: r.error ? "error" : r.available ? (r.premium ? "premium" : "available") : "taken",
-        error: r.error,
+        status:  r.available ? (r.premium ? "premium" : "available") : "taken",
         expirationDate: r.expirationDate
       })))
 

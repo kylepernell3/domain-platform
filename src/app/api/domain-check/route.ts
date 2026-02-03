@@ -1,3 +1,4 @@
+150
 // ============================================================================
 // DOMAIN AVAILABILITY CHECK API ROUTE
 // Real domain checking via WhoisXMLAPI + RDAP fallback
@@ -16,7 +17,6 @@ interface DomainCheckResult {
   registrar?: string
   expirationDate?: string
   createdDate?: string
-  error?: string
 }
 
 interface BulkCheckResult {
@@ -164,7 +164,7 @@ async function checkDomainAvailability(domain: string): Promise<DomainCheckResul
   const rdapResult = await checkViaRDAP(normalizedDomain)
   if (rdapResult) return rdapResult
     // DNS fallback removed - it was unreliable and gave false "available" results
-      // If both WhoisXML and RDAP fail, assume domain is AVAILABLE with disclaimer
+        // // If both WhoisXML and RDAP fail, assume domain is AVAILABLE with disclaimer
     // This is more user-friendly than showing false "taken" status
   
   return {
@@ -173,6 +173,6 @@ async function checkDomainAvailability(domain: string): Promise<DomainCheckResul
     price: null,
     renewalPrice: null,
     currency: "USD",
-    registrar: "Unable to verify",
-    error: "Unable to verify availability - domain may be registered"  }
+    registrar: "Unable to verify"
+      }
 }
