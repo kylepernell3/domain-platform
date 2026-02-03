@@ -175,7 +175,7 @@ const PLANS: PricingPlan[] = [
     name: "Professional",
     description: "Everything you need for a small business site",
     monthlyPrice: 19.99,
-    annualPrice: 191.88, // 15.99 * 12
+    annualPrice: 191.88,
     features: [
       "Automatic HTTPS for all connected domains",
       "Unlimited domain management",
@@ -202,7 +202,7 @@ const PLANS: PricingPlan[] = [
     name: "Developer",
     description: "For developers shipping serious projects",
     monthlyPrice: 79.99,
-    annualPrice: 767.88, // 63.99 * 12
+    annualPrice: 767.88,
     features: [
       "Everything in Professional",
       "Automatic HTTPS for unlimited sites and domains",
@@ -223,7 +223,7 @@ const PLANS: PricingPlan[] = [
     name: "Enterprise",
     description: "Scalable, managed hosting for teams",
     monthlyPrice: 249.99,
-    annualPrice: 2399.88, // 199.99 * 12
+    annualPrice: 2399.88,
     features: [
       "Everything in Developer",
       "Multi-site management dashboard (coming soon)",
@@ -424,52 +424,87 @@ function useTheme(): [Theme, () => void, boolean] {
 }
 
 function useSupabaseClient() {
-  const [supabase, setSupabase] = useState<any>(null)
+  const [supabase, setSupabase] = useState<ReturnType<typeof Object> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
     const loadSupabase = async () => {
+      // Try the project's existing helper first
       try {
-        const { createClient } = await import("@/lib/supabase/client")
-        setSupabase(createClient())
-        setError(null)
-      } catch (e) {
+        const mod = await import("@/lib/supabase/client")
+        const client = typeof mod.createClient === "function" ? mod.createClient() : mod.default
+        if (!cancelled) {
+          setSupabase(client)
+          setError(null)
+          setLoading(false)
+        }
+        return
+      } catch {
+        // Local helper not available — fall through to manual creation
+      }
+
+      // Fallback: build a browser client from env vars
+      try {
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        if (!url || !anonKey) {
+          throw new Error(
+            "Missing Supabase configuration. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."
+          )
+        }
+        const { createClient } = await import("@supabase/supabase-js")
+        const client = createClient(url, anonKey)
+        if (!cancelled) {
+          setSupabase(client)
+          setError(null)
+        }
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "Failed to initialize authentication"
         console.error("Failed to load Supabase client:", e)
-        setError("Failed to initialize authentication")
-      } finally { setLoading(false) }
+        if (!cancelled) setError(msg)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
     loadSupabase()
+    return () => { cancelled = true }
   }, [])
 
   return { supabase, loading, error }
 }
 
-function useStripe() {
-  const [stripe, setStripe] = useState<any>(null)
-  const [elements, setElements] = useState<any>(null)
+function useStripePayment() {
+  const [stripe, setStripe] = useState<ReturnType<typeof Object> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
     const loadStripe = async () => {
       try {
         const { loadStripe: loadStripeJS } = await import("@stripe/stripe-js")
         const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
         if (!publishableKey) throw new Error("Stripe publishable key not configured")
         const stripeInstance = await loadStripeJS(publishableKey)
-        setStripe(stripeInstance)
-        if (stripeInstance) setElements(stripeInstance.elements())
-        setError(null)
-      } catch (e: any) {
+        if (!cancelled) {
+          setStripe(stripeInstance)
+          setError(null)
+        }
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "Failed to initialize payment system"
         console.error("Failed to load Stripe:", e)
-        setError(e.message || "Failed to initialize payment system")
-      } finally { setLoading(false) }
+        if (!cancelled) setError(msg)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
     loadStripe()
+    return () => { cancelled = true }
   }, [])
 
-  return { stripe, elements, loading, error }
+  return { stripe, loading, error }
 }
 
 // ============================================================================
@@ -809,25 +844,45 @@ function OrderSummary({ plan, billingCycle, theme }: { plan: PricingPlan; billin
   )
 }
 
-function StripeCardForm({ stripe, theme, onCardChange, cardError }: { stripe: any; theme: Theme; onCardChange: (complete: boolean, error?: string) => void; cardError?: string }) {
+function StripeCardForm({ stripe, theme, onCardChange, cardError }: { stripe: ReturnType<typeof Object> | null; theme: Theme; onCardChange: (complete: boolean, error?: string) => void; cardError?: string }) {
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const cardContainerRef = useRef<HTMLDivElement>(null)
-  const cardElementRef = useRef<any>(null)
+  const cardElementRef = useRef<ReturnType<typeof Object> | null>(null)
+  const onCardChangeRef = useRef(onCardChange)
+
+  // Keep callback ref current to avoid remounting the Stripe element when the
+  // parent re-creates the callback identity.
+  useEffect(() => { onCardChangeRef.current = onCardChange }, [onCardChange])
 
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     if (!stripe || !mounted || !cardContainerRef.current) return
-    const elements = stripe.elements()
-    const style = { base: { fontSize: "16px", color: theme === "dark" ? "#ffffff" : "#1f2937", fontFamily: "system-ui, -apple-system, sans-serif", "::placeholder": { color: theme === "dark" ? "#6b7280" : "#9ca3af" } }, invalid: { color: "#ef4444", iconColor: "#ef4444" } }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const elements = (stripe as any).elements()
+    const style = {
+      base: {
+        fontSize: "16px",
+        color: theme === "dark" ? "#ffffff" : "#1f2937",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        "::placeholder": { color: theme === "dark" ? "#6b7280" : "#9ca3af" },
+      },
+      invalid: { color: "#ef4444", iconColor: "#ef4444" },
+    }
     const card = elements.create("card", { style, hidePostalCode: true })
     card.mount(cardContainerRef.current)
     cardElementRef.current = card
     setLoading(false)
-    card.on("change", (event: any) => onCardChange(event.complete, event.error?.message))
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    card.on("change", (event: any) =>
+      onCardChangeRef.current(event.complete, event.error?.message)
+    )
+
     return () => { card.unmount() }
-  }, [stripe, mounted, theme, onCardChange])
+  }, [stripe, mounted, theme])
 
   if (!stripe) return <div className={`p-4 rounded-xl border ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-300"}`} role="alert"><div className="flex items-center gap-2 text-amber-500"><AlertCircle className="h-5 w-5" /><span>Payment system loading...</span></div></div>
 
@@ -880,9 +935,9 @@ function SuccessMessage({ theme, email }: { theme: Theme; email: string }) {
   return (
     <div className="text-center py-16">
       <div className="inline-flex items-center justify-center w-20 h-20 bg-green-500 rounded-full mb-6"><CheckCircle className="h-10 w-10 text-white" /></div>
-      <h2 className={`text-3xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Account Created Successfully!</h2>
-      <p className={`text-lg mb-8 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>We&apos;ve sent a verification email to <strong>{email}</strong></p>
-      <p className={`text-sm mb-8 ${theme === "dark" ? "text-gray-500" : "text-gray-500"}`}>Please check your inbox and click the verification link to activate your account.</p>
+      <h2 className={`text-3xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Check Your Email to Confirm Your Account</h2>
+      <p className={`text-lg mb-8 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>We&apos;ve sent a confirmation link to <strong>{email}</strong>.</p>
+      <p className={`text-sm mb-8 ${theme === "dark" ? "text-gray-500" : "text-gray-500"}`}>Please check your inbox (and spam folder) and click the link to activate your account.</p>
       <Link href="/login" className="inline-flex items-center gap-2 px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-500/25 hover:shadow-red-500/40">Continue to Sign In<ArrowRight className="h-5 w-5" /></Link>
     </div>
   )
@@ -896,7 +951,7 @@ export default function SignupPage() {
   const router = useRouter()
   const [theme, toggleTheme, mounted] = useTheme()
   const { supabase, loading: supabaseLoading, error: supabaseError } = useSupabaseClient()
-  const { stripe, elements, loading: stripeLoading, error: stripeError } = useStripe()
+  const { stripe, error: stripeError } = useStripePayment()
 
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA)
@@ -924,7 +979,7 @@ export default function SignupPage() {
       switch (field) {
         case "fullName": isValid = value.trim().length >= 2; error = isValid ? undefined : "Name must be at least 2 characters"; break
         case "email": isValid = validateEmail(value); error = isValid ? undefined : "Please enter a valid email address"; break
-        case "password": isValid = validatePassword(value).isValid; error = isValid ? undefined : "Password does not meet requirements"; break
+        case "password": isValid = validatePassword(value).isValid; error = isValid ? undefined : "Password does not meet all requirements"; break
         case "confirmPassword": isValid = value === formData.password && value.length > 0; error = isValid ? undefined : "Passwords do not match"; break
         case "companyName": isValid = formData.accountType === "personal" || value.trim().length >= 2; error = isValid ? undefined : "Company name is required"; break
         case "phone": isValid = value.length === 0 || /^[\d\s\-+()]+$/.test(value); error = isValid ? undefined : "Please enter a valid phone number"; break
@@ -936,6 +991,7 @@ export default function SignupPage() {
       }
       setValidationState((prev) => ({ ...prev, [field]: isValid ? "valid" : "invalid" }))
       if (error) setErrors((prev) => ({ ...prev, [field]: error }))
+      else setErrors((prev) => ({ ...prev, [field]: undefined }))
     }, 300)
   }, [formData.password, formData.accountType])
 
@@ -950,10 +1006,11 @@ export default function SignupPage() {
     if (step === 2) {
       if (!formData.fullName.trim()) newErrors.fullName = "Full name is required"
       else if (formData.fullName.trim().length < 2) newErrors.fullName = "Name must be at least 2 characters"
-      if (!formData.email.trim()) newErrors.email = "Email is required"
+      if (!formData.email.trim()) newErrors.email = "Email address is required"
       else if (!validateEmail(formData.email)) newErrors.email = "Please enter a valid email address"
       if (!formData.password) newErrors.password = "Password is required"
-      else if (!validatePassword(formData.password).isValid) newErrors.password = "Password does not meet requirements"
+      else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters"
+      else if (!validatePassword(formData.password).isValid) newErrors.password = "Password does not meet all requirements (uppercase, lowercase, number, and special character)"
       if (!formData.confirmPassword) newErrors.confirmPassword = "Please confirm your password"
       else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match"
       if (formData.accountType === "business" && !formData.companyName.trim()) newErrors.companyName = "Company name is required for business accounts"
@@ -999,41 +1056,94 @@ export default function SignupPage() {
     setSocialLoading(provider)
     setErrors({})
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/auth/callback?plan=${formData.selectedPlan}&billing=${formData.billingCycle}` } })
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?plan=${formData.selectedPlan}&billing=${formData.billingCycle}`,
+        },
+      })
       if (error) throw error
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : `Failed to sign up with ${provider}. Please try again.`
       console.error("Social signup error:", error)
-      setErrors({ general: error.message || `Failed to sign up with ${provider}. Please try again.` })
-    } finally { setSocialLoading(null) }
+      setErrors({ general: msg })
+      setSocialLoading(null)
+    }
+    // NOTE: On success the browser is redirected by Supabase, so we intentionally
+    // do NOT clear setSocialLoading here — the page will unmount.
   }, [supabase, formData.selectedPlan, formData.billingCycle])
 
   const handleSubmit = useCallback(async () => {
     if (!validateStep(4)) return
-    if (!supabase) { setErrors({ general: "Authentication system not available. Please try again." }); return }
+    if (!supabase) {
+      setErrors({ general: "Authentication system is not available. Please refresh and try again." })
+      return
+    }
+
     setIsLoading(true)
     setErrors({})
+
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
-          data: { full_name: formData.fullName, company_name: formData.companyName || null, account_type: formData.accountType, phone: formData.phone || null, selected_plan: formData.selectedPlan, billing_cycle: formData.billingCycle, subscribe_marketing: formData.subscribeMarketing },
+          data: {
+            full_name: formData.fullName,
+            company_name: formData.companyName || null,
+            account_type: formData.accountType,
+            phone: formData.phone || null,
+            selected_plan: formData.selectedPlan,
+            billing_cycle: formData.billingCycle,
+            subscribe_marketing: formData.subscribeMarketing,
+          },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
+
       if (authError) {
-        if (authError.message.includes("already registered")) setErrors({ email: "This email is already registered. Please sign in instead." })
-        else if (authError.message.includes("invalid")) setErrors({ email: "Please enter a valid email address." })
-        else setErrors({ general: authError.message })
+        // Map common Supabase error messages to user-friendly text
+        const msg = authError.message || ""
+        if (msg.includes("already registered") || msg.includes("already been registered")) {
+          setErrors({ email: "This email is already registered. Please sign in instead." })
+        } else if (msg.includes("valid email") || msg.includes("invalid")) {
+          setErrors({ email: "Please enter a valid email address." })
+        } else if (msg.includes("password")) {
+          setErrors({ password: msg })
+        } else {
+          setErrors({ general: msg || "An error occurred during sign up. Please try again." })
+        }
         return
       }
+
+      // Supabase v2: when "Confirm email" is enabled the response includes a
+      // user object but NO session.  When the email already exists Supabase may
+      // return a user with an empty identities array (to prevent enumeration).
+      if (authData?.user?.identities && authData.user.identities.length === 0) {
+        setErrors({ email: "This email is already registered. Please sign in instead." })
+        return
+      }
+
+      if (authData?.session) {
+        // Email confirmation is disabled — the user is already authenticated.
+        router.push("/login")
+        return
+      }
+
+      // Email confirmation is required — show the confirmation notice.
       setIsSuccess(true)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Signup error:", error)
-      if (error.message.includes("network")) setErrors({ general: "Network error. Please check your connection and try again." })
-      else setErrors({ general: error.message || "An unexpected error occurred. Please try again." })
-    } finally { setIsLoading(false) }
-  }, [formData, supabase, validateStep])
+      const msg = error instanceof Error ? error.message : ""
+      if (msg.includes("network") || msg.includes("fetch")) {
+        setErrors({ general: "Network error. Please check your connection and try again." })
+      } else {
+        setErrors({ general: msg || "An unexpected error occurred. Please try again." })
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [formData, supabase, validateStep, router])
 
   if (!mounted) return <div className="min-h-screen bg-gray-900 flex items-center justify-center"><Loader2 className="h-8 w-8 text-red-500 animate-spin" aria-label="Loading" /></div>
   if (isSuccess) return <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}><Navigation theme={theme} toggleTheme={toggleTheme} /><main className="max-w-2xl mx-auto px-4 py-16"><SuccessMessage theme={theme} email={formData.email} /></main><Footer theme={theme} /></div>
