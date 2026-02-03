@@ -242,6 +242,8 @@ const PLANS: PricingPlan[] = [
   },
 ]
 
+const WHITE_LABEL_PRICE_MONTHLY = 499
+
 const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
   { id: "length", label: "At least 8 characters", test: (p) => p.length >= 8 },
   { id: "uppercase", label: "One uppercase letter", test: (p) => /[A-Z]/.test(p) },
@@ -765,7 +767,7 @@ function WhiteLabelUpsell({ enabled, onToggle, theme }: { enabled: boolean; onTo
         } ${theme === "dark" ? "bg-gray-800/50" : "bg-white"}`}
         role="switch"
         aria-checked={enabled}
-        aria-label="Toggle white-label client dashboard add-on for $29 per month"
+        aria-label={`Toggle white-label client dashboard add-on for $${WHITE_LABEL_PRICE_MONTHLY} per month`}
       >
         <div className={`flex-shrink-0 p-4 rounded-xl bg-gradient-to-br ${enabled ? "from-red-500 to-orange-500" : "from-gray-500 to-gray-600"} transition-all duration-300`}>
           <Palette className="h-7 w-7 text-white" />
@@ -777,7 +779,7 @@ function WhiteLabelUpsell({ enabled, onToggle, theme }: { enabled: boolean; onTo
                 White‑label client dashboard
               </h3>
               <p className={`text-base font-semibold mt-0.5 ${enabled ? "text-red-500" : theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
-                + $29/mo
+                + ${WHITE_LABEL_PRICE_MONTHLY}/mo
               </p>
             </div>
             <div className="flex-shrink-0">
@@ -896,12 +898,12 @@ function OrderSummary({ plan, billingCycle, theme, enableWhiteLabel }: { plan: P
         {monthlyEquivalent && <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Monthly equivalent</span><span className={`font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>${monthlyEquivalent}/mo</span></div>}
         {savings > 0 && <div className="flex justify-between text-green-500"><span>Annual savings</span><span className="font-medium">-${formatPrice(savings)}</span></div>}
         {enableWhiteLabel && (
-          <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label add‑on</span><span className={`font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>$29.00/mo</span></div>
+          <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label add‑on</span><span className={`font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>${formatPrice(WHITE_LABEL_PRICE_MONTHLY)}/mo</span></div>
         )}
         <div className={`pt-3 border-t ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
           <div className="flex justify-between">
             <span className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Total</span>
-            <div className="text-right"><span className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{price === 0 ? "Free" : `$${formatPrice(price)}`}</span>{price > 0 && <span className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>/{billingCycle === "annual" ? "year" : "month"}</span>}{enableWhiteLabel && <div className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>+ $29.00/mo white‑label</div>}</div>
+            <div className="text-right"><span className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{price === 0 ? "Free" : `$${formatPrice(price)}`}</span>{price > 0 && <span className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>/{billingCycle === "annual" ? "year" : "month"}</span>}{enableWhiteLabel && <div className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>+ ${formatPrice(WHITE_LABEL_PRICE_MONTHLY)}/mo white‑label</div>}</div>
           </div>
         </div>
       </div>
@@ -1317,7 +1319,7 @@ export default function SignupPage() {
                       <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Email</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.email}</span></div>
                       {formData.companyName && <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Company</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.companyName}</span></div>}
                       <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Account Type</span><span className={`capitalize ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.accountType}</span></div>
-                      <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label add‑on</span><span className={`font-medium ${formData.enableWhiteLabel ? "text-green-500" : theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.enableWhiteLabel ? "Enabled — $29/mo" : "Off"}</span></div>
+                      <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label add‑on</span><span className={`font-medium ${formData.enableWhiteLabel ? "text-green-500" : theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.enableWhiteLabel ? `Enabled — $${WHITE_LABEL_PRICE_MONTHLY}/mo` : "Off"}</span></div>
                     </div>
                   </div>
                   {!skipPayment && (
