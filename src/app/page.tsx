@@ -718,26 +718,6 @@ function PricingTierCard({ tier, index, popular = false, isFree = false, isAnnua
               </li>
             ))}
           </ul>
-<<<<<<< HEAD
-  <Link href={`/signup?plan=${tier.name.toLowerCase()}`} className="w-full">
-  <button 
-    className={`w-full py-3 px-6 rounded-lg font-semibold tracking-wide flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-900 ${
-      popular 
-      ? 'btn-swipe-red shadow-lg shadow-red-500/20 focus:ring-red-500' 
-      : isFree
-      ? 'btn-swipe-green shadow-lg shadow-emerald-500/20 focus:ring-emerald-500'
-      : 'btn-swipe-gray focus:ring-neutral-500'
-    }`}
-    aria-label={`Get started with ${tier.name} plan`}
-  >
-    {isFree ? 'Start Free' : 'Get Started'}
-    <ArrowRight className="h-4 w-4" aria-hidden="true" />
-  </button>
-</Link>
-
-
-
-=======
           <Link href={`/signup?plan=${tier.name.toLowerCase()}`}>
             <button 
               className={`w-full py-3 px-6 rounded-lg font-semibold tracking-wide flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-900 ${
@@ -753,7 +733,6 @@ function PricingTierCard({ tier, index, popular = false, isFree = false, isAnnua
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </Link>
->>>>>>> 04977aac22800fc44edd89d59d53cccf67bf41ce
         </div>
       </Card>
     </div>
