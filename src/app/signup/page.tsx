@@ -14,7 +14,7 @@ import {
   Zap, Crown, Loader2, AlertCircle, CheckCircle, Menu, ChevronDown,
   ChevronUp, MapPin, Home, Hash, Server, Cloud, HardDrive, Database,
   ShieldCheck, Headphones, Users, Activity, Code, MessageCircle,
-  RefreshCw, BarChart3, Network, Layers,
+  RefreshCw, BarChart3, Network, Layers, Palette,
 } from "lucide-react"
 
 // ============================================================================
@@ -59,6 +59,7 @@ interface FormData {
   agreeToTerms: boolean
   agreeToPrivacy: boolean
   subscribeMarketing: boolean
+  enableWhiteLabel: boolean
 }
 
 interface FormErrors {
@@ -354,6 +355,7 @@ const INITIAL_FORM_DATA: FormData = {
   selectedPlan: "professional", billingCycle: "annual", fullName: "", email: "", password: "", confirmPassword: "",
   companyName: "", accountType: "personal", phone: "", cardholderName: "", billingAddress: "", billingCity: "",
   billingState: "", billingZip: "", billingCountry: "US", agreeToTerms: false, agreeToPrivacy: false, subscribeMarketing: false,
+  enableWhiteLabel: false,
 }
 
 const INITIAL_VALIDATION_STATE: FieldValidationState = {
@@ -741,6 +743,49 @@ function PricingCard({ plan, selected, billingCycle, onSelect, theme }: { plan: 
   )
 }
 
+function WhiteLabelUpsell({ enabled, onToggle, theme }: { enabled: boolean; onToggle: () => void; theme: Theme }) {
+  return (
+    <div className="max-w-2xl mx-auto mt-8">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 flex items-start gap-4 ${
+          enabled
+            ? "border-red-500 shadow-lg shadow-red-500/20"
+            : theme === "dark"
+            ? "border-gray-700 hover:border-gray-600"
+            : "border-gray-200 hover:border-gray-300"
+        } ${theme === "dark" ? "bg-gray-800/50" : "bg-white"}`}
+        role="switch"
+        aria-checked={enabled}
+        aria-label="Toggle white-label client dashboard add-on"
+      >
+        <div className={`flex-shrink-0 p-3 rounded-xl bg-gradient-to-br ${enabled ? "from-red-500 to-orange-500" : "from-gray-500 to-gray-600"}`}>
+          <Palette className="h-6 w-6 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+              White‑label client dashboard
+            </h3>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <span className={`text-sm font-semibold ${enabled ? "text-red-500" : theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+                + $29/mo
+              </span>
+              <div className={`w-10 h-6 rounded-full transition-colors duration-300 flex items-center ${enabled ? "bg-red-500 justify-end" : theme === "dark" ? "bg-gray-600 justify-start" : "bg-gray-300 justify-start"}`}>
+                <div className="w-4 h-4 mx-1 bg-white rounded-full shadow transition-all duration-300" />
+              </div>
+            </div>
+          </div>
+          <p className={`text-sm mt-1 ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+            Let clients log in on your own domain with your branding. Remove all DomainPro references and present a fully custom experience.
+          </p>
+        </div>
+      </button>
+    </div>
+  )
+}
+
 function FormInput({ id, label, type = "text", value, onChange, error, icon, placeholder, required, theme, autoComplete, validationStatus, showPasswordToggle, onBlur, ariaDescribedBy }: { id: string; label: string; type?: string; value: string; onChange: (value: string) => void; error?: string; icon?: React.ReactNode; placeholder?: string; required?: boolean; theme: Theme; autoComplete?: string; validationStatus?: ValidationStatus; showPasswordToggle?: boolean; onBlur?: () => void; ariaDescribedBy?: string }) {
   const [showPassword, setShowPassword] = useState(false)
   const inputType = showPasswordToggle && showPassword ? "text" : type
@@ -1096,6 +1141,7 @@ export default function SignupPage() {
             selected_plan: formData.selectedPlan,
             billing_cycle: formData.billingCycle,
             subscribe_marketing: formData.subscribeMarketing,
+            enable_white_label: formData.enableWhiteLabel,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
@@ -1168,6 +1214,7 @@ export default function SignupPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {PLANS.map((plan) => <PricingCard key={plan.id} plan={plan} selected={formData.selectedPlan === plan.id} billingCycle={formData.billingCycle} onSelect={() => updateFormData("selectedPlan", plan.id)} theme={theme} />)}
                 </div>
+                <WhiteLabelUpsell enabled={formData.enableWhiteLabel} onToggle={() => updateFormData("enableWhiteLabel", !formData.enableWhiteLabel)} theme={theme} />
                 <div className={`mt-8 text-center ${theme === "dark" ? "text-gray-500" : "text-gray-400"}`}><p className="text-sm">All plans include 30-day money-back guarantee</p></div>
               </div>
             )}
@@ -1250,6 +1297,7 @@ export default function SignupPage() {
                       <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Email</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.email}</span></div>
                       {formData.companyName && <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Company</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.companyName}</span></div>}
                       <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Account Type</span><span className={`capitalize ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.accountType}</span></div>
+                      <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label</span><span className={`font-medium ${formData.enableWhiteLabel ? "text-green-500" : theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.enableWhiteLabel ? "On (+$29/mo)" : "Off"}</span></div>
                     </div>
                   </div>
                   {!skipPayment && (
