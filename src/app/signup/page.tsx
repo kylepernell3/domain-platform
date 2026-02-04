@@ -5,7 +5,7 @@
 // Complete Production-Ready with Stripe, Dropdowns, Accessibility
 // ============================================================================
 
-import React, { useState, useEffect, useCallback, useRef } from "react"
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
@@ -21,7 +21,7 @@ import {
 // TYPE DEFINITIONS
 // ============================================================================
 
-type PlanId = "starter" | "professional" | "business" | "enterprise"
+type PlanId = "starter" | "professional" | "business" | "enterprise" | "white-label"
 type BillingCycle = "monthly" | "annual"
 type AccountType = "personal" | "business"
 type Theme = "light" | "dark"
@@ -59,7 +59,11 @@ interface FormData {
   agreeToTerms: boolean
   agreeToPrivacy: boolean
   subscribeMarketing: boolean
-  enableWhiteLabel: boolean
+  wlCompanyName: string
+  wlExpectedClients: string
+  wlGoLiveTimeline: string
+  wlCustomDomain: string
+  wlAdditionalNotes: string
 }
 
 interface FormErrors {
@@ -79,6 +83,9 @@ interface FormErrors {
   agreeToPrivacy?: string
   payment?: string
   general?: string
+  wlCompanyName?: string
+  wlExpectedClients?: string
+  wlGoLiveTimeline?: string
 }
 
 interface FieldValidationState {
@@ -93,6 +100,7 @@ interface FieldValidationState {
   billingCity: ValidationStatus
   billingState: ValidationStatus
   billingZip: ValidationStatus
+  wlCompanyName: ValidationStatus
 }
 
 interface PasswordRequirement {
@@ -137,6 +145,11 @@ interface StepConfig {
   number: number
   title: string
   icon: React.ReactNode
+}
+
+interface SelectOption {
+  value: string
+  label: string
 }
 
 // Clock Icon Component
@@ -240,9 +253,27 @@ const PLANS: PricingPlan[] = [
     icon: <Crown className="h-6 w-6" />,
     color: "from-amber-500 to-yellow-500",
   },
+  {
+    id: "white-label",
+    name: "White Label",
+    description: "Fully branded client portal under your domain",
+    monthlyPrice: 499,
+    annualPrice: 4790.40,
+    features: [
+      "Everything in Enterprise",
+      "Custom domain login portal for your clients",
+      "Your logo, colors, and brand throughout the dashboard",
+      "Remove all DomainPro branding and references",
+      "Branded email notifications sent on your behalf",
+      "Dedicated onboarding & setup assistance",
+      "Priority support with SLA",
+      "Custom client management workflows",
+    ],
+    popular: false,
+    icon: <Palette className="h-6 w-6" />,
+    color: "from-rose-500 to-pink-600",
+  },
 ]
-
-const WHITE_LABEL_PRICE_MONTHLY = 499
 
 const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
   { id: "length", label: "At least 8 characters", test: (p) => p.length >= 8 },
@@ -353,23 +384,49 @@ const COUNTRIES: Country[] = [
   { code: "KR", name: "South Korea" }, { code: "BR", name: "Brazil" }, { code: "MX", name: "Mexico" }, { code: "IN", name: "India" },
 ]
 
+const WL_CLIENT_COUNT_OPTIONS: SelectOption[] = [
+  { value: "", label: "Select expected clients…" },
+  { value: "1-10", label: "1–10 clients" },
+  { value: "11-50", label: "11–50 clients" },
+  { value: "51-200", label: "51–200 clients" },
+  { value: "201-500", label: "201–500 clients" },
+  { value: "500+", label: "500+ clients" },
+]
+
+const WL_TIMELINE_OPTIONS: SelectOption[] = [
+  { value: "", label: "Select timeline…" },
+  { value: "asap", label: "ASAP — as soon as possible" },
+  { value: "2-weeks", label: "Within 2 weeks" },
+  { value: "1-month", label: "Within 1 month" },
+  { value: "2-3-months", label: "Within 2–3 months" },
+  { value: "flexible", label: "Flexible — no rush" },
+]
+
 const INITIAL_FORM_DATA: FormData = {
   selectedPlan: "professional", billingCycle: "annual", fullName: "", email: "", password: "", confirmPassword: "",
   companyName: "", accountType: "personal", phone: "", cardholderName: "", billingAddress: "", billingCity: "",
   billingState: "", billingZip: "", billingCountry: "US", agreeToTerms: false, agreeToPrivacy: false, subscribeMarketing: false,
-  enableWhiteLabel: false,
+  wlCompanyName: "", wlExpectedClients: "", wlGoLiveTimeline: "", wlCustomDomain: "", wlAdditionalNotes: "",
 }
 
 const INITIAL_VALIDATION_STATE: FieldValidationState = {
   fullName: "idle", email: "idle", password: "idle", confirmPassword: "idle", companyName: "idle",
   phone: "idle", cardholderName: "idle", billingAddress: "idle", billingCity: "idle", billingState: "idle", billingZip: "idle",
+  wlCompanyName: "idle",
 }
 
-const STEP_CONFIG: StepConfig[] = [
+const STEP_CONFIG_DEFAULT: StepConfig[] = [
   { number: 1, title: "Plan", icon: <Sparkles className="h-5 w-5" /> },
   { number: 2, title: "Account", icon: <User className="h-5 w-5" /> },
   { number: 3, title: "Payment", icon: <CreditCard className="h-5 w-5" /> },
   { number: 4, title: "Review", icon: <CheckCircle className="h-5 w-5" /> },
+]
+
+const STEP_CONFIG_WHITE_LABEL: StepConfig[] = [
+  { number: 1, title: "Plan", icon: <Sparkles className="h-5 w-5" /> },
+  { number: 2, title: "Account", icon: <User className="h-5 w-5" /> },
+  { number: 3, title: "Details", icon: <Building2 className="h-5 w-5" /> },
+  { number: 4, title: "Confirm", icon: <CheckCircle className="h-5 w-5" /> },
 ]
 
 // ============================================================================
@@ -679,8 +736,7 @@ function Footer({ theme }: { theme: Theme }) {
   )
 }
 
-function ProgressSteps({ currentStep, skipPayment, theme }: { currentStep: number; skipPayment: boolean; theme: Theme }) {
-  const steps = skipPayment ? STEP_CONFIG.filter((s) => s.number !== 3) : STEP_CONFIG
+function ProgressSteps({ currentStep, steps, theme }: { currentStep: number; steps: StepConfig[]; theme: Theme }) {
   return (
     <div className="flex items-center justify-center mb-12" role="navigation" aria-label="Signup progress">
       {steps.map((step, index) => {
@@ -742,66 +798,6 @@ function PricingCard({ plan, selected, billingCycle, onSelect, theme }: { plan: 
         ))}
       </ul>
     </button>
-  )
-}
-
-function WhiteLabelUpsell({ enabled, onToggle, theme }: { enabled: boolean; onToggle: () => void; theme: Theme }) {
-  const features = [
-    "Custom domain login portal for your clients",
-    "Your logo, colors, and brand throughout the dashboard",
-    "Remove all DomainPro branding and references",
-    "Branded email notifications sent on your behalf",
-  ]
-
-  return (
-    <div className="max-w-3xl mx-auto mt-10">
-      <button
-        type="button"
-        onClick={onToggle}
-        className={`w-full p-7 rounded-2xl border-2 text-left transition-all duration-300 flex items-start gap-5 ${
-          enabled
-            ? "border-red-500 shadow-xl shadow-red-500/20"
-            : theme === "dark"
-            ? "border-gray-700 hover:border-gray-600"
-            : "border-gray-200 hover:border-gray-300"
-        } ${theme === "dark" ? "bg-gray-800/50" : "bg-white"}`}
-        role="switch"
-        aria-checked={enabled}
-        aria-label={`Toggle white-label client dashboard add-on for $${WHITE_LABEL_PRICE_MONTHLY} per month`}
-      >
-        <div className={`flex-shrink-0 p-4 rounded-xl bg-gradient-to-br ${enabled ? "from-red-500 to-orange-500" : "from-gray-500 to-gray-600"} transition-all duration-300`}>
-          <Palette className="h-7 w-7 text-white" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                White‑label client dashboard
-              </h3>
-              <p className={`text-base font-semibold mt-0.5 ${enabled ? "text-red-500" : theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
-                + ${WHITE_LABEL_PRICE_MONTHLY}/mo
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <div className={`w-12 h-7 rounded-full transition-colors duration-300 flex items-center ${enabled ? "bg-red-500 justify-end" : theme === "dark" ? "bg-gray-600 justify-start" : "bg-gray-300 justify-start"}`}>
-                <div className="w-5 h-5 mx-1 bg-white rounded-full shadow transition-all duration-300" />
-              </div>
-            </div>
-          </div>
-          <p className={`text-base mt-3 leading-relaxed ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
-            Let clients log in on your own domain with your branding. Present a fully custom, professional experience with no trace of DomainPro.
-          </p>
-          <ul className="mt-4 space-y-2">
-            {features.map((feature, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <Check className={`h-4 w-4 mt-0.5 flex-shrink-0 ${enabled ? "text-red-500" : "text-green-500"}`} />
-                <span className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{feature}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </button>
-    </div>
   )
 }
 
@@ -884,7 +880,7 @@ function SocialSignupButtons({ onSignup, loadingProvider, theme, disabled }: { o
   )
 }
 
-function OrderSummary({ plan, billingCycle, theme, enableWhiteLabel }: { plan: PricingPlan; billingCycle: BillingCycle; theme: Theme; enableWhiteLabel?: boolean }) {
+function OrderSummary({ plan, billingCycle, theme }: { plan: PricingPlan; billingCycle: BillingCycle; theme: Theme }) {
   const price = billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice
   const monthlyEquivalent = billingCycle === "annual" ? getMonthlyEquivalent(plan.annualPrice) : null
   const savings = billingCycle === "annual" && plan.monthlyPrice > 0 ? plan.monthlyPrice * 12 - plan.annualPrice : 0
@@ -897,13 +893,10 @@ function OrderSummary({ plan, billingCycle, theme, enableWhiteLabel }: { plan: P
         <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Billing</span><span className={`font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{billingCycle === "monthly" ? "Monthly" : "Annual"}</span></div>
         {monthlyEquivalent && <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Monthly equivalent</span><span className={`font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>${monthlyEquivalent}/mo</span></div>}
         {savings > 0 && <div className="flex justify-between text-green-500"><span>Annual savings</span><span className="font-medium">-${formatPrice(savings)}</span></div>}
-        {enableWhiteLabel && (
-          <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label add‑on</span><span className={`font-medium ${theme === "dark" ? "text-white" : "text-gray-900"}`}>${formatPrice(WHITE_LABEL_PRICE_MONTHLY)}/mo</span></div>
-        )}
         <div className={`pt-3 border-t ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}>
           <div className="flex justify-between">
             <span className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Total</span>
-            <div className="text-right"><span className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{price === 0 ? "Free" : `$${formatPrice(price)}`}</span>{price > 0 && <span className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>/{billingCycle === "annual" ? "year" : "month"}</span>}{enableWhiteLabel && <div className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>+ ${formatPrice(WHITE_LABEL_PRICE_MONTHLY)}/mo white‑label</div>}</div>
+            <div className="text-right"><span className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{price === 0 ? "Free" : `$${formatPrice(price)}`}</span>{price > 0 && <span className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>/{billingCycle === "annual" ? "year" : "month"}</span>}</div>
           </div>
         </div>
       </div>
@@ -918,8 +911,6 @@ function StripeCardForm({ stripe, theme, onCardChange, cardError }: { stripe: Re
   const cardElementRef = useRef<ReturnType<typeof Object> | null>(null)
   const onCardChangeRef = useRef(onCardChange)
 
-  // Keep callback ref current to avoid remounting the Stripe element when the
-  // parent re-creates the callback identity.
   useEffect(() => { onCardChangeRef.current = onCardChange }, [onCardChange])
 
   useEffect(() => { setMounted(true) }, [])
@@ -1010,6 +1001,169 @@ function SuccessMessage({ theme, email }: { theme: Theme; email: string }) {
   )
 }
 
+function WhiteLabelSuccessMessage({ theme, email }: { theme: Theme; email: string }) {
+  return (
+    <div className="text-center py-16">
+      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full mb-6"><Palette className="h-10 w-10 text-white" /></div>
+      <h2 className={`text-3xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Thanks! We&apos;ll Be in Touch</h2>
+      <p className={`text-lg mb-4 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>We&apos;ve created your account and our team will contact you at <strong>{email}</strong> to finalize your white‑label setup.</p>
+      <p className={`text-sm mb-8 ${theme === "dark" ? "text-gray-500" : "text-gray-500"}`}>In the meantime, check your inbox for a confirmation email to activate your account. A member of our team will reach out within one business day to discuss next steps, onboarding, and billing.</p>
+      <div className="flex items-center justify-center gap-4">
+        <Link href="/login" className="inline-flex items-center gap-2 px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-500/25 hover:shadow-red-500/40">Continue to Sign In<ArrowRight className="h-5 w-5" /></Link>
+      </div>
+    </div>
+  )
+}
+
+function WhiteLabelIntakeForm({
+  formData,
+  errors,
+  validationState,
+  updateFormData,
+  validateFieldRealtime,
+  handleFieldBlur,
+  theme,
+}: {
+  formData: FormData
+  errors: FormErrors
+  validationState: FieldValidationState
+  updateFormData: <K extends keyof FormData>(key: K, value: FormData[K]) => void
+  validateFieldRealtime: (field: keyof FieldValidationState, value: string) => void
+  handleFieldBlur: (field: keyof FieldValidationState) => void
+  theme: Theme
+}) {
+  return (
+    <div className="max-w-2xl mx-auto">
+      <div className={`p-8 rounded-2xl border ${theme === "dark" ? "bg-gray-800/50 border-gray-700" : "bg-white border-gray-200"}`}>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-3 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600">
+            <Palette className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h2 className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"}`}>White‑Label Details</h2>
+            <p className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Tell us about your business so we can tailor your setup</p>
+          </div>
+        </div>
+
+        <div className="space-y-5 mt-6">
+          <FormInput
+            id="wlCompanyName"
+            label="Company / Agency Name"
+            value={formData.wlCompanyName}
+            onChange={(v) => { updateFormData("wlCompanyName", v); if (v.length > 0) validateFieldRealtime("wlCompanyName", v) }}
+            onBlur={() => handleFieldBlur("wlCompanyName")}
+            error={errors.wlCompanyName}
+            icon={<Building2 className="h-5 w-5" />}
+            placeholder="Your company or agency name"
+            required
+            theme={theme}
+            autoComplete="organization"
+            validationStatus={validationState.wlCompanyName}
+          />
+
+          <div className="space-y-1">
+            <label htmlFor="wlExpectedClients" className={`block text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+              Expected Number of Client Accounts <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <div className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme === "dark" ? "text-gray-500" : "text-gray-400"}`}>
+                <Users className="h-5 w-5" />
+              </div>
+              <select
+                id="wlExpectedClients"
+                value={formData.wlExpectedClients}
+                onChange={(e) => updateFormData("wlExpectedClients", e.target.value)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl border transition-all ${
+                  errors.wlExpectedClients
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                    : theme === "dark"
+                    ? "bg-gray-800 border-gray-700 text-white focus:border-red-500 focus:ring-red-500/20"
+                    : "bg-white border-gray-300 text-gray-900 focus:border-red-500 focus:ring-red-500/20"
+                } focus:outline-none focus:ring-4`}
+                required
+                aria-required="true"
+                aria-invalid={errors.wlExpectedClients ? "true" : "false"}
+              >
+                {WL_CLIENT_COUNT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            {errors.wlExpectedClients && (
+              <p className="text-sm text-red-500 flex items-center gap-1" role="alert">
+                <AlertCircle className="h-4 w-4" />{errors.wlExpectedClients}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="wlGoLiveTimeline" className={`block text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+              Desired Go‑Live Timeline <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <div className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme === "dark" ? "text-gray-500" : "text-gray-400"}`}>
+                <Clock className="h-5 w-5" />
+              </div>
+              <select
+                id="wlGoLiveTimeline"
+                value={formData.wlGoLiveTimeline}
+                onChange={(e) => updateFormData("wlGoLiveTimeline", e.target.value)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl border transition-all ${
+                  errors.wlGoLiveTimeline
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                    : theme === "dark"
+                    ? "bg-gray-800 border-gray-700 text-white focus:border-red-500 focus:ring-red-500/20"
+                    : "bg-white border-gray-300 text-gray-900 focus:border-red-500 focus:ring-red-500/20"
+                } focus:outline-none focus:ring-4`}
+                required
+                aria-required="true"
+                aria-invalid={errors.wlGoLiveTimeline ? "true" : "false"}
+              >
+                {WL_TIMELINE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            {errors.wlGoLiveTimeline && (
+              <p className="text-sm text-red-500 flex items-center gap-1" role="alert">
+                <AlertCircle className="h-4 w-4" />{errors.wlGoLiveTimeline}
+              </p>
+            )}
+          </div>
+
+          <FormInput
+            id="wlCustomDomain"
+            label="Preferred Client Portal Domain"
+            value={formData.wlCustomDomain}
+            onChange={(v) => updateFormData("wlCustomDomain", v)}
+            icon={<Globe className="h-5 w-5" />}
+            placeholder="e.g. portal.youragency.com"
+            theme={theme}
+          />
+
+          <div className="space-y-1">
+            <label htmlFor="wlAdditionalNotes" className={`block text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+              Additional Requirements or Notes
+            </label>
+            <textarea
+              id="wlAdditionalNotes"
+              value={formData.wlAdditionalNotes}
+              onChange={(e) => updateFormData("wlAdditionalNotes", e.target.value)}
+              placeholder="Anything else you'd like us to know — branding preferences, integrations, special requirements…"
+              rows={4}
+              className={`w-full px-4 py-3 rounded-xl border transition-all ${
+                theme === "dark"
+                  ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-red-500 focus:ring-red-500/20"
+                  : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:border-red-500 focus:ring-red-500/20"
+              } focus:outline-none focus:ring-4 resize-vertical`}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -1031,7 +1185,14 @@ export default function SignupPage() {
   const [cardError, setCardError] = useState<string | undefined>()
 
   const selectedPlan = PLANS.find((p) => p.id === formData.selectedPlan) || PLANS[1]
+  const isWhiteLabel = formData.selectedPlan === "white-label"
   const skipPayment = selectedPlan.monthlyPrice === 0
+
+  const steps = useMemo<StepConfig[]>(() => {
+    if (isWhiteLabel) return STEP_CONFIG_WHITE_LABEL
+    if (skipPayment) return STEP_CONFIG_DEFAULT.filter((s) => s.number !== 3)
+    return STEP_CONFIG_DEFAULT
+  }, [isWhiteLabel, skipPayment])
 
   const updateFormData = useCallback(<K extends keyof FormData>(key: K, value: FormData[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }))
@@ -1055,6 +1216,7 @@ export default function SignupPage() {
         case "billingCity": isValid = value.trim().length >= 2; error = isValid ? undefined : "Please enter your city"; break
         case "billingState": isValid = value.trim().length >= 2; error = isValid ? undefined : "Please enter your state/province"; break
         case "billingZip": isValid = value.trim().length >= 3; error = isValid ? undefined : "Please enter your ZIP/postal code"; break
+        case "wlCompanyName": isValid = value.trim().length >= 2; error = isValid ? undefined : "Company name must be at least 2 characters"; break
       }
       setValidationState((prev) => ({ ...prev, [field]: isValid ? "valid" : "invalid" }))
       if (error) setErrors((prev) => ({ ...prev, [field]: error }))
@@ -1082,13 +1244,20 @@ export default function SignupPage() {
       else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match"
       if (formData.accountType === "business" && !formData.companyName.trim()) newErrors.companyName = "Company name is required for business accounts"
     }
-    if (step === 3 && !skipPayment) {
-      if (!formData.cardholderName.trim()) newErrors.cardholderName = "Cardholder name is required"
-      if (!formData.billingAddress.trim()) newErrors.billingAddress = "Street address is required"
-      if (!formData.billingCity.trim()) newErrors.billingCity = "City is required"
-      if (!formData.billingState.trim()) newErrors.billingState = "State/Province is required"
-      if (!formData.billingZip.trim()) newErrors.billingZip = "ZIP/Postal code is required"
-      if (!cardComplete) newErrors.payment = "Please enter valid card details"
+    if (step === 3) {
+      if (isWhiteLabel) {
+        if (!formData.wlCompanyName.trim()) newErrors.wlCompanyName = "Company name is required"
+        else if (formData.wlCompanyName.trim().length < 2) newErrors.wlCompanyName = "Company name must be at least 2 characters"
+        if (!formData.wlExpectedClients) newErrors.wlExpectedClients = "Please select expected number of clients"
+        if (!formData.wlGoLiveTimeline) newErrors.wlGoLiveTimeline = "Please select a go‑live timeline"
+      } else if (!skipPayment) {
+        if (!formData.cardholderName.trim()) newErrors.cardholderName = "Cardholder name is required"
+        if (!formData.billingAddress.trim()) newErrors.billingAddress = "Street address is required"
+        if (!formData.billingCity.trim()) newErrors.billingCity = "City is required"
+        if (!formData.billingState.trim()) newErrors.billingState = "State/Province is required"
+        if (!formData.billingZip.trim()) newErrors.billingZip = "ZIP/Postal code is required"
+        if (!cardComplete) newErrors.payment = "Please enter valid card details"
+      }
     }
     if (step === 4) {
       if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the Terms of Service"
@@ -1096,21 +1265,27 @@ export default function SignupPage() {
     }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }, [formData, skipPayment, cardComplete])
+  }, [formData, isWhiteLabel, skipPayment, cardComplete])
 
   const nextStep = useCallback(() => {
     if (validateStep(currentStep)) {
-      if (currentStep === 2 && skipPayment) setCurrentStep(4)
-      else setCurrentStep((prev) => Math.min(prev + 1, 4))
+      if (currentStep === 2 && skipPayment && !isWhiteLabel) {
+        setCurrentStep(4)
+      } else {
+        setCurrentStep((prev) => Math.min(prev + 1, 4))
+      }
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
-  }, [currentStep, validateStep, skipPayment])
+  }, [currentStep, validateStep, skipPayment, isWhiteLabel])
 
   const prevStep = useCallback(() => {
-    if (currentStep === 4 && skipPayment) setCurrentStep(2)
-    else setCurrentStep((prev) => Math.max(prev - 1, 1))
+    if (currentStep === 4 && skipPayment && !isWhiteLabel) {
+      setCurrentStep(2)
+    } else {
+      setCurrentStep((prev) => Math.max(prev - 1, 1))
+    }
     window.scrollTo({ top: 0, behavior: "smooth" })
-  }, [currentStep, skipPayment])
+  }, [currentStep, skipPayment, isWhiteLabel])
 
   const handleCardChange = useCallback((complete: boolean, error?: string) => {
     setCardComplete(complete)
@@ -1136,8 +1311,6 @@ export default function SignupPage() {
       setErrors({ general: msg })
       setSocialLoading(null)
     }
-    // NOTE: On success the browser is redirected by Supabase, so we intentionally
-    // do NOT clear setSocialLoading here — the page will unmount.
   }, [supabase, formData.selectedPlan, formData.billingCycle])
 
   const handleSubmit = useCallback(async () => {
@@ -1151,26 +1324,35 @@ export default function SignupPage() {
     setErrors({})
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const metadata: Record<string, any> = {
+        full_name: formData.fullName,
+        company_name: formData.companyName || null,
+        account_type: formData.accountType,
+        phone: formData.phone || null,
+        selected_plan: formData.selectedPlan,
+        billing_cycle: formData.billingCycle,
+        subscribe_marketing: formData.subscribeMarketing,
+      }
+
+      if (isWhiteLabel) {
+        metadata.wl_company_name = formData.wlCompanyName
+        metadata.wl_expected_clients = formData.wlExpectedClients
+        metadata.wl_go_live_timeline = formData.wlGoLiveTimeline
+        metadata.wl_custom_domain = formData.wlCustomDomain || null
+        metadata.wl_additional_notes = formData.wlAdditionalNotes || null
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
-          data: {
-            full_name: formData.fullName,
-            company_name: formData.companyName || null,
-            account_type: formData.accountType,
-            phone: formData.phone || null,
-            selected_plan: formData.selectedPlan,
-            billing_cycle: formData.billingCycle,
-            subscribe_marketing: formData.subscribeMarketing,
-            enable_white_label: formData.enableWhiteLabel,
-          },
+          data: metadata,
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
       if (authError) {
-        // Map common Supabase error messages to user-friendly text
         const msg = authError.message || ""
         if (msg.includes("already registered") || msg.includes("already been registered")) {
           setErrors({ email: "This email is already registered. Please sign in instead." })
@@ -1184,21 +1366,30 @@ export default function SignupPage() {
         return
       }
 
-      // Supabase v2: when "Confirm email" is enabled the response includes a
-      // user object but NO session.  When the email already exists Supabase may
-      // return a user with an empty identities array (to prevent enumeration).
       if (authData?.user?.identities && authData.user.identities.length === 0) {
         setErrors({ email: "This email is already registered. Please sign in instead." })
         return
       }
 
-      if (authData?.session) {
-        // Email confirmation is disabled — the user is already authenticated.
+      // Log white-label intake data (placeholder — replace with real API call)
+      if (isWhiteLabel) {
+        console.log("White-label intake submitted:", {
+          email: formData.email,
+          fullName: formData.fullName,
+          companyName: formData.wlCompanyName,
+          expectedClients: formData.wlExpectedClients,
+          goLiveTimeline: formData.wlGoLiveTimeline,
+          customDomain: formData.wlCustomDomain,
+          additionalNotes: formData.wlAdditionalNotes,
+          billingCycle: formData.billingCycle,
+        })
+      }
+
+      if (authData?.session && !isWhiteLabel) {
         router.push("/login")
         return
       }
 
-      // Email confirmation is required — show the confirmation notice.
       setIsSuccess(true)
     } catch (error: unknown) {
       console.error("Signup error:", error)
@@ -1211,36 +1402,51 @@ export default function SignupPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [formData, supabase, validateStep, router])
+  }, [formData, supabase, validateStep, router, isWhiteLabel])
 
   if (!mounted) return <div className="min-h-screen bg-gray-900 flex items-center justify-center"><Loader2 className="h-8 w-8 text-red-500 animate-spin" aria-label="Loading" /></div>
-  if (isSuccess) return <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}><Navigation theme={theme} toggleTheme={toggleTheme} /><main className="max-w-2xl mx-auto px-4 py-16"><SuccessMessage theme={theme} email={formData.email} /></main><Footer theme={theme} /></div>
+
+  if (isSuccess) {
+    return (
+      <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
+        <Navigation theme={theme} toggleTheme={toggleTheme} />
+        <main className="max-w-2xl mx-auto px-4 py-16">
+          {formData.selectedPlan === "white-label"
+            ? <WhiteLabelSuccessMessage theme={theme} email={formData.email} />
+            : <SuccessMessage theme={theme} email={formData.email} />
+          }
+        </main>
+        <Footer theme={theme} />
+      </div>
+    )
+  }
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-50"}`}>
       <Navigation theme={theme} toggleTheme={toggleTheme} />
       <main className="py-12 px-4" role="main">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10">
             <h1 className={`text-4xl sm:text-5xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Create Your Account</h1>
             <p className={`text-lg ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>Get started with DomainPro in just a few steps</p>
           </div>
-          <ProgressSteps currentStep={currentStep} skipPayment={skipPayment} theme={theme} />
+          <ProgressSteps currentStep={currentStep} steps={steps} theme={theme} />
           {errors.general && <div className="max-w-2xl mx-auto mb-6"><ErrorAlert message={errors.general} theme={theme} onDismiss={() => setErrors((prev) => ({ ...prev, general: undefined }))} /></div>}
           {supabaseError && <div className="max-w-2xl mx-auto mb-6"><ErrorAlert message={supabaseError} theme={theme} /></div>}
 
           <div className="transition-all duration-500">
+            {/* =============== STEP 1: PLAN SELECTION =============== */}
             {currentStep === 1 && (
               <div>
                 <BillingToggle billingCycle={formData.billingCycle} onChange={(cycle) => updateFormData("billingCycle", cycle)} theme={theme} />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                   {PLANS.map((plan) => <PricingCard key={plan.id} plan={plan} selected={formData.selectedPlan === plan.id} billingCycle={formData.billingCycle} onSelect={() => updateFormData("selectedPlan", plan.id)} theme={theme} />)}
                 </div>
-                <WhiteLabelUpsell enabled={formData.enableWhiteLabel} onToggle={() => updateFormData("enableWhiteLabel", !formData.enableWhiteLabel)} theme={theme} />
                 <div className={`mt-8 text-center ${theme === "dark" ? "text-gray-500" : "text-gray-400"}`}><p className="text-sm">All plans include 30-day money-back guarantee</p></div>
               </div>
             )}
 
+            {/* =============== STEP 2: ACCOUNT INFORMATION =============== */}
             {currentStep === 2 && (
               <div className="max-w-2xl mx-auto">
                 <div className={`p-8 rounded-2xl border ${theme === "dark" ? "bg-gray-800/50 border-gray-700" : "bg-white border-gray-200"}`}>
@@ -1270,7 +1476,20 @@ export default function SignupPage() {
               </div>
             )}
 
-            {currentStep === 3 && !skipPayment && (
+            {/* =============== STEP 3: PAYMENT (normal plans) or WHITE-LABEL INTAKE =============== */}
+            {currentStep === 3 && isWhiteLabel && (
+              <WhiteLabelIntakeForm
+                formData={formData}
+                errors={errors}
+                validationState={validationState}
+                updateFormData={updateFormData}
+                validateFieldRealtime={validateFieldRealtime}
+                handleFieldBlur={handleFieldBlur}
+                theme={theme}
+              />
+            )}
+
+            {currentStep === 3 && !isWhiteLabel && !skipPayment && (
               <div className="max-w-2xl mx-auto">
                 <div className="grid gap-6 lg:grid-cols-5">
                   <div className={`lg:col-span-3 p-8 rounded-2xl border ${theme === "dark" ? "bg-gray-800/50 border-gray-700" : "bg-white border-gray-200"}`}>
@@ -1302,16 +1521,21 @@ export default function SignupPage() {
                       <SecurityBadges theme={theme} />
                     </div>
                   </div>
-                  <div className="lg:col-span-2"><OrderSummary plan={selectedPlan} billingCycle={formData.billingCycle} theme={theme} enableWhiteLabel={formData.enableWhiteLabel} /></div>
+                  <div className="lg:col-span-2"><OrderSummary plan={selectedPlan} billingCycle={formData.billingCycle} theme={theme} /></div>
                 </div>
               </div>
             )}
 
+            {/* =============== STEP 4: REVIEW / CONFIRM =============== */}
             {currentStep === 4 && (
               <div className="max-w-2xl mx-auto">
                 <div className={`p-8 rounded-2xl border ${theme === "dark" ? "bg-gray-800/50 border-gray-700" : "bg-white border-gray-200"}`}>
-                  <h2 className={`text-2xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Review Your Order</h2>
-                  <OrderSummary plan={selectedPlan} billingCycle={formData.billingCycle} theme={theme} enableWhiteLabel={formData.enableWhiteLabel} />
+                  <h2 className={`text-2xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                    {isWhiteLabel ? "Review Your Application" : "Review Your Order"}
+                  </h2>
+                  <OrderSummary plan={selectedPlan} billingCycle={formData.billingCycle} theme={theme} />
+
+                  {/* Account details */}
                   <div className={`mt-6 p-4 rounded-xl ${theme === "dark" ? "bg-gray-700/50" : "bg-gray-100"}`}>
                     <h3 className={`font-semibold mb-3 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Account Details</h3>
                     <div className="space-y-2">
@@ -1319,23 +1543,57 @@ export default function SignupPage() {
                       <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Email</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.email}</span></div>
                       {formData.companyName && <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Company</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.companyName}</span></div>}
                       <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Account Type</span><span className={`capitalize ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.accountType}</span></div>
-                      <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>White‑label add‑on</span><span className={`font-medium ${formData.enableWhiteLabel ? "text-green-500" : theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.enableWhiteLabel ? `Enabled — $${WHITE_LABEL_PRICE_MONTHLY}/mo` : "Off"}</span></div>
                     </div>
                   </div>
-                  {!skipPayment && (
+
+                  {/* White-label intake details */}
+                  {isWhiteLabel && (
+                    <div className={`mt-4 p-4 rounded-xl ${theme === "dark" ? "bg-gray-700/50" : "bg-gray-100"}`}>
+                      <h3 className={`font-semibold mb-3 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>White‑Label Details</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Company / Agency</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.wlCompanyName}</span></div>
+                        <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Expected Clients</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.wlExpectedClients}</span></div>
+                        <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Go‑Live Timeline</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{WL_TIMELINE_OPTIONS.find((o) => o.value === formData.wlGoLiveTimeline)?.label || formData.wlGoLiveTimeline}</span></div>
+                        {formData.wlCustomDomain && <div className="flex justify-between"><span className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Portal Domain</span><span className={theme === "dark" ? "text-white" : "text-gray-900"}>{formData.wlCustomDomain}</span></div>}
+                        {formData.wlAdditionalNotes && <div className="mt-2"><span className={`block text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Notes</span><span className={`block text-sm mt-1 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>{formData.wlAdditionalNotes}</span></div>}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Payment method (normal paid plans only) */}
+                  {!skipPayment && !isWhiteLabel && (
                     <div className={`mt-4 p-4 rounded-xl ${theme === "dark" ? "bg-gray-700/50" : "bg-gray-100"}`}>
                       <h3 className={`font-semibold mb-3 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>Payment Method</h3>
                       <div className="flex items-center gap-3"><CreditCard className={`h-5 w-5 ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`} /><span className={theme === "dark" ? "text-white" : "text-gray-900"}>Card ending in ****</span></div>
                       <div className="mt-2"><span className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Billing: {formData.billingCity}, {formData.billingState} {formData.billingZip}</span></div>
                     </div>
                   )}
+
+                  {/* White-label billing note */}
+                  {isWhiteLabel && (
+                    <div className={`mt-4 p-4 rounded-xl border ${theme === "dark" ? "bg-rose-500/5 border-rose-500/20" : "bg-rose-50 border-rose-200"}`}>
+                      <div className="flex items-start gap-3">
+                        <Palette className={`h-5 w-5 flex-shrink-0 mt-0.5 ${theme === "dark" ? "text-rose-400" : "text-rose-600"}`} />
+                        <p className={`text-sm ${theme === "dark" ? "text-rose-300" : "text-rose-700"}`}>
+                          No payment is required right now. After you submit this application, our team will contact you to discuss your setup, finalize billing, and schedule onboarding.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-4 mt-8 mb-8">
                     <Checkbox id="agreeToTerms" checked={formData.agreeToTerms} onChange={(v) => updateFormData("agreeToTerms", v)} error={errors.agreeToTerms} theme={theme} label={<>I agree to the <Link href="/legal/terms" className="text-red-500 hover:text-red-400 underline">Terms of Service</Link><span className="text-red-500 ml-1">*</span></>} />
                     <Checkbox id="agreeToPrivacy" checked={formData.agreeToPrivacy} onChange={(v) => updateFormData("agreeToPrivacy", v)} error={errors.agreeToPrivacy} theme={theme} label={<>I agree to the <Link href="/legal/privacy" className="text-red-500 hover:text-red-400 underline">Privacy Policy</Link><span className="text-red-500 ml-1">*</span></>} />
                     <Checkbox id="subscribeMarketing" checked={formData.subscribeMarketing} onChange={(v) => updateFormData("subscribeMarketing", v)} theme={theme} label="Send me product updates, tips, and exclusive offers" />
                   </div>
                   <button onClick={handleSubmit} disabled={isLoading || supabaseLoading} className={`w-full py-4 bg-red-500 hover:bg-red-600 disabled:bg-red-500/50 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-red-500/25 ${isLoading ? "" : "hover:shadow-red-500/40"}`} aria-busy={isLoading} aria-disabled={isLoading || supabaseLoading}>
-                    {isLoading ? <><Loader2 className="h-5 w-5 animate-spin" />Creating Account...</> : <><Sparkles className="h-5 w-5" />Create Account{!skipPayment && selectedPlan.monthlyPrice > 0 && <span>{" — $"}{formatPrice(formData.billingCycle === "monthly" ? selectedPlan.monthlyPrice : selectedPlan.annualPrice)}</span>}</>}
+                    {isLoading ? (
+                      <><Loader2 className="h-5 w-5 animate-spin" />{isWhiteLabel ? "Submitting Application…" : "Creating Account…"}</>
+                    ) : isWhiteLabel ? (
+                      <><Sparkles className="h-5 w-5" />Submit Application</>
+                    ) : (
+                      <><Sparkles className="h-5 w-5" />Create Account{!skipPayment && selectedPlan.monthlyPrice > 0 && <span>{" — $"}{formatPrice(formData.billingCycle === "monthly" ? selectedPlan.monthlyPrice : selectedPlan.annualPrice)}</span>}</>
+                    )}
                   </button>
                   <p className={`text-xs text-center mt-4 ${theme === "dark" ? "text-gray-500" : "text-gray-400"}`}>🔒 Your information is protected with 256-bit SSL encryption</p>
                 </div>
