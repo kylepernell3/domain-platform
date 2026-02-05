@@ -200,13 +200,6 @@ interface EmailForwardingRule {
   active: boolean
 }
 
-interface AccessHistoryEntry {
-  action: string
-  user: string
-  ip: string
-  time: string
-}
-
 interface StatCard {
   label: string
   icon: LucideIcon
@@ -632,12 +625,20 @@ function ToggleSwitch({ enabled, onChange, theme }: { enabled: boolean; onChange
 
 export default function DashboardPage() {
   const router = useRouter()
-  const supabase = createClient()
+
+  // ─── FIX #1: Stable supabase client ref (prevents infinite re-renders) ───
+  const supabaseRef = useRef(createClient())
+  const supabase = supabaseRef.current
+
+  // ─── FIX #2: Stable router ref for use inside effects ───
+  const routerRef = useRef(router)
+  useEffect(() => { routerRef.current = router }, [router])
 
   // ── Auth & user state ──
   const [user, setUser] = useState<UserState | null>(null)
   const [userProfile, setUserProfile] = useState<Database["public"]["Tables"]["profiles"]["Row"] | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
+  const [authFailed, setAuthFailed] = useState(false)
 
   // ── Theme ──
   const [theme, setTheme] = useState<"dark" | "light">("dark")
@@ -666,7 +667,7 @@ export default function DashboardPage() {
   })
   const [searchMode, setSearchMode] = useState<"domains" | "settings">("domains")
 
-  // ── Notifications & Insights (declared BEFORE insightsData) ──
+  // ── Notifications & Insights ──
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [notificationsPanelOpen, setNotificationsPanelOpen] = useState(false)
   const [notificationsTab, setNotificationsTab] = useState<"notifications" | "insights">("notifications")
@@ -772,19 +773,43 @@ export default function DashboardPage() {
   // EFFECTS
   // ============================================
 
-  // 1. Load user session and profile
+  // ─── FIX #3: Load user session with timeout safety net ───
   useEffect(() => {
     let cancelled = false
 
+    // Safety net: force loading to end after 5 seconds no matter what
+    const safetyTimeout = setTimeout(() => {
+      if (!cancelled) {
+        console.warn("[Dashboard] Auth loading safety timeout triggered after 5s")
+        setIsLoadingUser(false)
+      }
+    }, 5000)
+
     async function loadUserProfile() {
       try {
+        console.log("[Dashboard] Loading user session...")
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
-        if (sessionError || !session) {
-          if (!cancelled) router.push("/login")
+        if (sessionError) {
+          console.error("[Dashboard] Session error:", sessionError)
+          if (!cancelled) {
+            setIsLoadingUser(false)
+            setAuthFailed(true)
+            routerRef.current.push("/login")
+          }
           return
         }
 
+        if (!session) {
+          console.warn("[Dashboard] No session found, redirecting to login")
+          if (!cancelled) {
+            setIsLoadingUser(false)
+            routerRef.current.push("/login")
+          }
+          return
+        }
+
+        console.log("[Dashboard] Session found for:", session.user.email)
         if (!cancelled) {
           setUser({
             name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "User",
@@ -792,37 +817,59 @@ export default function DashboardPage() {
           })
         }
 
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single()
+        // Profile fetch is non-blocking — page will render even if this fails
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", session.user.id)
+            .single()
 
-        if (!cancelled) {
-          if (profileError) {
-            console.error("Error fetching profile:", profileError)
-          } else {
-            setUserProfile(profile)
+          if (!cancelled) {
+            if (profileError) {
+              console.error("[Dashboard] Profile fetch error (non-fatal):", profileError)
+              // Still set a minimal profile so downstream effects can work
+              setUserProfile({ id: session.user.id } as Database["public"]["Tables"]["profiles"]["Row"])
+            } else {
+              setUserProfile(profile)
+            }
+          }
+        } catch (profileErr) {
+          console.error("[Dashboard] Profile fetch exception (non-fatal):", profileErr)
+          if (!cancelled) {
+            // Provide minimal profile so domains can still load
+            setUserProfile({ id: session.user.id } as Database["public"]["Tables"]["profiles"]["Row"])
           }
         }
       } catch (error) {
-        console.error("Error loading user:", error)
+        console.error("[Dashboard] Fatal auth error:", error)
+        if (!cancelled) {
+          setAuthFailed(true)
+        }
       } finally {
-        if (!cancelled) setIsLoadingUser(false)
+        if (!cancelled) {
+          console.log("[Dashboard] Auth loading complete")
+          setIsLoadingUser(false)
+        }
       }
     }
 
     loadUserProfile()
-    return () => { cancelled = true }
-  }, [router, supabase])
+    return () => {
+      cancelled = true
+      clearTimeout(safetyTimeout)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // FIX: empty deps — supabase is a stable ref, router is a ref
 
-  // 2. Load domains when profile is available
+  // ─── FIX #4: Load domains with error fallback ───
   useEffect(() => {
     if (!userProfile) return
     let cancelled = false
 
     async function loadDomains() {
       try {
+        console.log("[Dashboard] Loading domains for user:", userProfile!.id)
         const { data: domainsData, error } = await supabase
           .from("domains")
           .select("*")
@@ -830,11 +877,13 @@ export default function DashboardPage() {
           .order("created_at", { ascending: false })
 
         if (error) {
-          console.error("Error fetching domains:", error)
+          console.error("[Dashboard] Domains fetch error:", error)
+          // Don't block — render with empty domains
           return
         }
 
         if (!cancelled && domainsData) {
+          console.log("[Dashboard] Loaded", domainsData.length, "domains")
           const transformed: DomainItem[] = domainsData.map((d) => ({
             id: d.id,
             name: d.domain_name,
@@ -860,74 +909,110 @@ export default function DashboardPage() {
             nameservers: ["ns1.domainpro.com", "ns2.domainpro.com"],
           }))
           setDomains(transformed)
-          dashboardDataFetchedRef.current = false // allow dashboard data re-fetch
+          dashboardDataFetchedRef.current = false
         }
       } catch (error) {
-        console.error("Error loading domains:", error)
+        console.error("[Dashboard] Domains fetch exception:", error)
+        // Render with empty domains — no crash
       }
     }
 
     loadDomains()
     return () => { cancelled = true }
-  }, [userProfile, supabase])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfile?.id]) // FIX: only depend on the ID, not the whole object
 
-  // 3. Load dashboard data (activity, insights, analytics) — runs once after domains load
+  // ─── FIX #5: Load dashboard data with graceful fallbacks for missing tables ───
   const domainIds = useMemo(() => domains.map((d) => d.id), [domains])
 
   useEffect(() => {
-    if (!userProfile || domains.length === 0) return
+    if (!userProfile) return
+    if (domains.length === 0) return
     if (dashboardDataFetchedRef.current) return
     let cancelled = false
 
     async function loadDashboardData() {
+      console.log("[Dashboard] Loading dashboard data (activity, insights, analytics)...")
+      dashboardDataFetchedRef.current = true // Set BEFORE async to prevent race
+
+      // FIX #6: Each query is independent — one failing won't block others
+      // Activity log
       try {
-        const [activityRes, insightsRes, analyticsRes] = await Promise.all([
-          supabase
-            .from("activity_log")
-            .select("*")
-            .eq("user_id", userProfile!.id)
-            .order("created_at", { ascending: false })
-            .limit(10),
-          supabase
-            .from("insights")
-            .select("*")
-            .eq("user_id", userProfile!.id)
-            .eq("is_active", true)
-            .order("created_at", { ascending: false }),
-          supabase
+        const { data, error } = await supabase
+          .from("activity_log")
+          .select("*")
+          .eq("user_id", userProfile!.id)
+          .order("created_at", { ascending: false })
+          .limit(10)
+
+        if (!cancelled) {
+          if (error) {
+            console.error("[Dashboard] activity_log query error (table may not exist):", error.message)
+          } else if (data) {
+            setActivities(data)
+          }
+        }
+      } catch (err) {
+        console.error("[Dashboard] activity_log fetch exception:", err)
+      }
+
+      // Insights
+      try {
+        const { data, error } = await supabase
+          .from("insights")
+          .select("*")
+          .eq("user_id", userProfile!.id)
+          .eq("is_active", true)
+          .order("created_at", { ascending: false })
+
+        if (!cancelled) {
+          if (error) {
+            console.error("[Dashboard] insights query error (table may not exist):", error.message)
+          } else if (data) {
+            setInsights(data)
+            setInsightsData(data)
+          }
+        }
+      } catch (err) {
+        console.error("[Dashboard] insights fetch exception:", err)
+      }
+
+      // Domain analytics
+      try {
+        if (domainIds.length > 0) {
+          const { data, error } = await supabase
             .from("domain_analytics")
             .select("*")
             .in("domain_id", domainIds)
-            .order("date", { ascending: true }),
-        ])
+            .order("date", { ascending: true })
 
-        if (cancelled) return
-        dashboardDataFetchedRef.current = true
-
-        if (activityRes.data) setActivities(activityRes.data)
-        if (insightsRes.data) {
-          setInsights(insightsRes.data)
-          setInsightsData(insightsRes.data)
+          if (!cancelled) {
+            if (error) {
+              console.error("[Dashboard] domain_analytics query error (table may not exist):", error.message)
+            } else if (data) {
+              setChartData({
+                trafficTrends: data.map((d: Record<string, unknown>) => ({
+                  month: String(d.date ?? ""),
+                  value: Number(d.visits ?? 0),
+                })),
+                domainGrowth: [],
+                sslStatus: [],
+                uptimeHistory: [],
+              })
+            }
+          }
         }
-        if (analyticsRes.data) {
-          setChartData({
-            trafficTrends: analyticsRes.data.map((d: Record<string, unknown>) => ({
-              month: String(d.date ?? ""),
-              value: Number(d.visits ?? 0),
-            })),
-            domainGrowth: [],
-            sslStatus: [],
-            uptimeHistory: [],
-          })
-        }
-      } catch (error) {
-        console.error("Error loading dashboard data:", error)
+      } catch (err) {
+        console.error("[Dashboard] domain_analytics fetch exception:", err)
       }
+
+      console.log("[Dashboard] Dashboard data loading complete")
     }
 
     loadDashboardData()
     return () => { cancelled = true }
-  }, [userProfile, domainIds, domains.length, supabase])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfile?.id, domainIds.join(","), domains.length]) // FIX: stable string dep instead of array ref
 
   // 4. Load theme, widget visibility, and search history from localStorage (client-only)
   useEffect(() => {
@@ -952,7 +1037,7 @@ export default function DashboardPage() {
         setDomains((prev) => prev.map((d) => ({ ...d, pinned: pinnedIds.includes(d.id) })))
       }
     } catch (e) {
-      console.error("Error loading localStorage preferences:", e)
+      console.error("[Dashboard] Error loading localStorage preferences:", e)
     }
   }, [])
 
@@ -1011,13 +1096,23 @@ export default function DashboardPage() {
     return () => document.removeEventListener("keydown", handleKeyPress)
   }, [handleKeyPress])
 
-  // 6. Loading simulation & performance tracking
+  // ─── FIX #7: Loading simulation with guaranteed completion ───
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false)
       setLoadTime((Date.now() - loadStartTime) / 1000)
     }, 1500)
-    return () => clearTimeout(timer)
+
+    // FIX: Absolute safety net — never stay loading more than 8 seconds
+    const safetyTimer = setTimeout(() => {
+      setIsLoading(false)
+      console.warn("[Dashboard] Loading safety timeout triggered")
+    }, 8000)
+
+    return () => {
+      clearTimeout(timer)
+      clearTimeout(safetyTimer)
+    }
   }, [loadStartTime])
 
   // 7. Auto-refresh timer
@@ -1056,37 +1151,41 @@ export default function DashboardPage() {
   // ============================================
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/login")
+    try {
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.error("[Dashboard] Sign out error:", err)
+    }
+    routerRef.current.push("/login")
   }
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark"
     setTheme(newTheme)
-    localStorage.setItem("domainpro-theme", newTheme)
+    try { localStorage.setItem("domainpro-theme", newTheme) } catch (e) { console.error(e) }
   }
 
   const updateWidgetVisibility = (widget: keyof WidgetVisibility, visible: boolean) => {
     const newVisibility = { ...widgetVisibility, [widget]: visible }
     setWidgetVisibility(newVisibility)
-    localStorage.setItem("domainpro-widgets", JSON.stringify(newVisibility))
+    try { localStorage.setItem("domainpro-widgets", JSON.stringify(newVisibility)) } catch (e) { console.error(e) }
   }
 
   const resetWidgets = () => {
     setWidgetVisibility(defaultWidgetVisibility)
-    localStorage.setItem("domainpro-widgets", JSON.stringify(defaultWidgetVisibility))
+    try { localStorage.setItem("domainpro-widgets", JSON.stringify(defaultWidgetVisibility)) } catch (e) { console.error(e) }
   }
 
   const addToSearchHistory = (query: string) => {
     if (!query.trim()) return
     const newHistory = [query, ...searchHistory.filter((h) => h !== query)].slice(0, 5)
     setSearchHistory(newHistory)
-    localStorage.setItem("domainpro-search-history", JSON.stringify(newHistory))
+    try { localStorage.setItem("domainpro-search-history", JSON.stringify(newHistory)) } catch (e) { console.error(e) }
   }
 
   const clearSearchHistory = () => {
     setSearchHistory([])
-    localStorage.removeItem("domainpro-search-history")
+    try { localStorage.removeItem("domainpro-search-history") } catch (e) { console.error(e) }
   }
 
   const markNotificationRead = (id: number) => {
@@ -1114,7 +1213,7 @@ export default function DashboardPage() {
     setDomains((prev) => {
       const updated = prev.map((d) => (d.id === domainId ? { ...d, pinned: !d.pinned } : d))
       const pinnedIds = updated.filter((d) => d.pinned).map((d) => d.id)
-      localStorage.setItem("domainpro-pinned", JSON.stringify(pinnedIds))
+      try { localStorage.setItem("domainpro-pinned", JSON.stringify(pinnedIds)) } catch (e) { console.error(e) }
       return updated
     })
   }
@@ -1150,30 +1249,35 @@ export default function DashboardPage() {
 
   const saveDomainSettings = async () => {
     setSettingsSaving(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    if (selectedDomainForSettings) {
-      setDomains((prev) =>
-        prev.map((d) =>
-          d.id === selectedDomainForSettings.id
-            ? {
-                ...d,
-                locked: domainSettingsForm.locked,
-                autoRenew: domainSettingsForm.autoRenew,
-                privacy: domainSettingsForm.privacy,
-                dnssec: domainSettingsForm.dnssec,
-                registrationYears: domainSettingsForm.registrationYears,
-                nameservers: domainSettingsForm.useCustomNS
-                  ? [domainSettingsForm.ns1, domainSettingsForm.ns2].filter(Boolean)
-                  : ["ns1.domainpro.com", "ns2.domainpro.com"],
-              }
-            : d
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (selectedDomainForSettings) {
+        setDomains((prev) =>
+          prev.map((d) =>
+            d.id === selectedDomainForSettings.id
+              ? {
+                  ...d,
+                  locked: domainSettingsForm.locked,
+                  autoRenew: domainSettingsForm.autoRenew,
+                  privacy: domainSettingsForm.privacy,
+                  dnssec: domainSettingsForm.dnssec,
+                  registrationYears: domainSettingsForm.registrationYears,
+                  nameservers: domainSettingsForm.useCustomNS
+                    ? [domainSettingsForm.ns1, domainSettingsForm.ns2].filter(Boolean)
+                    : ["ns1.domainpro.com", "ns2.domainpro.com"],
+                }
+              : d
+          )
         )
-      )
+      }
+      setSettingsSaved(true)
+      setHasUnsavedChanges(false)
+      setTimeout(() => setSettingsSaved(false), 3000)
+    } catch (err) {
+      console.error("[Dashboard] Save domain settings error:", err)
+    } finally {
+      setSettingsSaving(false)
     }
-    setSettingsSaving(false)
-    setSettingsSaved(true)
-    setHasUnsavedChanges(false)
-    setTimeout(() => setSettingsSaved(false), 3000)
   }
 
   const closeDomainSettings = () => {
@@ -1482,16 +1586,38 @@ export default function DashboardPage() {
   // EARLY RETURNS (loading / auth guard)
   // ============================================
 
+  // ─── FIX #8: More informative loading screen with timeout info ───
   if (isLoadingUser) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500" />
+        <p className="text-neutral-500 text-sm">Loading dashboard...</p>
+      </div>
+    )
+  }
+
+  // ─── FIX #9: If auth failed but loading is done, show error instead of blank screen ───
+  if (!user && authFailed) {
+    return (
+      <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center gap-4">
+        <AlertTriangle className="h-12 w-12 text-yellow-500" />
+        <p className="text-white text-lg font-medium">Authentication Error</p>
+        <p className="text-neutral-400 text-sm">Unable to verify your session. Please try logging in again.</p>
+        <Link href="/login" className="mt-4 px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">
+          Go to Login
+        </Link>
       </div>
     )
   }
 
   if (!user) {
-    return null // router.push('/login') already fires in the effect
+    // Still redirecting — show a brief message instead of blank screen
+    return (
+      <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500" />
+        <p className="text-neutral-500 text-sm">Redirecting to login...</p>
+      </div>
+    )
   }
 
   // ============================================
