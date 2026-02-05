@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   Globe,
   Search,
@@ -37,7 +37,6 @@ import {
   Lock,
   Unlock,
   Plus,
-  Edit3,
   Eye,
   EyeOff,
   Server,
@@ -48,23 +47,13 @@ import {
   Upload,
   Zap,
   Link2,
-  ToggleLeft,
-  ToggleRight,
   Key,
   Mail,
-  ArrowRight,
   Info,
-  Wifi,
-  WifiOff,
-  Play,
-  Pause,
-  RotateCcw,
-  Hash,
   Type,
   MapPin,
-  AtSign,
   Pencil,
-  Save,
+  Hash,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -117,6 +106,12 @@ interface SslCertificate {
   domains_covered: string[];
 }
 
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
 type DnsStatus = 'healthy' | 'warning' | 'error' | 'not_configured';
 type SslStatus = 'active' | 'pending' | 'none' | 'error';
 type PlanType = 'starter' | 'professional' | 'developer' | 'enterprise' | 'white_label';
@@ -143,7 +138,7 @@ const mockDnsRecords: DnsRecord[] = [
 
 const mockActivityLog: ActivityLogEntry[] = [
   { id: '1', action: 'dns_record_added', description: 'Added A record for www subdomain', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), user: 'john@example.com', ip_address: '192.168.1.100' },
-  { id: '2', action: 'ssl_renewed', description: 'SSL certificate automatically renewed', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), user: 'System', ip_address: undefined },
+  { id: '2', action: 'ssl_renewed', description: 'SSL certificate automatically renewed', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), user: 'System' },
   { id: '3', action: 'auto_renew_enabled', description: 'Auto-renewal enabled for domain', timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), user: 'john@example.com', ip_address: '192.168.1.100' },
   { id: '4', action: 'privacy_enabled', description: 'WHOIS privacy protection enabled', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), user: 'john@example.com', ip_address: '192.168.1.105' },
   { id: '5', action: 'domain_registered', description: 'Domain successfully registered', timestamp: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), user: 'john@example.com', ip_address: '192.168.1.100' },
@@ -311,13 +306,12 @@ const NavigationHeader: React.FC<{
 }> = ({ user, onSignOut, domainName }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const router = useRouter();
 
   return (
     <header className="sticky top-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo & Back */}
+          {/* Logo & Breadcrumb */}
           <div className="flex items-center gap-4">
             <a href="/" className="flex items-center gap-2 group">
               <div className="relative">
@@ -327,7 +321,7 @@ const NavigationHeader: React.FC<{
                 Domain<span className="text-red-500">Pro</span>
               </span>
             </a>
-            
+
             {/* Breadcrumb */}
             <div className="hidden md:flex items-center gap-2 text-sm">
               <ChevronRight className="w-4 h-4 text-gray-600" />
@@ -404,11 +398,10 @@ const NavigationHeader: React.FC<{
         {/* Mobile Breadcrumb */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-white/5">
-            <div className="flex items-center gap-2 text-sm">
-              <a href="/domains" className="text-gray-400 hover:text-white transition-colors">
-                ← Back to Domains
-              </a>
-            </div>
+            <a href="/domains" className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
+              <ChevronLeft className="w-4 h-4" />
+              Back to Domains
+            </a>
           </div>
         )}
       </div>
@@ -435,10 +428,13 @@ const HeroSection: React.FC<{
     <div className="relative bg-gradient-to-br from-[#111] via-[#0f0f0f] to-[#0a0a0a] border-b border-white/5">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)',
+            backgroundSize: '40px 40px',
+          }}
+        />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -490,7 +486,7 @@ const HeroSection: React.FC<{
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 <span>Expires: {formatDate(domain.expires_at)}</span>
-                <span className={`ml-1 ${daysUntilExpiry <= 30 ? 'text-yellow-400' : daysUntilExpiry <= 7 ? 'text-red-400' : 'text-green-400'}`}>
+                <span className={`ml-1 ${daysUntilExpiry <= 7 ? 'text-red-400' : daysUntilExpiry <= 30 ? 'text-yellow-400' : 'text-green-400'}`}>
                   ({daysUntilExpiry} days)
                 </span>
               </div>
@@ -747,7 +743,8 @@ const DnsTabContent: React.FC<{
   const [dnssecEnabled, setDnssecEnabled] = useState(false);
 
   const filteredRecords = records.filter((record) => {
-    const matchesSearch = record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch =
+      record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       record.value.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = selectedType === 'all' || record.type === selectedType;
     return matchesSearch && matchesType;
@@ -758,12 +755,17 @@ const DnsTabContent: React.FC<{
   return (
     <div className="space-y-6">
       {/* DNS Status Banner */}
-      <div className={`p-4 rounded-xl border ${
-        domain.dns_status === 'healthy' ? 'bg-green-500/5 border-green-500/20' :
-        domain.dns_status === 'warning' ? 'bg-yellow-500/5 border-yellow-500/20' :
-        domain.dns_status === 'error' ? 'bg-red-500/5 border-red-500/20' :
-        'bg-white/5 border-white/10'
-      }`}>
+      <div
+        className={`p-4 rounded-xl border ${
+          domain.dns_status === 'healthy'
+            ? 'bg-green-500/5 border-green-500/20'
+            : domain.dns_status === 'warning'
+              ? 'bg-yellow-500/5 border-yellow-500/20'
+              : domain.dns_status === 'error'
+                ? 'bg-red-500/5 border-red-500/20'
+                : 'bg-white/5 border-white/10'
+        }`}
+      >
         <div className="flex items-center gap-3">
           {domain.dns_status === 'healthy' ? (
             <CheckCircle className="w-5 h-5 text-green-400" />
@@ -775,12 +777,17 @@ const DnsTabContent: React.FC<{
             <HelpCircle className="w-5 h-5 text-gray-400" />
           )}
           <div className="flex-1">
-            <p className={`font-medium ${
-              domain.dns_status === 'healthy' ? 'text-green-400' :
-              domain.dns_status === 'warning' ? 'text-yellow-400' :
-              domain.dns_status === 'error' ? 'text-red-400' :
-              'text-gray-400'
-            }`}>
+            <p
+              className={`font-medium ${
+                domain.dns_status === 'healthy'
+                  ? 'text-green-400'
+                  : domain.dns_status === 'warning'
+                    ? 'text-yellow-400'
+                    : domain.dns_status === 'error'
+                      ? 'text-red-400'
+                      : 'text-gray-400'
+              }`}
+            >
               {getDnsStatusConfig(domain.dns_status).label}
             </p>
             <p className="text-sm text-gray-500">{getDnsStatusConfig(domain.dns_status).description}</p>
@@ -866,11 +873,15 @@ const DnsTabContent: React.FC<{
                       <span className="text-sm text-gray-400">{record.ttl}s</span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
-                        record.propagation === 'complete' ? 'bg-green-500/10 text-green-400' :
-                        record.propagation === 'pending' ? 'bg-yellow-500/10 text-yellow-400' :
-                        'bg-red-500/10 text-red-400'
-                      }`}>
+                      <div
+                        className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
+                          record.propagation === 'complete'
+                            ? 'bg-green-500/10 text-green-400'
+                            : record.propagation === 'pending'
+                              ? 'bg-yellow-500/10 text-yellow-400'
+                              : 'bg-red-500/10 text-red-400'
+                        }`}
+                      >
                         {record.propagation === 'complete' ? (
                           <CheckCircle className="w-3 h-3" />
                         ) : record.propagation === 'pending' ? (
@@ -927,13 +938,13 @@ const DnsTabContent: React.FC<{
           </div>
           <button
             onClick={() => setDnssecEnabled(!dnssecEnabled)}
-            className={`relative w-14 h-8 rounded-full transition-colors ${
-              dnssecEnabled ? 'bg-red-500' : 'bg-white/10'
-            }`}
+            className={`relative w-14 h-8 rounded-full transition-colors ${dnssecEnabled ? 'bg-red-500' : 'bg-white/10'}`}
           >
-            <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-              dnssecEnabled ? 'translate-x-6' : 'translate-x-0'
-            }`} />
+            <span
+              className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
+                dnssecEnabled ? 'translate-x-6' : 'translate-x-0'
+              }`}
+            />
           </button>
         </div>
       </div>
@@ -950,9 +961,7 @@ const DnsTabContent: React.FC<{
               <p className="text-sm text-gray-500">Current nameserver configuration</p>
             </div>
           </div>
-          <button className="text-sm text-red-400 hover:text-red-300 transition-colors">
-            Change Nameservers
-          </button>
+          <button className="text-sm text-red-400 hover:text-red-300 transition-colors">Change Nameservers</button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {['ns1.domainpro.com', 'ns2.domainpro.com', 'ns3.domainpro.com', 'ns4.domainpro.com'].map((ns, i) => (
@@ -985,12 +994,17 @@ const SslTabContent: React.FC<{
   return (
     <div className="space-y-6">
       {/* SSL Status Card */}
-      <div className={`p-6 rounded-2xl border ${
-        domain.ssl_status === 'active' ? 'bg-green-500/5 border-green-500/20' :
-        domain.ssl_status === 'pending' ? 'bg-yellow-500/5 border-yellow-500/20' :
-        domain.ssl_status === 'error' ? 'bg-red-500/5 border-red-500/20' :
-        'bg-white/5 border-white/10'
-      }`}>
+      <div
+        className={`p-6 rounded-2xl border ${
+          domain.ssl_status === 'active'
+            ? 'bg-green-500/5 border-green-500/20'
+            : domain.ssl_status === 'pending'
+              ? 'bg-yellow-500/5 border-yellow-500/20'
+              : domain.ssl_status === 'error'
+                ? 'bg-red-500/5 border-red-500/20'
+                : 'bg-white/5 border-white/10'
+        }`}
+      >
         <div className="flex items-start gap-4">
           <div className={`p-3 rounded-xl ${sslConfig.bgColor}`}>
             <SslIcon className={`w-6 h-6 ${sslConfig.textColor}`} />
@@ -1002,7 +1016,7 @@ const SslTabContent: React.FC<{
               <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-400">
                 <span>Expires: {formatDate(certificate.expires_at)}</span>
                 <span>•</span>
-                <span>Type: {certificate.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                <span>Type: {certificate.type.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}</span>
               </div>
             )}
           </div>
@@ -1152,8 +1166,7 @@ const SettingsTabContent: React.FC<{
   domain: Domain;
   onToggleAutoRenew: () => void;
   onTogglePrivacy: () => void;
-  onSaveChanges: () => void;
-}> = ({ domain, onToggleAutoRenew, onTogglePrivacy, onSaveChanges }) => {
+}> = ({ domain, onToggleAutoRenew, onTogglePrivacy }) => {
   const [domainLockEnabled, setDomainLockEnabled] = useState(true);
   const [showTransferCode, setShowTransferCode] = useState(false);
 
@@ -1175,13 +1188,13 @@ const SettingsTabContent: React.FC<{
           </div>
           <button
             onClick={() => setDomainLockEnabled(!domainLockEnabled)}
-            className={`relative w-14 h-8 rounded-full transition-colors ${
-              domainLockEnabled ? 'bg-red-500' : 'bg-white/10'
-            }`}
+            className={`relative w-14 h-8 rounded-full transition-colors ${domainLockEnabled ? 'bg-red-500' : 'bg-white/10'}`}
           >
-            <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-              domainLockEnabled ? 'translate-x-6' : 'translate-x-0'
-            }`} />
+            <span
+              className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
+                domainLockEnabled ? 'translate-x-6' : 'translate-x-0'
+              }`}
+            />
           </button>
         </div>
       </div>
@@ -1196,24 +1209,20 @@ const SettingsTabContent: React.FC<{
             <div>
               <h3 className="text-lg font-semibold text-white">Auto-Renewal</h3>
               <p className="text-sm text-gray-500 mt-1">
-                Automatically renew your domain before it expires. You'll be charged {formatCurrency(domain.purchase_price)} annually.
+                Automatically renew your domain before it expires. You&apos;ll be charged {formatCurrency(domain.purchase_price)} annually.
               </p>
-              {domain.auto_renew && (
-                <p className="text-sm text-green-400 mt-2">
-                  Next renewal: {formatDate(domain.expires_at)}
-                </p>
-              )}
+              {domain.auto_renew && <p className="text-sm text-green-400 mt-2">Next renewal: {formatDate(domain.expires_at)}</p>}
             </div>
           </div>
           <button
             onClick={onToggleAutoRenew}
-            className={`relative w-14 h-8 rounded-full transition-colors ${
-              domain.auto_renew ? 'bg-red-500' : 'bg-white/10'
-            }`}
+            className={`relative w-14 h-8 rounded-full transition-colors ${domain.auto_renew ? 'bg-red-500' : 'bg-white/10'}`}
           >
-            <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-              domain.auto_renew ? 'translate-x-6' : 'translate-x-0'
-            }`} />
+            <span
+              className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
+                domain.auto_renew ? 'translate-x-6' : 'translate-x-0'
+              }`}
+            />
           </button>
         </div>
       </div>
@@ -1238,13 +1247,13 @@ const SettingsTabContent: React.FC<{
           </div>
           <button
             onClick={onTogglePrivacy}
-            className={`relative w-14 h-8 rounded-full transition-colors ${
-              domain.privacy_enabled ? 'bg-red-500' : 'bg-white/10'
-            }`}
+            className={`relative w-14 h-8 rounded-full transition-colors ${domain.privacy_enabled ? 'bg-red-500' : 'bg-white/10'}`}
           >
-            <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-              domain.privacy_enabled ? 'translate-x-6' : 'translate-x-0'
-            }`} />
+            <span
+              className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
+                domain.privacy_enabled ? 'translate-x-6' : 'translate-x-0'
+              }`}
+            />
           </button>
         </div>
       </div>
@@ -1261,7 +1270,7 @@ const SettingsTabContent: React.FC<{
               Required to transfer your domain to another registrar. Keep this code private and secure.
             </p>
             <div className="flex items-center gap-3">
-              <div className="flex-1 px-4 py-3 bg-white/5 rounded-xl font-mono text-sm">
+              <div className="flex-1 px-4 py-3 bg-white/5 rounded-xl font-mono text-sm text-white">
                 {showTransferCode ? 'EPP-XXXX-XXXX-XXXX' : '••••••••••••••••'}
               </div>
               <button
@@ -1379,14 +1388,12 @@ const ActivityTabContent: React.FC<{
           {filteredActivity.map((entry, index) => {
             const ActivityIcon = getActivityIcon(entry.action);
             const isLast = index === filteredActivity.length - 1;
-            
+
             return (
               <div key={entry.id} className="relative">
                 {/* Timeline Line */}
-                {!isLast && (
-                  <div className="absolute left-6 top-14 w-0.5 h-full bg-white/5" />
-                )}
-                
+                {!isLast && <div className="absolute left-6 top-14 w-0.5 h-full bg-white/5" />}
+
                 <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors">
                   <div className="relative z-10 p-3 rounded-xl bg-white/5 border border-white/10">
                     <ActivityIcon className="w-5 h-5 text-gray-400" />
@@ -1461,7 +1468,7 @@ const ErrorState: React.FC<{
   onRetry?: () => void;
 }> = ({ message, onRetry }) => {
   const router = useRouter();
-  
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
       <div className="bg-[#111] border border-red-500/20 rounded-2xl p-8 max-w-md w-full text-center">
@@ -1497,10 +1504,9 @@ const ErrorState: React.FC<{
 // MAIN COMPONENT: Single Domain Page
 // ============================================================================
 
-export default function SingleDomainPage() {
+export default function SingleDomainPage({ params }: PageProps) {
   const router = useRouter();
-  const params = useParams();
-  const domainId = params?.id as string;
+  const domainId = params.id;
 
   // State
   const [domain, setDomain] = useState<Domain | null>(null);
@@ -1523,13 +1529,17 @@ export default function SingleDomainPage() {
         setError(null);
 
         // Check auth
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!session) {
           router.push('/login');
           return;
         }
 
-        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
         if (!authUser) {
           router.push('/login');
           return;
@@ -1603,10 +1613,7 @@ export default function SingleDomainPage() {
     if (!domain) return;
     try {
       const newValue = !domain.auto_renew;
-      const { error: updateError } = await supabase
-        .from('domains')
-        .update({ auto_renew: newValue })
-        .eq('id', domain.id);
+      const { error: updateError } = await supabase.from('domains').update({ auto_renew: newValue }).eq('id', domain.id);
 
       if (updateError) throw updateError;
       setDomain({ ...domain, auto_renew: newValue });
@@ -1620,10 +1627,7 @@ export default function SingleDomainPage() {
     if (!domain) return;
     try {
       const newValue = !domain.privacy_enabled;
-      const { error: updateError } = await supabase
-        .from('domains')
-        .update({ privacy_enabled: newValue })
-        .eq('id', domain.id);
+      const { error: updateError } = await supabase.from('domains').update({ privacy_enabled: newValue }).eq('id', domain.id);
 
       if (updateError) throw updateError;
       setDomain({ ...domain, privacy_enabled: newValue });
@@ -1657,10 +1661,6 @@ export default function SingleDomainPage() {
     console.log('Renew certificate');
   };
 
-  const handleSaveSettings = () => {
-    console.log('Save settings');
-  };
-
   // Loading state
   if (loading) {
     return <LoadingState />;
@@ -1674,19 +1674,10 @@ export default function SingleDomainPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Navigation Header */}
-      <NavigationHeader
-        user={user}
-        onSignOut={handleSignOut}
-        domainName={domain.domain_name}
-      />
+      <NavigationHeader user={user} onSignOut={handleSignOut} domainName={domain.domain_name} />
 
       {/* Hero Section */}
-      <HeroSection
-        domain={domain}
-        onRenew={handleRenew}
-        copiedDomain={copiedDomain}
-        onCopyDomain={handleCopyDomain}
-      />
+      <HeroSection domain={domain} onRenew={handleRenew} copiedDomain={copiedDomain} onCopyDomain={handleCopyDomain} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1695,12 +1686,7 @@ export default function SingleDomainPage() {
           <aside className="lg:w-64 flex-shrink-0">
             <div className="bg-[#111] border border-white/5 rounded-2xl p-4 lg:sticky lg:top-24">
               <nav className="space-y-2">
-                <SidebarTab
-                  icon={Layers}
-                  label="Overview"
-                  active={activeTab === 'overview'}
-                  onClick={() => setActiveTab('overview')}
-                />
+                <SidebarTab icon={Layers} label="Overview" active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} />
                 <SidebarTab
                   icon={Database}
                   label="DNS Management"
@@ -1716,18 +1702,8 @@ export default function SingleDomainPage() {
                   badge={domain.ssl_status === 'active' ? '✓' : undefined}
                   badgeColor={domain.ssl_status === 'active' ? 'bg-green-500/10 text-green-400' : undefined}
                 />
-                <SidebarTab
-                  icon={Settings}
-                  label="Domain Settings"
-                  active={activeTab === 'settings'}
-                  onClick={() => setActiveTab('settings')}
-                />
-                <SidebarTab
-                  icon={Activity}
-                  label="Activity Log"
-                  active={activeTab === 'activity'}
-                  onClick={() => setActiveTab('activity')}
-                />
+                <SidebarTab icon={Settings} label="Domain Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+                <SidebarTab icon={Activity} label="Activity Log" active={activeTab === 'activity'} onClick={() => setActiveTab('activity')} />
               </nav>
 
               {/* Quick Links */}
@@ -1788,17 +1764,10 @@ export default function SingleDomainPage() {
             )}
 
             {activeTab === 'settings' && (
-              <SettingsTabContent
-                domain={domain}
-                onToggleAutoRenew={handleToggleAutoRenew}
-                onTogglePrivacy={handleTogglePrivacy}
-                onSaveChanges={handleSaveSettings}
-              />
+              <SettingsTabContent domain={domain} onToggleAutoRenew={handleToggleAutoRenew} onTogglePrivacy={handleTogglePrivacy} />
             )}
 
-            {activeTab === 'activity' && (
-              <ActivityTabContent activityLog={activityLog} />
-            )}
+            {activeTab === 'activity' && <ActivityTabContent activityLog={activityLog} />}
           </div>
         </div>
       </div>
